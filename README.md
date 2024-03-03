@@ -1,9 +1,8 @@
 # README
 
-## 概要
+## 前提
 
-- productsテーブル, routers.product, testなどのサンプルコードが含まれています
-- API仕様書からproductsをcreateなどして学習用にご利用ください
+Dockerのインストール、gitの初期設定を行っていること
 
 
 ## ローカル環境構築
