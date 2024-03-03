@@ -1,2 +1,6 @@
-**/__pycache__/**
+**__pycache__**
+app/htmlcov/*
+app/.pytest_cache/*
 .DS_Store
+.coverage
+
