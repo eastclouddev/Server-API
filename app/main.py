@@ -1,24 +1,23 @@
+from starlette import status
 from fastapi import FastAPI
+# from apis import product
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.endpoints.some_endpoint import router as api_router
-from app.config import settings
 
-app = FastAPI(title=settings.APP_NAME)
+
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=["http://localhost:3000"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.get("/")
-def read_root():
-    return {"message": "Hello from FastAPI"}
+# for Health heck
+@app.get("/", status_code=status.HTTP_200_OK)
+async def read_root():
+    return "OK"
 
-app.include_router(api_router)
+# ルーターの読み込み
+# app.include_router(product.router)
 
-#if __name__ == "__main__":
-#    import uvicorn
-#    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
