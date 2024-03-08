@@ -35,7 +35,7 @@ class Companies(Base):
 
 
 class CompanyBillingInfos(Base): # TODO:sは不要?
-    __tablename__ = "company_billing_infos"
+    __tablename__ = "company_billing_infos" # TODO:sは不要?
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
@@ -51,7 +51,7 @@ class CompanyBillingInfos(Base): # TODO:sは不要?
 
 
 class CompanyBillingStatuses(Base):
-    __tablename__ = "billing_statuses"
+    __tablename__ = "company_billing_statuses"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(String(50), nullable=False)
@@ -89,7 +89,7 @@ class CompanyTransactionHistories(Base):
 
 
 class CourseProgresses(Base):
-    __tablename__ = "course_Progresses"
+    __tablename__ = "course_progresses"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True) # workbench上はautoincrementなかった、おそらく忘れ
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -265,7 +265,7 @@ class TestContents(Base):
 
 
 class UserAccountInfo(Base):
-    __tablename__ = "transter_infos"
+    __tablename__ = "user_account_info"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True) # autoincrement忘れ
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -281,7 +281,7 @@ class UserAccountInfo(Base):
 
 
 class UserAccountTypes(Base):
-    __tablename__ = "account_types"
+    __tablename__ = "user_account_types"
 
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String(50), nullable=False)
@@ -291,7 +291,7 @@ class UserAccountTypes(Base):
 
 
 class UserRewardHistories(Base):
-    __tablename__ = "reward_histories"
+    __tablename__ = "user_reward_histories"
 
     id = Column(Integer, primary_key=True, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -302,7 +302,7 @@ class UserRewardHistories(Base):
 
 
 class UserRewards(Base):
-    __tablename__ = "rewards"
+    __tablename__ = "user_rewards"
 
     id = Column(Integer, primary_key=True, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
