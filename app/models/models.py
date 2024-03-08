@@ -83,7 +83,7 @@ class CompanyTransactionHistories(Base):
     invoice_date = Column(Date, nullable=False)
     due_date = Column(Date, nullable=False)
     amount = Column(Numeric(10, 2), nullable=False)
-    billing_status_id = Column(Integer, ForeignKey("billing_statuses.id"), nullable=False)
+    billing_status_id = Column(Integer, ForeignKey("company_billing_statuses.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 
@@ -91,7 +91,7 @@ class CompanyTransactionHistories(Base):
 class CourseProgresses(Base):
     __tablename__ = "course_progresses"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True) # workbench上はautoincrementなかった、おそらく忘れ
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
     progress_percentage = Column(Integer)
@@ -154,7 +154,7 @@ class LearningRecords(Base):
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
     duration = Column(Integer, nullable=False)
     notes = Column(Text)
-    study_date = Column(DateTime, nullable=False)
+    study_date = Column(Date, nullable=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 
@@ -233,7 +233,7 @@ class Sections(Base):
 class SectionTags(Base):
     __tablename__ = "section_tags"
 
-    id = Column(Integer, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     course_id = Column(Integer, ForeignKey("courses.id"), primary_key=True, nullable=False)
     tag_id = Column(Integer, ForeignKey("tags.id"), primary_key=True, nullable=False)
     created_at = Column(DateTime, default=datetime.now())
@@ -253,7 +253,7 @@ class Tags(Base):
 class TestContents(Base):
     __tablename__ = "test_contents"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True) # autoincrement忘れ
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     curriculum_id = Column(Integer, ForeignKey("curriculums.id"), nullable=False)
     question = Column(Text, nullable=False)
     media_content = Column(JSON)
@@ -267,13 +267,13 @@ class TestContents(Base):
 class UserAccountInfo(Base):
     __tablename__ = "user_account_info"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True) # autoincrement忘れ
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     bank_name = Column(String(255), nullable=False)
     bank_code = Column(String(10), nullable=False)
     branch_name = Column(String(255))
     branch_code = Column(String(10))
-    account_type_id = Column(Integer, ForeignKey("account_types.id"), nullable=False)
+    account_type_id = Column(Integer, ForeignKey("user_account_types.id"), nullable=False)
     account_number = Column(String(255), nullable=False)
     account_name = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=datetime.now())
@@ -283,7 +283,7 @@ class UserAccountInfo(Base):
 class UserAccountTypes(Base):
     __tablename__ = "user_account_types"
 
-    id = Column(Integer, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(String(50), nullable=False)
     description = Column(Text)
     created_at = Column(DateTime, default=datetime.now())
@@ -293,7 +293,7 @@ class UserAccountTypes(Base):
 class UserRewardHistories(Base):
     __tablename__ = "user_reward_histories"
 
-    id = Column(Integer, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     total_amount = Column(Numeric(10, 2), nullable=False)
     target_year_month = Column(String(10), nullable=False)
@@ -304,7 +304,7 @@ class UserRewardHistories(Base):
 class UserRewards(Base):
     __tablename__ = "user_rewards"
 
-    id = Column(Integer, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     amount = Column(Numeric(10, 2), nullable=False)
     reason = Column(String(255))
