@@ -21,3 +21,5 @@ async def read_root():
 # ルーターの読み込み
 # app.include_router(product.router)
 
+
+print('aaa')
