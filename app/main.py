@@ -3,7 +3,7 @@ from fastapi import FastAPI
 # from apis import product
 from fastapi.middleware.cors import CORSMiddleware
 
-
+print('hallo World')
 app = FastAPI()
 
 app.add_middleware(
