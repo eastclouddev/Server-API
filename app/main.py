@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 print('hallo World')
+print('!!!')
 app = FastAPI()
 
 app.add_middleware(
