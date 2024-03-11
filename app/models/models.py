@@ -34,8 +34,8 @@ class Companies(Base):
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 
 
-class CompanyBillingInfos(Base): # TODO:sは不要?
-    __tablename__ = "company_billing_infos" # TODO:sは不要?
+class CompanyBillingInfo(Base):
+    __tablename__ = "company_billing_info"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
@@ -65,7 +65,7 @@ class CompanyReceipts(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
-    billing_info_id = Column(Integer, ForeignKey("company_billing_infos.id"), nullable=False)
+    billing_info_id = Column(Integer, ForeignKey("company_billing_info.id"), nullable=False)
     receipt_number = Column(String(255), nullable=False, unique=True)
     amount = Column(Numeric(10, 2), nullable=False)
     payment_date = Column(Date, nullable=False)
@@ -79,7 +79,7 @@ class CompanyTransactionHistories(Base):
     __tablename__ = "company_transaction_histories"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    billing_info_id = Column(Integer, ForeignKey("company_billing_infos.id"), nullable=False)
+    billing_info_id = Column(Integer, ForeignKey("company_billing_info.id"), nullable=False)
     invoice_date = Column(Date, nullable=False)
     due_date = Column(Date, nullable=False)
     amount = Column(Numeric(10, 2), nullable=False)
@@ -97,7 +97,7 @@ class CourseProgresses(Base):
     progress_percentage = Column(Integer)
     status_id = Column(Integer, ForeignKey("learning_statuses.id"), nullable=False, default=0)
     started_at = Column(DateTime, default=None)
-    last_accessed_at = Column(DateTime) # TODO:こいつ初期値ないの?
+    last_accessed_at = Column(DateTime, default=None)
     completed_at = Column(DateTime, default=None)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
@@ -121,7 +121,7 @@ class CurriculumProgresses(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     curriculum_id = Column(Integer, ForeignKey("curriculums.id"), nullable=False)
-    is_completed = Column(Boolean)
+    is_completed = Column(Boolean, default=False)
     status_id = Column(Integer, ForeignKey("learning_statuses.id"), nullable=False, default=0)
     started_at = Column(DateTime, default=None)
     last_accessed_at = Column(DateTime, default=None)
@@ -140,7 +140,7 @@ class Curriculums(Base):
     content = Column(Text)
     display_no = Column(Integer, nullable=False)
     video_url = Column(String(255))
-    is_test = Column(Boolean)
+    is_test = Column(Boolean, default=False)
     media_content = Column(JSON)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
@@ -169,6 +169,16 @@ class LearningStatuses(Base):
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 
 
+class Mentorships(Base):
+    __tablename__ = "mentorships"
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    memtor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.now())
+    updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
+
+
 class PaymentMethods(Base):
     __tablename__ = "payment_methods"
 
@@ -188,7 +198,32 @@ class Questions(Base):
     title = Column(String(255), nullable=False)
     content = Column(Text, nullable=False)
     media_content = Column(JSON)
-    is_closed = Column(Boolean)
+    is_closed = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.now())
+    updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
+
+
+class ReviewRequests(Base):
+    __tablename__ = "review_requests"
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    curriculum_id = Column(Integer, ForeignKey("curriculums.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    title = Column(String(255), nullable=False)
+    content = Column(Text, nullable=False)
+    is_closed = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.now())
+    updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
+
+
+class ReviewResponses(Base):
+    __tablename__ = "review_responses"
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    review_request_id = Column(Integer, ForeignKey("review_requests.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    parent_response_id = Column(Integer, ForeignKey("review_responses.id"))
+    content = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 
@@ -225,7 +260,7 @@ class Sections(Base):
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
     title = Column(String(100), nullable=False)
     description = Column(Text)
-    order = Column(Integer)
+    display_no = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 
