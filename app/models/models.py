@@ -195,7 +195,7 @@ class Mentorships(Base):
     __tablename__ = "mentorships"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    memtor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    mentor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
