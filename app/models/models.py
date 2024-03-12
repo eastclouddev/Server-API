@@ -4,6 +4,16 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from database.database import Base
 
+class AccessToken(Base):
+    __tablename__ = "access_tokens"
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    token = Column(String(255), nullable=False, unique=True)
+    expires_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=datetime.now())
+    updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
+
 
 class Answers(Base):
     __tablename__ = "answers"
@@ -146,6 +156,18 @@ class Curriculums(Base):
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 
 
+class Devices(Base):
+    __tablename__ = "devices"
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    device_type = Column(String(255))
+    device_name = Column(String(255))
+    last_access = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.now())
+    updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
+
+
 class LearningRecords(Base):
     __tablename__ = "learning_records"
 
@@ -175,6 +197,18 @@ class Mentorships(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     memtor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.now())
+    updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
+
+
+class News(Base):
+    __tablename__ = "news"
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    title = Column(String(255), nullable=False)
+    summary = Column(Text)
+    content = Column(Text, nullable=False)
+    published_at = Column(DateTime, nullable=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 
@@ -361,6 +395,8 @@ class Users(Base):
     email = Column(String(255), nullable=False, unique=True)
     role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)
     last_login = Column(DateTime, default=None)
+    is_enable = Column(Boolean, default=True)
+    is_logged_in = Column(Boolean,default=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 

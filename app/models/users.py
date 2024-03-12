@@ -17,6 +17,8 @@ from models.user_rewards import UserRewards
 from models.mentorships import Mentorships
 from models.review_requests import ReviewRequests
 from models.review_responses import ReviewResponses
+from models.access_token import AccessToken
+from models.devices import Devices
 
 class Users(Base):
     __tablename__ = "users"
@@ -31,6 +33,8 @@ class Users(Base):
     email = Column(String(255), nullable=False, unique=True)
     role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)
     last_login = Column(DateTime, default=None)
+    is_enable = Column(Boolean, default=True)
+    is_logged_in = Column(Boolean,default=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 
@@ -47,3 +51,5 @@ class Users(Base):
     mentorships = relationship("Mentorships", backref="users")
     review_requests = relationship("ReviewRequests", backref="users")
     review_responses = relationship("ReviewResponses", backref="users")
+    access_token = relationship("AccessToken", backref="users")
+    devices = relationship("Devices", backref="users")
