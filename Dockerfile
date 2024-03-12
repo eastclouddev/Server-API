@@ -3,14 +3,11 @@ FROM python:3.9-slim
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip uninstall JWT  
-RUN pip uninstall PyJWT  
-RUN pip install PyJWT
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 COPY ./app .
 
-CMD bash -c "cd /app && \
+CMD bash -c "cd /app/database && \
     alembic upgrade head && \
     cd /app && \
     python seed.py && \
