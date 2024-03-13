@@ -1,7 +1,8 @@
 from starlette import status
 from fastapi import FastAPI
-from apis import login
 from fastapi.middleware.cors import CORSMiddleware
+
+from apis import login
 
 
 app = FastAPI()
@@ -16,7 +17,7 @@ app.add_middleware(
 # for Health heck
 @app.get("/", status_code=status.HTTP_200_OK)
 async def read_root():
-    return "OK!"
+    return "OK"
 
 # ルーターの読み込み
 
