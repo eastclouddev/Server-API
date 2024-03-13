@@ -24,6 +24,7 @@ class Answers(Base):
     parent_answer_id = Column(Integer, ForeignKey("answers.id"), default=None)
     content = Column(Text, nullable=False)
     media_content = Column(JSON)
+    is_read = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 
@@ -161,6 +162,7 @@ class Devices(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    uuid = Column(String(36), nullable=False, unique=True)
     device_type = Column(String(255))
     device_name = Column(String(255))
     last_access = Column(DateTime)
@@ -258,6 +260,7 @@ class ReviewResponses(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     parent_response_id = Column(Integer, ForeignKey("review_responses.id"))
     content = Column(Text, nullable=False)
+    is_read = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 

@@ -10,6 +10,7 @@ class Devices(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    uuid = Column(String(36), nullable=False, unique=True)
     device_type = Column(String(255))
     device_name = Column(String(255))
     last_access = Column(DateTime)

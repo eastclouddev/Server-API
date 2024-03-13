@@ -13,5 +13,6 @@ class ReviewResponses(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     parent_response_id = Column(Integer, ForeignKey("review_responses.id"))
     content = Column(Text, nullable=False)
+    is_read = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
