@@ -7,7 +7,7 @@ RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 COPY ./app .
 
-CMD bash -c "cd /app/database && \
+CMD bash -c "cd /app && \
     alembic upgrade head && \
     cd /app && \
     python seed.py && \
