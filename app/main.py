@@ -1,6 +1,6 @@
 from starlette import status
 from fastapi import FastAPI
-# from apis import product
+from apis import account
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -19,5 +19,5 @@ async def read_root():
     return "OK"
 
 # ルーターの読み込み
-# app.include_router(product.router)
+app.include_router(account.router)
 
