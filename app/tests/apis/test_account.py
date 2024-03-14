@@ -16,7 +16,7 @@
 from fastapi.testclient import TestClient
 
 
-def get_user_01(client_fixture: TestClient):
+def test_get_user_01(client_fixture: TestClient):
 
     response = client_fixture.get(
         "/companies/{company_id}/users",
