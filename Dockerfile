@@ -3,6 +3,9 @@ FROM python:3.9-slim
 WORKDIR /app
 
 COPY requirements.txt .
+# JWTが競合しないように一度アンインストール
+RUN pip uninstall JWT
+RUN pip uninstall PyJWT
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 COPY ./app .
