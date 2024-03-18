@@ -48,7 +48,7 @@ class Users(Base):
     user_account_info = relationship("UserAccountInfo", backref="users")
     user_reward_histories = relationship("UserRewardHistories", backref="users")
     user_rewards = relationship("UserRewards", backref="users")
-    mentorships = relationship("Mentorships", backref="users")
+    mentorships = relationship("Mentorships", foreign_keys="[Mentorships.mentor_id]")
     review_requests = relationship("ReviewRequests", backref="users")
     review_responses = relationship("ReviewResponses", backref="users")
     access_token = relationship("AccessToken", backref="users")
