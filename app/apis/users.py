@@ -16,7 +16,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.patch("/{user_id}", status_code=status.HTTP_200_OK)
-async def update_password(db: DbDependency, param: UserUpdate, user_id: int = Path(gt=0)):
+async def update_account(db: DbDependency, param: UserUpdate, user_id: int = Path(gt=0)):
         # メールアドレスの重複チェック
         duplication_user = account_update_cruds.find_by_email(db, param.email, user_id)
         if duplication_user:
