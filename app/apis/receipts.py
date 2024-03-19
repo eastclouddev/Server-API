@@ -22,8 +22,6 @@ async def get_receipt(db: DbDependency, receipt_id: int = Path(gt=0)):
     if not company_receipt:
         raise HTTPException(status_code=404, detail="Receipt not found.")
     
-    logger.warning(company_receipt.amount)
-    
     company = receipts_crud.find_by_company_id(db, company_receipt.company_id)
     payment_method = receipts_crud.find_by_payment_method_id(db, company_receipt.payment_method_id)
 
@@ -35,7 +33,7 @@ async def get_receipt(db: DbDependency, receipt_id: int = Path(gt=0)):
         "company_id": company_receipt.company_id,
         "billing_id": company_receipt.billing_info_id,
         "date": company_receipt.payment_date.strftime("%Y-%m-%d"),
-        "amount": company_receipt.amount, # TODO:フロント側のNumber処理で.00は消えるので注意
+        "amount": company_receipt.amount, # フロント側のNumber処理で.00は消えるので注意
         "received_from": company.name,
         "payment_method": payment_method.name
     }
