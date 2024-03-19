@@ -9,16 +9,19 @@ from models.company_billing_statuses import CompanyBillingStatuses
 def find_by_detail(db: Session, billing_id: int):
     billing_info = db.query(CompanyBillingInfo).filter(CompanyBillingInfo.id == billing_id).first()
     if not billing_info:
+        print("billing_info")
         return None
     company_id = billing_info.company_id
 
     payment_method = db.query(PaymentMethods).filter(billing_info.payment_method_id == PaymentMethods.id).first()
     if not payment_method :
+        print("payment_method")
         return None
     payment_methods = payment_method.name
 
     company_receipt = db.query(CompanyReceipts).filter(billing_info.id == CompanyReceipts.billing_info_id).first()
     if not company_receipt:
+        print("company_receipt")
         return None
     amount = company_receipt.amount
     pre_payment_date = company_receipt.payment_date
@@ -26,43 +29,16 @@ def find_by_detail(db: Session, billing_id: int):
 
     transaction_history = db.query(CompanyTransactionHistories).filter(billing_info.id == CompanyTransactionHistories.billing_info_id).first()
     if not transaction_history:
+        print("trnsaction_history")
         return None
     pre_date = transaction_history.invoice_date
     date = pre_date.strftime("%Y-%m-%d")
 
     billing_status = db.query(CompanyBillingStatuses).filter(transaction_history.billing_status_id == CompanyBillingStatuses.id).first()
     if not billing_status:
+        print("billing_status")
         return None
     status = billing_status.name
-
-    # def find_by_detail(db: Session, billing_id: int):
-    # AAA = db.query(CompanyBillingInfo).filter(CompanyBillingInfo.id == billing_id).first()
-    # if not AAA:
-    #     return None
-    # company_id = AAA.company_id
-
-    # BBB = db.query(PaymentMethods).filter(AAA.payment_method_id == PaymentMethods.id).first()
-    # if not BBB:
-    #     return None
-    # payment_methods = BBB.name
-
-    # CCC = db.query(CompanyReceipts).filter(AAA.id == CompanyReceipts.billing_info_id).first()
-    # if not CCC:
-    #     return None
-    # amount = CCC.amount
-    # pre_payment_date = CCC.payment_date
-    # payment_date = pre_payment_date.strftime("%Y-%m-%d")
-
-    # DDD = db.query(CompanyTransactionHistories).filter(AAA.id == CompanyTransactionHistories.billing_info_id).first()
-    # if not DDD:
-    #     return None
-    # pre_date = DDD.invoice_date
-    # date = pre_date.strftime("%Y-%m-%d")
-
-    # EEE = db.query(CompanyBillingStatuses).filter(DDD.billing_status_id == CompanyBillingStatuses.id).first()
-    # if not EEE:
-    #     return None
-    # status = EEE.name
 
     #請求履歴詳細
     info = {
@@ -77,7 +53,7 @@ def find_by_detail(db: Session, billing_id: int):
     payment_details = {
 
         "payment_details": {
-        "payment_methods": payment_methods,
+        "payment_method": payment_methods,
         "payment_date": payment_date
         } 
     }

@@ -5,17 +5,17 @@ from sqlalchemy.orm import Session
 from database.database import get_db
 from cruds import get_detail as get_detail
 from logging import getLogger
+from starlette import status
 
 logger = getLogger("uvicorn.app")
 DbDependency = Annotated[Session, Depends(get_db)]
-router = APIRouter(prefix="", tags=["Get_Details_History"])
+router = APIRouter(prefix="/billings", tags=["Get_Detail"])
 
 
-@router.get("/billings/{billing_id}")
-# @router.get("/billings/{billing_id}",response_model= ResponseBilling)
-
+@router.get("/{billing_id}",status_code=status.HTTP_200_OK)
 async def get_details(db: DbDependency, billing_id: int ):
     """
+    請求履歴詳細取得
 
     Parameter
     -----------------------
