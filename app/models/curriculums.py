@@ -6,7 +6,7 @@ from database.database import Base
 
 from models.curriculum_progresses import CurriculumProgresses
 from models.questions import Questions
-from models.test_contents import TestContents
+from models.quiz_contents import QuizContents
 from models.review_requests import ReviewRequests
 
 class Curriculums(Base):
@@ -26,6 +26,6 @@ class Curriculums(Base):
     
     curriculum_progresses = relationship("CurriculumProgresses", backref="curriculums")
     questions = relationship("Questions", backref="curriculums")
-    test_contents = relationship("TestContents", backref="curriculums")
+    quiz_contents = relationship("QuizContents", backref="curriculums")
     review_requests = relationship("ReviewRequests", backref="curriculums")
 
