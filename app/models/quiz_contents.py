@@ -5,8 +5,8 @@ from sqlalchemy.orm import relationship
 from database.database import Base
 
 
-class TestContents(Base):
-    __tablename__ = "test_contents"
+class QuizContents(Base):
+    __tablename__ = "quiz_contents"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     curriculum_id = Column(Integer, ForeignKey("curriculums.id"), nullable=False)
