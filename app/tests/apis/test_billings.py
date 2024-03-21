@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
 """取得成功パターン"""
-def test_get_details_01(client_fixture: TestClient):
+def test_billings_01(client_fixture: TestClient):
     
     response = client_fixture.get(
         "/billings/1"
@@ -18,7 +18,7 @@ def test_get_details_01(client_fixture: TestClient):
     assert "payment_date" in response.json()["payment_details"]
 
 """取得失敗パターン"""
-def test_get_details_02(client_fixture: TestClient):
+def test_billings_02(client_fixture: TestClient):
 
     response = client_fixture.get(
         "/billings/10"
