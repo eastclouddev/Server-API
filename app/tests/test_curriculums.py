@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
 """取得成功パターン"""
-def test_mentors_01(client_fixture: TestClient):
+def test_curriculums_01(client_fixture: TestClient):
     
     response = client_fixture.get(
         "/curriculums/1"
@@ -18,7 +18,7 @@ def test_mentors_01(client_fixture: TestClient):
 
 
 """取得失敗パターン"""
-def test_mentors_02(client_fixture: TestClient):
+def test_curriculums_02(client_fixture: TestClient):
 
     response = client_fixture.get(
        "/curriculums/999"
