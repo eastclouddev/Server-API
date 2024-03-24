@@ -1,6 +1,7 @@
 from starlette import status
 from fastapi import FastAPI
 # from apis import product
+from apis import mentors
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -20,4 +21,4 @@ async def read_root():
 
 # ルーターの読み込み
 # app.include_router(product.router)
-
+app.include_router(mentors.router)
