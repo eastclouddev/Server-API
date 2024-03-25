@@ -31,9 +31,13 @@ def cereate_question_list(db,found_question):
             "is_closed": question.is_closed
         }
         answer = db.query(Answers).filter(Answers.question_id == question.id).first()
-        find_is_read = {"is_read": answer.is_read }
-        one_question.update(find_is_read)
-
+        if  answer:
+            find_is_read = {"is_read": answer.is_read }
+            one_question.update(find_is_read)
+        else :
+            find_is_read = {"is_read": False }
+            one_question.update(find_is_read)
+        
         question_list.append(one_question)
 
     

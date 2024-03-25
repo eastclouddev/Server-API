@@ -16,7 +16,7 @@ router = APIRouter(prefix="/students", tags=["MyQuestion"])
 
 @router.get("/{student_id}/questions",response_model=ResponseBody, status_code=status.HTTP_200_OK)
 
-async def get_user(db: DbDependency,Request:RequestList, user_id:int):
+async def get_user(db: DbDependency, student_id:int):
 
     """
     自分の質問を取得する
@@ -52,7 +52,7 @@ async def get_user(db: DbDependency,Request:RequestList, user_id:int):
     """
 
 
-    found_question = get_my_question_crud.find_by_question(db, user_id)
+    found_question = get_my_question_crud.find_by_question(db, student_id)
 
     if not found_question:
         raise HTTPException(status_code=404, detail="question not found")
