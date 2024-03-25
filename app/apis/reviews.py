@@ -14,8 +14,11 @@ router = APIRouter(prefix="/reviews", tags=["ReviewResponses"])
 
 @router.patch("/responses/{response_id}", response_model=ResponseBody, status_code=status.HTTP_200_OK)
 async def response_update(db: DbDependency, update: RiquestBody,response_id: int = Path(gt=0)):
+    
+    new_response = review_crud.update(db, update,response_id)
+    if not new_response:
+        raise HTTPException(status_code=404, detail="Response not found.")
     try:
-        new_response = review_crud.update(db, update,response_id)
         db.commit()
     except Exception as e:
         logger.error(str(e)) # logger.warning,logger.info が使えます

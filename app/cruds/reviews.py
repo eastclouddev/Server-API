@@ -11,7 +11,7 @@ def find_response(db: Session, response_id: int):
 def update(db: Session, update:RiquestBody ,response_id: int):
     found_response = find_response(db, response_id)
     if not found_response:
-        raise HTTPException(status_code=404, detail="Response not found.")
+        return None
     
     found_response.content =update.content
     found_response.is_read =update.is_read
