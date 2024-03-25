@@ -6,8 +6,16 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class RequestBody(BaseModel):
-    pass
+    title: str = Field(examples=["Newsのタイトル"])
+    content: str = Field(examples=["Newsの内容"])
+    is_published: bool = Field(examples=[False])
+    published_at: str = Field(examples=["2024-03-01T10:00:00"])
 
 
 class ResponseBody(BaseModel):
-    pass
+    id: int
+    title: str
+    content: str
+    is_published: bool
+    published_at: str
+    created_at: str
