@@ -25,15 +25,15 @@ def test_login_01(client_fixture: TestClient):
 
 """取得失敗パターン"""
 def test_login_02(client_fixture: TestClient):
-    """受け取ったpasswordとemailが元の情報と不一致"""
+    """受け取ったemailとpasswordが元の情報と不一致"""
     response = client_fixture.post(
         "/login",
         json={
-            "email": "zzz@gmail.com",
+            "email": "bbb@gmail.com",
             "password": "zzzpassword",
             "device_info": {
                 "device_type": "smartphone",
-                "device_name": "iPhone12"
+                "device_name": "iPhone11"
             }
         }   
     )
