@@ -6,8 +6,12 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class RequestBody(BaseModel):
-    pass
+    user_id: int = Field(examples=[1])
+    content: str = Field(examples=["内容を記載"])
 
 
 class ResponseBody(BaseModel):
-    pass
+    answer_id: int
+    question_id: int
+    user_id: int
+    content: str
