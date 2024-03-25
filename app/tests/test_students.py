@@ -8,13 +8,13 @@ def test_students_01(client_fixture: TestClient):
     )
 
     assert response.status_code == 200
-    assert "id" in response.json()
-    assert "title" in response.json()
-    assert "content" in response.json()
-    assert "curriculum_id" in response.json()
-    assert "created_at" in response.json()
-    assert "is_read" in response.json()
-    assert "is_closed" in response.json()
+    assert "id" in response.json()["questions"][0]
+    assert "title" in response.json()["questions"][0]
+    assert "content" in response.json()["questions"][0]
+    assert "curriculum_id" in response.json()["questions"][0]
+    assert "created_at" in response.json()["questions"][0]
+    assert "is_read" in response.json()["questions"][0]
+    assert "is_closed" in response.json()["questions"][0]
 
 
 
@@ -26,5 +26,4 @@ def test_students_02(client_fixture: TestClient):
     )
 
     assert response.status_code == 404
-
 
