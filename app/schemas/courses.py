@@ -9,5 +9,13 @@ class RequestBody(BaseModel):
     pass
 
 
+class Course(BaseModel):
+    course_id: int
+    title: str
+    description: str
+    created_user: int
+    thumbnail_url: str
+    created_at: str
+
 class ResponseBody(BaseModel):
-    pass
+    courses: list[Course]
