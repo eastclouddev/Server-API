@@ -12,7 +12,7 @@ class LearningRecords(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
     duration = Column(Integer, nullable=False)
-    notes = Column(Text)
+    details = Column(String(255), nullable=False)
     study_date = Column(DateTime, nullable=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
