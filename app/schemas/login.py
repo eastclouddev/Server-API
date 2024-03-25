@@ -12,3 +12,9 @@ class RequestBody(BaseModel):
     password: Optional[str] = Field(None, examples=["password123"])
     device_info: DeviceInfo
 
+class ResponseBody(BaseModel):
+    user_id: int
+    access_token: str
+    expires_in: int
+    role: str
+

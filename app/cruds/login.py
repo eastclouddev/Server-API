@@ -2,12 +2,8 @@ from sqlalchemy.orm import Session
 from models.users import Users
 from models.roles import Roles
 from models.devices import Devices
-from logging import getLogger
 
 
-logger = getLogger("uvicorn.app")
-
-# ユーザーの認証関数
 def find_by_user(db: Session, email: str):
     return db.query(Users).filter(Users.email == email).first()
 
