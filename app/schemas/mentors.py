@@ -9,5 +9,10 @@ class RequestBody(BaseModel):
     pass
 
 
-class ResponseBody(BaseModel):
-    pass
+class DetailResponseBody(BaseModel):
+    mentor_id: int
+    account_name: str
+    bank_name: str
+    branch_name: str
+    account_number: str
+    account_type: str
