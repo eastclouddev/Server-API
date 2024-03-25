@@ -6,6 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
+from schemas.news import ResponseBody
+from cruds import news as news_crud
+
 logger = getLogger("uvicorn.app")
 
 DbDependency = Annotated[Session, Depends(get_db)]
@@ -13,7 +16,20 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/news", tags=["News"])
 
 
-# 開発時に消してください
-@router.get("", status_code=status.HTTP_200_OK)
-async def sample_func(db: DbDependency):
-	return {}
+@router.get("/{news_id}", response_model=ResponseBody, status_code=status.HTTP_200_OK)
+async def find_by_news_id(db: DbDependency, news_id: int = Path(gt=0)):
+
+    news = news_crud.find_by_news_id(db, news_id)
+
+    if not news:
+        raise HTTPException(status_code=404, detail="The requested news article was not found.")
+
+    re_di = {
+		"id": news.id,
+		"title": news.title,
+		"summary": news.summary,
+		"content": news.content,
+		"published_at": news.published_at.isoformat()
+    }
+
+    return re_di

@@ -10,4 +10,8 @@ class RequestBody(BaseModel):
 
 
 class ResponseBody(BaseModel):
-    pass
+    id: int
+    title: str
+    summary: str
+    content: str
+    published_at: str
