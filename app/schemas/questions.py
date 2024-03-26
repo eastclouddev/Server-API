@@ -15,7 +15,7 @@ class ResponseList(BaseModel):
     id:int
     question_id: int
     user_id:int
-    parent_answer_id:int
+    parent_answer_id:Optional[int]
     content: str
     media_content:dict
     is_read: bool
