@@ -31,3 +31,6 @@ def find_by_detail(db: Session, company_id: int):
     }
 
     return info
+
+def find_companies(db:Session):
+    return db.query(Companies).all()

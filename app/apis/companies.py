@@ -6,8 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.companies import RequestBody, ResponseBody, DetailResponseBody
+from schemas.companies import RequestBody, ResponseBody, DetailResponseBody,AllResponseBody
 from cruds import companies as companies_cruds
+from services import companies as compamies_services
 
 logger = getLogger("uvicorn.app")
 
@@ -85,3 +86,29 @@ async def find_company_detail(db: DbDependency, company_id: int = Path(gt=0)):
     if not info:
         raise HTTPException(status_code=404, detail="Company not found.")
     return info
+
+
+
+@router.get("",response_model=AllResponseBody, status_code=status.HTTP_200_OK)
+def get_companies(db: DbDependency):
+
+    """
+    会社情報一覧取得
+    
+    Parameters
+    ----------
+    なし
+
+    Returns
+    -------
+    {"companies": companies_list} : dic{}
+                    会社情報一覧
+    
+    """
+
+    found_companies = companies_cruds.find_companies(db)
+
+    if not found_companies:
+        raise HTTPException(status_code=500,detail="Internal server error.")
+    
+    return compamies_services.create_companies_list(found_companies)
