@@ -1,3 +1,4 @@
+import hashlib
 from logging import getLogger
 from typing import Annotated
 
@@ -9,14 +10,12 @@ from starlette import status
 from schemas.login import RequestBody, ResponseBody
 from cruds import login as login_crud
 from services import login as login_service
-import hashlib
 
 logger = getLogger("uvicorn.app")
 
 DbDependency = Annotated[Session, Depends(get_db)]
 
 router = APIRouter(prefix="/login", tags=["Login"])
-
 
 
 @router.post("", response_model=ResponseBody, status_code=status.HTTP_200_OK)

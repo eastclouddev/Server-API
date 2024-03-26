@@ -16,10 +16,8 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/curriculums", tags=["Curriculums"])
 
 
-@router.get("/{curriculum_id}",response_model=ResponseBody,status_code=status.HTTP_200_OK)
-# @router.get("/billings/{billing_id}",response_model= ResponseBilling)
-
-async def get_details(db: DbDependency, curriculum_id: int ):
+@router.get("/{curriculum_id}", response_model=ResponseBody, status_code=status.HTTP_200_OK)
+async def find_curriculum_detail(db: DbDependency, curriculum_id: int = Path(gt=0)):
     """
     カリキュラム詳細取得
 

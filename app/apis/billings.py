@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from cruds import billings as billings
 from schemas.billings import ResponseBody
+from cruds import billings as billings_crud
 
 logger = getLogger("uvicorn.app")
 
@@ -15,8 +15,8 @@ DbDependency = Annotated[Session, Depends(get_db)]
 
 router = APIRouter(prefix="/billings", tags=["Billings"])
 
-@router.get("/{billing_id}",response_model=ResponseBody,status_code=status.HTTP_200_OK)
-async def get_details(db: DbDependency, billing_id: int ):
+@router.get("/{billing_id}", response_model=ResponseBody, status_code=status.HTTP_200_OK)
+async def find_billing_detail(db: DbDependency, billing_id: int = Path(gt=0)):
     """
     請求履歴詳細取得
 
@@ -45,7 +45,7 @@ async def get_details(db: DbDependency, billing_id: int ):
                 支払い日（YYYY-MM-DD形式）
 
     """
-    info = billings.find_by_detail(db, billing_id)
+    info = billings_crud.find_by_detail(db, billing_id)
     if not info:
         raise HTTPException(status_code=404, detail="Billing record not found")
     return info

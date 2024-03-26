@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.reviews import RequestBody,ResponseBody
-from cruds import reviews as review_crud
+from schemas.reviews import RequestBody, ResponseBody
+from cruds import reviews as reviews_crud
 
 logger = getLogger("uvicorn.app")
 
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/reviews", tags=["Reviews"])
 
 
 @router.patch("/responses/{response_id}", response_model=ResponseBody, status_code=status.HTTP_200_OK)
-async def response_update(db: DbDependency, update: RequestBody,response_id: int = Path(gt=0)):
+async def update_review_response(db: DbDependency, update: RequestBody, response_id: int = Path(gt=0)):
     """
     レビュー回答更新
 
@@ -49,7 +49,7 @@ async def response_update(db: DbDependency, update: RequestBody,response_id: int
 
     """
     
-    new_response = review_crud.update(db, update,response_id)
+    new_response = reviews_crud.update(db, update,response_id)
     if not new_response:
         raise HTTPException(status_code=404, detail="Response not found.")
     try:

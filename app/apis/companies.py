@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.companies import RequestBody, ResponseBody,DetailResponseBody
+from schemas.companies import RequestBody, ResponseBody, DetailResponseBody
 from cruds import companies as companies_cruds
 
 logger = getLogger("uvicorn.app")
@@ -45,9 +45,8 @@ async def create_companies(db: DbDependency, param: RequestBody):
     
 
 
-@router.get("/{company_id}", response_model=ResponseBody,status_code=status.HTTP_200_OK)
-
-async def get_details(db: DbDependency, company_id: int ):
+@router.get("/{company_id}", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
+async def find_company_detail(db: DbDependency, company_id: int = Path(gt=0)):
     """
     会社詳細取得
 
