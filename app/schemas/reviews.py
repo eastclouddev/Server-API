@@ -19,3 +19,17 @@ class ResponseBody(BaseModel):
     content: str
     is_read: bool
     updated_at: str
+
+class UpdateRequestBody(BaseModel):
+    title: Optional[str] = Field(examples=["title"])
+    content: Optional[str] = Field(examples=["content"])
+    is_closed: Optional[bool] = Field(examples=[False])
+
+
+
+class UpdateResponseBody(BaseModel):
+    id: int
+    title: str
+    content: str
+    is_closed: bool
+    updated_at: str

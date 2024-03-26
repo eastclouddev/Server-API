@@ -1,8 +1,9 @@
 from sqlalchemy.orm import Session
 
 from models.users import Users
-from schemas.reviews import RequestBody
+from schemas.reviews import RequestBody,UpdateRequestBody
 from models.review_responses import ReviewResponses
+from models.review_requests import ReviewRequests
 
 
 def find_response(db: Session, response_id: int):
@@ -28,3 +29,28 @@ def update(db: Session, update:RequestBody ,response_id: int):
     }
 
     return update_response
+
+
+def find_review(db: Session, review_id: int):
+    return db.query(ReviewRequests).filter(ReviewRequests.id == review_id).first()
+
+
+def update_review(db: Session, update:UpdateRequestBody ,review_id: int):
+    found_review = find_review(db, review_id)
+    if not found_review:
+        return None
+    
+    found_review.title =update.title
+    found_review.content =update.content
+    found_review.is_closed =update.is_closed
+    db.add(found_review)
+    
+    update_review = {
+        "id": review_id,
+        "title": found_review.title,
+        "content": found_review.content,
+        "is_closed": found_review.is_closed,
+        "updated_at": found_review.updated_at.isoformat()
+    }
+
+    return update_review
