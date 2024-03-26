@@ -6,8 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.questions import RequestBody, ResponseBody
+from schemas.questions import RequestBody, ResponseBody, DetailResponseBody
 from cruds import questions as questions_crud
+from services import questions as questions_service
 
 logger = getLogger("uvicorn.app")
 
@@ -45,3 +46,36 @@ async def create_answers(db: DbDependency, param: RequestBody, question_id: int 
     except Exception as e:
         logger.error(str(e))
         raise HTTPException(status_code=400, detail="Invalid input data.")
+    
+
+
+
+
+@router.get("/{question_id}",response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
+def get_questions_thread(db: DbDependency,question_id: int):
+
+    """
+    質問スレッド一覧取得
+    
+    Parameters
+    ----------
+    なし
+
+    Returns
+    -------
+    {
+        {"question":}
+        {"answers": answers_list}
+    }
+            : dic{}
+            質問スレッド一覧
+    
+    """
+
+    found_question = questions_crud.find_question(db,question_id)
+    found_answers = questions_crud.find_answers(db,question_id)
+
+    
+    answer_list = questions_service.create_answers_list(found_answers)
+    
+    return {"question":found_question,"answer":answer_list}
