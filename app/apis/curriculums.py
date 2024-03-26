@@ -18,7 +18,7 @@ router = APIRouter(prefix="/curriculums", tags=["Get_Curriculm_Detail"])
 
 async def get_details(db: DbDependency, curriculum_id: int ):
     """
-    会社詳細取得
+    カリキュラム詳細取得
 
     Parameter
     -----------------------
