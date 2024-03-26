@@ -38,13 +38,13 @@ async def update_account(db: DbDependency, param: UpdateRequestBody, user_id: in
 		raise HTTPException(status_code=401, detail="Authentication failed.")
 	
 @router.get("/{user_id}", response_model=Responsebody, status_code=status.HTTP_200_OK)
-async def merge_dicts(db: DbDependency, user_id: int = Path(gt=0)):
-    user = users_crud.find_by_user(db,user_id)
+async def find_user_detail(db: DbDependency, user_id: int = Path(gt=0)):
+    user = users_crud.find_by_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
-    role = users_crud.find_by_role(db,user.role_id)
+    role = users_crud.find_by_role(db, user.role_id)
     
-    merged_dict = {
+    re_di = {
         "user_id": user.id,
         "first_name": user.first_name,
         "last_name": user.last_name,
@@ -53,6 +53,6 @@ async def merge_dicts(db: DbDependency, user_id: int = Path(gt=0)):
         "email": user.email,
         "role": role.name,
         "last_login": user.last_login.isoformat()
-        }
+    }
 
-    return  merged_dict
+    return re_di

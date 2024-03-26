@@ -10,7 +10,6 @@ from schemas.state_progresses import ResponseBody
 from cruds import state_progresses as state_progresses_crud
 
 
-
 logger = getLogger("uvicorn.app")
 
 DbDependency = Annotated[Session, Depends(get_db)]
@@ -28,8 +27,8 @@ async def get_receipt(db: DbDependency, reqeust: Request):
     li = []
 
     for progress in progresses:
-        course = state_progresses_crud.find_by_course(db,progress.course_id)
-        status = state_progresses_crud.find_by_status(db,progress.status_id)
+        course = state_progresses_crud.find_by_course(db, progress.course_id)
+        status = state_progresses_crud.find_by_status(db, progress.status_id)
 
         if course and status:
             di = {
@@ -40,7 +39,6 @@ async def get_receipt(db: DbDependency, reqeust: Request):
                 "last_accessed_at": progress.last_accessed_at.isoformat()
             }
             li.append(di)
-
 
     re_di = {
         "progresses": li

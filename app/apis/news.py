@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.news import ResponseBody,AllResponseBody
+from schemas.news import ResponseBody, AllResponseBody
 from cruds import news as news_crud
 
 logger = getLogger("uvicorn.app")
@@ -34,7 +34,7 @@ async def find_by_news_id(db: DbDependency, news_id: int = Path(gt=0)):
 
     return re_di
 
-@router.get("", response_model=AllResponseBody,status_code=status.HTTP_200_OK)
+@router.get("", response_model=AllResponseBody, status_code=status.HTTP_200_OK)
 async def get_receipt(db: DbDependency, page: int, limit: int):
 
     news = news_crud.find_by_news(db)
