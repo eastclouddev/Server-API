@@ -12,6 +12,12 @@ class UpdateRequestBody(BaseModel):
     last_name_kana: Optional[str] = Field(None, examples=["ヤマダ"])
     email: Optional[str] = Field(None, examples=["hanako@example.com"])
 
-
-class ResponseBody(BaseModel):
-    pass
+class Responsebody(BaseModel):
+    user_id: int
+    first_name: str
+    last_name: str
+    first_name_kana: str
+    last_name_kana: str
+    email: str
+    role: str
+    last_login: str  

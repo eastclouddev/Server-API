@@ -33,3 +33,8 @@ def update_by_user(db: Session, param:UpdateRequestBody, user_id: str):
     db.add(user)
     return user
 
+def find_by_user(db: Session, user_id: int):
+    return db.query(Users).filter(Users.id == user_id).first()
+
+def find_by_role(db: Session, role_id: int):
+    return db.query(Roles).filter(Roles.id == role_id).first()
