@@ -10,4 +10,11 @@ class RequestBody(BaseModel):
 
 
 class ResponseBody(BaseModel):
-    pass
+    curriculum_id: int
+    title: str
+    description: str
+    video_url: str
+    content: str 
+    is_test: bool
+    display_no: int
+    
