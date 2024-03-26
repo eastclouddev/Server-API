@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 
 
-class RiquestBody(BaseModel):
+class RequestBody(BaseModel):
     content: Optional[str] = Field(examples=["content"])
     is_read: Optional[bool] = Field(examples=[False])
 
