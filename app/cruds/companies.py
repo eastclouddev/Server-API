@@ -7,6 +7,7 @@ from models.companies import Companies
 def create(db: Session, company_create: RequestBody):
     new_company = Companies(**company_create.model_dump())
     db.add(new_company)
+
     return new_company
 
 
@@ -14,8 +15,6 @@ def find_by_detail(db: Session, company_id: int):
     company_info = db.query(Companies).filter(Companies.id == company_id).first()
     if not company_info:
         return None
-    
-
 
     info = {
         "company_id": company_id,
@@ -30,7 +29,5 @@ def find_by_detail(db: Session, company_id: int):
         "created_at": company_info.created_at,
         "updated_at": company_info.updated_at
     }
-
-
 
     return info

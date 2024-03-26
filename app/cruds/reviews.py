@@ -8,14 +8,13 @@ from models.review_responses import ReviewResponses
 def find_response(db: Session, response_id: int):
     return db.query(ReviewResponses).filter(ReviewResponses.id == response_id).first()
 
-
 def update(db: Session, update:RequestBody ,response_id: int):
     found_response = find_response(db, response_id)
     if not found_response:
         return None
     
-    found_response.content =update.content
-    found_response.is_read =update.is_read
+    found_response.content = update.content
+    found_response.is_read = update.is_read
     db.add(found_response)
     
     update_response = {
