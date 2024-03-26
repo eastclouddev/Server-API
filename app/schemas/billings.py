@@ -8,10 +8,9 @@ from pydantic import BaseModel, ConfigDict, Field
 class RequestBody(BaseModel):
     pass
 
-class ResponsePayment(BaseModel):
+class Payment(BaseModel):
     payment_method: str
     payment_date: str 
-
 
 class ResponseBody(BaseModel):
     billing_id: int
@@ -19,4 +18,4 @@ class ResponseBody(BaseModel):
     date: str
     amount: float
     status: str
-    payment_details: Optional[ResponsePayment] = None
+    payment_details: Optional[Payment] = None

@@ -5,10 +5,10 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class RequestList(BaseModel):
-    user_id: int 
+class RequestBody(BaseModel):
+    pass
 
-class ResponseList(BaseModel):
+class Questions(BaseModel):
     id: int
     title: str
     content: str
@@ -17,7 +17,5 @@ class ResponseList(BaseModel):
     is_read: bool
     is_closed: bool
       
-    
-
 class ResponseBody(BaseModel):
-    questions: list[ResponseList]
+    questions: list[Questions]

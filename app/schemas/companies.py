@@ -15,7 +15,6 @@ class RequestBody(BaseModel):
     phone_number: str = Field(examples=["電話番号"])
     email: str = Field(examples=["メールアドレス"])
 
-
 class ResponseBody(BaseModel):
     company_id: int
     name: str
