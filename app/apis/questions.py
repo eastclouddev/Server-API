@@ -52,7 +52,7 @@ async def create_answers(db: DbDependency, param: RequestBody, question_id: int 
 
 
 @router.get("/{question_id}",response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
-def get_questions_thread(db: DbDependency,question_id: int):
+def find_questions_thread(db: DbDependency,question_id: int):
 
     """
     質問スレッド一覧取得
@@ -73,9 +73,7 @@ def get_questions_thread(db: DbDependency,question_id: int):
     """
 
     found_question = questions_crud.find_question(db,question_id)
-    found_answers = questions_crud.find_answers(db,question_id)
-
-    
+    found_answers = questions_crud.find_answers(db,question_id)    
     answer_list = questions_service.create_answers_list(found_answers)
     
     return {"question":found_question,"answer":answer_list}

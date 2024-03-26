@@ -63,7 +63,7 @@ async def update_review_response(db: DbDependency, update: RequestBody, response
 
 
 @router.patch("/{review_id}", response_model=UpdateResponseBody, status_code=status.HTTP_200_OK)
-async def review_update(db: DbDependency, update: UpdateRequestBody,review_id: int = Path(gt=0)):
+async def update_review(db: DbDependency, update: UpdateRequestBody,review_id: int = Path(gt=0)):
     """
     レビュー更新
 
