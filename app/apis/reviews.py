@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.reviews import RequestBody, ResponseBody,UpdateRequestBody,UpdateResponseBody
+from schemas.reviews import UpdateResponseRequestBody, UpdateResponseResponseBody, UpdateReviewRequestBody, UpdateReviewResponseBody
 
 from cruds import reviews as reviews_crud
 
@@ -17,8 +17,8 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/reviews", tags=["Reviews"])
 
 
-@router.patch("/responses/{response_id}", response_model=ResponseBody, status_code=status.HTTP_200_OK)
-async def update_review_response(db: DbDependency, update: RequestBody, response_id: int = Path(gt=0)):
+@router.patch("/responses/{response_id}", response_model=UpdateResponseResponseBody, status_code=status.HTTP_200_OK)
+async def update_review_response(db: DbDependency, update: UpdateResponseRequestBody, response_id: int = Path(gt=0)):
     """
     レビュー回答更新
 
@@ -50,20 +50,22 @@ async def update_review_response(db: DbDependency, update: RequestBody, response
 
     """
     
-    new_response = reviews_crud.update(db, update,response_id)
+    new_response = reviews_crud.update_response(db, update,response_id)
     if not new_response:
         raise HTTPException(status_code=404, detail="Response not found.")
+
     try:
         db.commit()
+        return new_response
+
     except Exception as e:
         logger.error(str(e)) # logger.warning,logger.info が使えます
         db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")
-    return new_response
 
 
-@router.patch("/{review_id}", response_model=UpdateResponseBody, status_code=status.HTTP_200_OK)
-async def update_review(db: DbDependency, update: UpdateRequestBody,review_id: int = Path(gt=0)):
+@router.patch("/{review_id}", response_model=UpdateReviewResponseBody, status_code=status.HTTP_200_OK)
+async def update_review(db: DbDependency, update: UpdateReviewRequestBody,review_id: int = Path(gt=0)):
     """
     レビュー更新
 
@@ -96,10 +98,12 @@ async def update_review(db: DbDependency, update: UpdateRequestBody,review_id: i
     new_review = reviews_crud.update_review(db, update,review_id)
     if not new_review:
         raise HTTPException(status_code=404, detail="Curriculum not found.")
+
     try:
         db.commit()
+        return new_review
+
     except Exception as e:
         logger.error(str(e)) # logger.warning,logger.info が使えます
         db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")
-    return new_review

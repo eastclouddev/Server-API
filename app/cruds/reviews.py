@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from models.users import Users
-from schemas.reviews import RequestBody,UpdateRequestBody
+from schemas.reviews import UpdateResponseRequestBody, UpdateReviewRequestBody
 from models.review_responses import ReviewResponses
 from models.review_requests import ReviewRequests
 
@@ -9,7 +9,7 @@ from models.review_requests import ReviewRequests
 def find_response(db: Session, response_id: int):
     return db.query(ReviewResponses).filter(ReviewResponses.id == response_id).first()
 
-def update(db: Session, update:RequestBody ,response_id: int):
+def update_response(db: Session, update:UpdateResponseRequestBody ,response_id: int):
     found_response = find_response(db, response_id)
     if not found_response:
         return None
@@ -35,7 +35,7 @@ def find_review(db: Session, review_id: int):
     return db.query(ReviewRequests).filter(ReviewRequests.id == review_id).first()
 
 
-def update_review(db: Session, update:UpdateRequestBody ,review_id: int):
+def update_review(db: Session, update:UpdateReviewRequestBody ,review_id: int):
     found_review = find_review(db, review_id)
     if not found_review:
         return None
