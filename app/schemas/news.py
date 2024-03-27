@@ -23,7 +23,7 @@ class CreateResponseBody(BaseModel):
     published_at: str
     created_at: str
 
-class ResponseBody(BaseModel):
+class DetailResponseBody(BaseModel):
     id: int
     title: str
     content: str
