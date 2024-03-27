@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.questions import RequestBody, ResponseBody, DetailResponseBody
+from schemas.questions import CreateRequestBody, CreateResponseBody, DetailResponseBody
 from cruds import questions as questions_crud
 from services import questions as questions_service
 
@@ -17,8 +17,8 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/questions", tags=["Questions"])
 
 
-@router.post("/{question_id}/answers", response_model=ResponseBody, status_code=status.HTTP_201_CREATED)
-async def create_answers(db: DbDependency, param: RequestBody, question_id: int = Path(gt=0)):
+@router.post("/{question_id}/answers", response_model=CreateResponseBody, status_code=status.HTTP_201_CREATED)
+async def create_answers(db: DbDependency, param: CreateRequestBody, question_id: int = Path(gt=0)):
 
     question = questions_crud.find_by_question(db, question_id)
     if not question:
@@ -46,12 +46,8 @@ async def create_answers(db: DbDependency, param: RequestBody, question_id: int 
     except Exception as e:
         logger.error(str(e))
         raise HTTPException(status_code=400, detail="Invalid input data.")
-    
 
-
-
-
-@router.get("/{question_id}",response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
+@router.get("/{question_id}", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
 def find_questions_thread(db: DbDependency,question_id: int):
 
     """
@@ -76,4 +72,9 @@ def find_questions_thread(db: DbDependency,question_id: int):
     found_answers = questions_crud.find_answers(db,question_id)    
     answer_list = questions_service.create_answers_list(found_answers)
     
-    return {"question":found_question,"answer":answer_list}
+    re_di = {
+        "question": found_question,
+        "answer": answer_list
+    }
+    
+    return re_di

@@ -5,37 +5,36 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class RequestBody(BaseModel):
+class CreateRequestBody(BaseModel):
     user_id: int = Field(examples=[1])
     content: str = Field(examples=["内容を記載"])
 
-
-class ResponseBody(BaseModel):
+class CreateResponseBody(BaseModel):
     answer_id: int
     question_id: int
     user_id: int
     content: str
 
 class ResponseQuestion(BaseModel):
-    id:int
-    curriculum_id:int
-    user_id:int
-    title:str
-    content:str
-    media_content:dict
-    is_closed:bool
-    created_at:str
+    id: int
+    curriculum_id: int
+    user_id: int
+    title: str
+    content: str
+    media_content: dict
+    is_closed: bool
+    created_at: str
 
 class ResponseList(BaseModel):
-    id:int
+    id: int
     question_id: int
-    user_id:int
-    parent_answer_id:Optional[int]
+    user_id: int
+    parent_answer_id: Optional[int]
     content: str
-    media_content:dict
+    media_content: Optional[dict]
     is_read: bool
     created_at: str
 
 class DetailResponseBody(BaseModel):
-    question:ResponseQuestion
+    question: ResponseQuestion
     answer: list[ResponseList]
