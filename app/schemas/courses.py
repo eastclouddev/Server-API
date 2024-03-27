@@ -20,16 +20,16 @@ class Course(BaseModel):
 class AllResponseBody(BaseModel):
     courses: list[Course]
 
-class CurriculumList(BaseModel):
+class Curriculum(BaseModel):
     curriculum_id: int
     title: str
     description: str
 
-class SectionList(BaseModel):
+class Section(BaseModel):
     section_id: int
     title: str
     description: str
-    curriculums: list[CurriculumList]
+    curriculums: list[Curriculum]
 
 class DetailResponseBody(BaseModel):
     course_id: int
@@ -37,4 +37,4 @@ class DetailResponseBody(BaseModel):
     description: str
     created_user_id: int
     created_at: str
-    sections: list[SectionList]
+    sections: list[Section]

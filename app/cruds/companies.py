@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
 
-from schemas.companies import RequestBody
+from schemas.companies import CreateRequestBody
 from models.companies import Companies 
 
 
-def create_company(db: Session, company_create: RequestBody):
+def create_company(db: Session, company_create: CreateRequestBody):
     new_company = Companies(**company_create.model_dump())
     db.add(new_company)
     return new_company

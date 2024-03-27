@@ -17,8 +17,8 @@ router = APIRouter(prefix="/courses", tags=["Courses"])
 
 
 @router.get("", response_model=AllResponseBody, status_code=status.HTTP_200_OK)
-async def get_courses(db: DbDependency):
-    courses = courses_crud.find_by_courses(db)
+async def find_courses(db: DbDependency):
+    courses = courses_crud.find_courses(db)
 
     li = []
     for course in courses:
@@ -40,8 +40,8 @@ async def get_courses(db: DbDependency):
 
 @router.get("/{course_id}", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
 async def find_course(db: DbDependency, course_id: int = Path(gt=0)):
-    course = courses_crud.find_by_course(db, course_id)
-    sections = courses_crud.find_by_sections(db, course_id)
+    course = courses_crud.find_by_course_id(db, course_id)
+    sections = courses_crud.find_sections(db, course_id)
 
     if not course:
         raise HTTPException(status_code=404, detail="Course not found.")
@@ -49,7 +49,7 @@ async def find_course(db: DbDependency, course_id: int = Path(gt=0)):
     section_li = []
     if sections:
         for section in sections:
-            curriculums = courses_crud.find_by_curriculums(db, section.id)
+            curriculums = courses_crud.find_curriculums(db, section.id)
             curriculum_li = []
             # 最内のリストを作成
             for curriculum in curriculums:
