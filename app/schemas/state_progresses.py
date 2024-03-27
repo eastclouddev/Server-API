@@ -16,4 +16,4 @@ class Progress(BaseModel):
     last_accessed_at: str
 
 class ResponseBody(BaseModel):
-    progresses:list[Progress]
+    progresses: list[Progress]

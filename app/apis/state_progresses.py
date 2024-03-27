@@ -22,13 +22,13 @@ async def get_receipt(db: DbDependency, reqeust: Request):
     # TODO:ヘッダー情報から必要なパラメータを取得する
     user_id = 1
 
-    progresses = state_progresses_crud.find_by_course_progresses(db, user_id)
+    progresses = state_progresses_crud.find_course_progresses(db, user_id)
                 
     li = []
 
     for progress in progresses:
-        course = state_progresses_crud.find_by_course(db, progress.course_id)
-        status = state_progresses_crud.find_by_status(db, progress.status_id)
+        course = state_progresses_crud.find_by_course_id(db, progress.course_id)
+        status = state_progresses_crud.find_by_status_id(db, progress.status_id)
 
         if course and status:
             di = {
