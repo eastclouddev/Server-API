@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.mentors import DetailResponseBody, ResponseBody, RequestBody
+from schemas.mentors import DetailResponseBody, CreateResponseBody, RequestBody, ResponseBody
 from cruds import mentors as mentors_crud
 
 logger = getLogger("uvicorn.app")
@@ -16,6 +16,29 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/mentors", tags=["Mentors"])
 
 
+@router.get("/{mentor_id}/rewards", response_model=ResponseBody, status_code=status.HTTP_200_OK)
+async def find_by_mentor_id(db: DbDependency, mentor_id: int = Path(gt=0)):
+
+    user_rewards = mentors_crud.find_by_mentor_id(db, mentor_id)
+
+    if not user_rewards:
+        raise HTTPException(status_code=404, detail="Mentor not found.")
+
+    li = []
+    for user_reward in user_rewards:
+        di = {
+            "reward_id": user_reward.id,
+            "date": user_reward.reward_at.strftime("%Y-%m-%d"),
+            "amount": user_reward.amount,
+            "to_mentor_id": int(mentor_id)
+        }
+        li.append(di)
+
+    re_di = {
+        "rewards": li
+    }
+
+    return re_di
 
 @router.get("/{mentor_id}/accounts",response_model=DetailResponseBody,status_code=status.HTTP_200_OK)
 async def find_info_detail(db: DbDependency, mentor_id: int = Path(gt=0)):
@@ -51,7 +74,7 @@ async def find_info_detail(db: DbDependency, mentor_id: int = Path(gt=0)):
     return info
 
 
-@router.post("/{mentor_id}/accounts", response_model=ResponseBody, status_code=status.HTTP_201_CREATED)
+@router.post("/{mentor_id}/accounts", response_model=CreateResponseBody, status_code=status.HTTP_201_CREATED)
 async def create_info(db: DbDependency, create_model: RequestBody, mentor_id: int = Path(gt=0)):
 
     """

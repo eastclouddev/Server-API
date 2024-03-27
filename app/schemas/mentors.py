@@ -21,7 +21,16 @@ class RequestBody(BaseModel):
     account_number: str = Field(examples=["口座番号"])
     account_name: str = Field(examples=["口座名義"])
 
+class Rewards(BaseModel):
+    reward_id: int
+    date: str
+    amount: float
+    to_mentor_id: int
+
 class ResponseBody(BaseModel):
+    rewards: list[Rewards]
+
+class CreateResponseBody(BaseModel):
     account_id: int
     mentor_id: int 
     bank_name: str

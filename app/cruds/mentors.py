@@ -1,10 +1,15 @@
 from sqlalchemy.orm import Session
 
+from schemas.mentors import CreateResponseBody
 from models.user_account_info import UserAccountInfo
 from models.users import Users
 from models.user_account_types import UserAccountTypes
 from models.mentorships import Mentorships
-from schemas.mentors import ResponseBody
+from models.user_rewards import UserRewards 
+
+
+def find_by_mentor_id(db: Session, mentor_id: int):
+    return db.query(UserRewards).filter(UserRewards.user_id == mentor_id).all()
 
 def find_bank_info(db: Session, mentor_id: int):
 
@@ -33,7 +38,7 @@ def find_bank_info(db: Session, mentor_id: int):
 
     return info
 
-def create(db: Session, create_model: ResponseBody, mentor_id: int):
+def create(db: Session, create_model: CreateResponseBody, mentor_id: int):
 
     mentor = db.query(Users).filter(Users.id == mentor_id).first()
 
