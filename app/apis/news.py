@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.news import ResponseBody, AllResponseBody
+from schemas.news import ResponseBody, AllResponseBody, CreateRequestBody, CreateResponseBody
 from cruds import news as news_crud
 
 logger = getLogger("uvicorn.app")
@@ -58,3 +58,27 @@ async def get_receipt(db: DbDependency, page: int, limit: int):
     }
 
     return re_di
+
+@router.post("", response_model=CreateResponseBody, status_code=status.HTTP_201_CREATED)
+async def create_news(db: DbDependency, param: CreateRequestBody):
+
+	try:
+
+		new_news = news_crud.create_news(db, param)
+		db.commit()
+
+		re_di = {
+			"id": new_news.id,
+			"title": new_news.title,
+			"content": new_news.content,
+			"is_published": new_news.is_published,
+			"published_at": new_news.published_at.isoformat(),
+			"created_at": new_news.created_at.isoformat()
+		}
+	
+	except Exception as e:
+		logger.error(e)
+		db.rollback()
+		raise HTTPException(status_code=400, detail="Invalid input data.")
+
+	return re_di

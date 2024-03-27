@@ -9,6 +9,20 @@ class RequestBody(BaseModel):
     pass
 
 
+class CreateRequestBody(BaseModel):
+    title: str = Field(examples=["Newsのタイトル"])
+    content: str = Field(examples=["Newsの内容"])
+    is_published: bool = Field(examples=[False])
+    published_at: str = Field(examples=["2024-03-01T10:00:00"])
+
+class CreateResponseBody(BaseModel):
+    id: int
+    title: str
+    content: str
+    is_published: bool
+    published_at: str
+    created_at: str
+
 class ResponseBody(BaseModel):
     id: int
     title: str
