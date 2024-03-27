@@ -12,7 +12,7 @@ class Payment(BaseModel):
     payment_method: str
     payment_date: str 
 
-class ResponseBody(BaseModel):
+class DetailonseBody(BaseModel):
     billing_id: int
     company_id: int
     date: str
