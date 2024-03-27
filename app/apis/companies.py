@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.companies import RequestBody, ResponseBody, DetailResponseBody,AllResponseBody
+from schemas.companies import CreateRequestBody, CreateResponseBody, DetailResponseBody,AllResponseBody
 from cruds import companies as companies_cruds
 from services import companies as compamies_services
 
@@ -17,11 +17,11 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/companies", tags=["Companies"])
 
 
-@router.post("", response_model=ResponseBody, status_code=status.HTTP_200_OK)
-async def create_companies(db: DbDependency, param: RequestBody):
+@router.post("", response_model=CreateResponseBody, status_code=status.HTTP_200_OK)
+async def create_companies(db: DbDependency, param: CreateRequestBody):
 
     try:
-        new_company = companies_cruds.create(db, param)
+        new_company = companies_cruds.create_company(db, param)
         
         db.commit()
         
@@ -82,9 +82,24 @@ async def find_company_detail(db: DbDependency, company_id: int = Path(gt=0)):
         レコードの最終更新日時（ISO 8601形式）
 
     """
-    info = companies_cruds.find_by_detail(db, company_id)
-    if not info:
+    company_info = companies_cruds.find_by_company_id(db, company_id)
+    if not company_info:
         raise HTTPException(status_code=404, detail="Company not found.")
+    
+    info = {
+        "company_id": company_id,
+        "name": company_info.name,
+        "prefecture": company_info.prefecture,
+        "city": company_info.city,
+        "town": company_info.town,
+        "address": company_info.address,
+        "postal_code": company_info.postal_code,
+        "phone_number": company_info.phone_number,
+        "email": company_info.email,
+        "created_at": company_info.created_at.isoformat(),
+        "updated_at": company_info.updated_at.isoformat()
+    }
+
     return info
 
 

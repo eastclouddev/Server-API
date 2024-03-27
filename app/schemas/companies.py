@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class RequestBody(BaseModel):
+class CreateRequestBody(BaseModel):
     name: str = Field(examples=["会社名"])
     prefecture: str = Field(examples=["都道府県"])
     city: str = Field(examples=["市区町村"])
@@ -15,7 +15,7 @@ class RequestBody(BaseModel):
     phone_number: str = Field(examples=["電話番号"])
     email: str = Field(examples=["メールアドレス"])
 
-class ResponseBody(BaseModel):
+class CreateResponseBody(BaseModel):
     company_id: int
     name: str
     prefecture: str
@@ -39,9 +39,7 @@ class DetailResponseBody(BaseModel):
     created_at: str
     updated_at: str
 
-
-
-class AllResponseList(BaseModel):
+class Company(BaseModel):
     company_id: int
     name: str 
     prefecture: str
@@ -54,4 +52,4 @@ class AllResponseList(BaseModel):
     created_at: str
 
 class AllResponseBody(BaseModel):
-    companies: list[AllResponseList]
+    companies: list[Company]
