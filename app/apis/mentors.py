@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.mentors import DetailResponseBody, CreateResponseBody, RequestBody, ResponseBody
+from schemas.mentors import DetailResponseBody, CreateResponseBody, RequestBody, RewardsResponseBody
 from cruds import mentors as mentors_crud
 
 logger = getLogger("uvicorn.app")
@@ -16,10 +16,10 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/mentors", tags=["Mentors"])
 
 
-@router.get("/{mentor_id}/rewards", response_model=ResponseBody, status_code=status.HTTP_200_OK)
+@router.get("/{mentor_id}/rewards", response_model=RewardsResponseBody, status_code=status.HTTP_200_OK)
 async def find_by_mentor_id(db: DbDependency, mentor_id: int = Path(gt=0)):
 
-    user_rewards = mentors_crud.find_by_mentor_id(db, mentor_id)
+    user_rewards = mentors_crud.find_rewards_by_mentor_id(db, mentor_id)
 
     if not user_rewards:
         raise HTTPException(status_code=404, detail="Mentor not found.")
@@ -40,7 +40,7 @@ async def find_by_mentor_id(db: DbDependency, mentor_id: int = Path(gt=0)):
 
     return re_di
 
-@router.get("/{mentor_id}/accounts",response_model=DetailResponseBody,status_code=status.HTTP_200_OK)
+@router.get("/{mentor_id}/accounts", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
 async def find_info_detail(db: DbDependency, mentor_id: int = Path(gt=0)):
     """
     送金先の情報詳細を取得
@@ -49,8 +49,6 @@ async def find_info_detail(db: DbDependency, mentor_id: int = Path(gt=0)):
     -----------------------
     mentor_id: int
         口座情報を取得したいメンターのID
-
-        
 
     Return
     ----------------------
@@ -98,7 +96,6 @@ async def create_info(db: DbDependency, create_model: RequestBody, mentor_id: in
         口座番号 
     account_name: str 
         口座名義
-        
 
     Return
     ----------------------
@@ -141,9 +138,9 @@ async def create_info(db: DbDependency, create_model: RequestBody, mentor_id: in
             "account_name": new_transfer.account_name
         }
 
+        return info
+
     except Exception as e:
         logger.error(str(e))
         db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")
-    
-    return info

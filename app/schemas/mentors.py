@@ -27,7 +27,7 @@ class Rewards(BaseModel):
     amount: float
     to_mentor_id: int
 
-class ResponseBody(BaseModel):
+class RewardsResponseBody(BaseModel):
     rewards: list[Rewards]
 
 class CreateResponseBody(BaseModel):

@@ -8,7 +8,7 @@ from models.mentorships import Mentorships
 from models.user_rewards import UserRewards 
 
 
-def find_by_mentor_id(db: Session, mentor_id: int):
+def find_rewards_by_mentor_id(db: Session, mentor_id: int):
     return db.query(UserRewards).filter(UserRewards.user_id == mentor_id).all()
 
 def find_bank_info(db: Session, mentor_id: int):
@@ -22,7 +22,7 @@ def find_bank_info(db: Session, mentor_id: int):
     if not bank_info:
         return None
 
-    account_type = db.query(UserAccountTypes).filter(bank_info.user_id == UserAccountTypes.id).first()
+    account_type = db.query(UserAccountTypes).filter(UserAccountTypes.id == bank_info.user_id).first()
     if not account_type:
         return None
 
@@ -45,7 +45,10 @@ def create(db: Session, create_model: CreateResponseBody, mentor_id: int):
     if not mentor:
         return None
 
-    account_type = db.query(UserAccountTypes).filter(create_model.account_type == UserAccountTypes.name).first()
+    account_type = db.query(UserAccountTypes).filter(UserAccountTypes.name == create_model.account_type).first()
+
+    if not account_type:
+        return None
 
     new_transfer = UserAccountInfo(
         user_id = mentor_id,
