@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.curriculums import ReviewsResponseBody, ResponseBody
+from schemas.curriculums import ReviewsResponseBody, DetailResponseBody
 from cruds import curriculums as curriculums_crud
 
 logger = getLogger("uvicorn.app")
@@ -40,7 +40,7 @@ async def find_curriculum_reviews(db: DbDependency, curriculum_id: int = Path(gt
 
     return re_di
 
-@router.get("/{curriculum_id}", response_model=ResponseBody, status_code=status.HTTP_200_OK)
+@router.get("/{curriculum_id}", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
 async def find_curriculum_detail(db: DbDependency, curriculum_id: int = Path(gt=0)):
     """
     カリキュラム詳細取得
@@ -68,7 +68,7 @@ async def find_curriculum_detail(db: DbDependency, curriculum_id: int = Path(gt=
         カリキュラムの表示順
 
     """
-    info = curriculums_crud.find_by_detail(db, curriculum_id)
+    info = curriculums_crud.find_by_curriculum_id(db, curriculum_id)
     if not info:
         raise HTTPException(status_code=404, detail="Curriculum not found.")
     return info

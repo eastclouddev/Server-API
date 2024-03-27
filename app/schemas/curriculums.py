@@ -9,7 +9,7 @@ class RequestBody(BaseModel):
     pass
 
 
-class ResponseBody(BaseModel):
+class DetailResponseBody(BaseModel):
     curriculum_id: int
     title: str
     description: str
