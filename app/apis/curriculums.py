@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
+from schemas.curriculums import ReviewsResponseBody, ResponseBody
 from cruds import curriculums as curriculums_crud
-from schemas.curriculums import ResponseBody
 
 logger = getLogger("uvicorn.app")
 
@@ -15,6 +15,30 @@ DbDependency = Annotated[Session, Depends(get_db)]
 
 router = APIRouter(prefix="/curriculums", tags=["Curriculums"])
 
+
+@router.get("/{curriculum_id}/reviews", response_model=ReviewsResponseBody, status_code=status.HTTP_200_OK)
+async def find_curriculum_reviews(db: DbDependency, curriculum_id: int = Path(gt=0)):
+    reviews = curriculums_crud.find_reviews(db, curriculum_id)
+
+    li = []
+    for review in reviews:
+        di = {
+            "id": review.id,
+            "curriculum_id": review.curriculum_id,
+            "user_id": review.user_id,
+            "title": review.title,
+            "content": review.content,
+            "is_closed": review.is_closed,
+            "created_at": review.created_at.isoformat(),
+            "updated_at": review.updated_at.isoformat()
+        }
+        li.append(di)
+
+    re_di = {
+        "reviews": li
+    }
+
+    return re_di
 
 @router.get("/{curriculum_id}", response_model=ResponseBody, status_code=status.HTTP_200_OK)
 async def find_curriculum_detail(db: DbDependency, curriculum_id: int = Path(gt=0)):

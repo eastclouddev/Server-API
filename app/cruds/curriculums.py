@@ -1,6 +1,11 @@
 from sqlalchemy.orm import Session
+
+from models.review_requests import ReviewRequests
 from models.curriculums import Curriculums
 
+
+def find_reviews(db: Session, curriculum_id: int):
+    return db.query(ReviewRequests).filter(ReviewRequests.curriculum_id == curriculum_id).all()
 
 def find_by_detail(db: Session, curriculum_id: int):
     curriculum_info = db.query(Curriculums).filter(Curriculums.id == curriculum_id).first()
