@@ -16,9 +16,22 @@ DbDependency = Annotated[Session, Depends(get_db)]
 
 router = APIRouter(prefix="/state_progresses", tags=["StateProgresses"])
 
-@router.get("",response_model=ResponseBody, status_code=status.HTTP_200_OK)
-async def get_receipt(db: DbDependency, reqeust: Request):
+@router.get("", response_model=ResponseBody, status_code=status.HTTP_200_OK)
+async def state_progresses(db: DbDependency, reqeust: Request):
+    """
+    現在の学習進捗
+    Parameters
+    ----------
+    request: Request
+        headersから情報を取得する
 
+    Returns
+    -------
+    re_di: ResponseBody
+        progresses: [
+            {course_id, course_title, progress_percentage, status, last_accessed_at}
+        ]
+    """
     # TODO:ヘッダー情報から必要なパラメータを取得する
     user_id = 1
 

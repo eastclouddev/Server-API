@@ -19,6 +19,18 @@ router = APIRouter(prefix="/news", tags=["News"])
 
 @router.get("/{news_id}", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
 async def find_by_news_id(db: DbDependency, news_id: int = Path(gt=0)):
+    """
+    ニュース詳細取得
+    Parameters
+    ----------
+    news_id: int
+        取得するニュースのID
+
+    Returns
+    -------
+    re_di: DetailResponseBody
+        id, title, content, published_at
+    """
 
     news = news_crud.find_by_news_id(db, news_id)
 
@@ -36,7 +48,20 @@ async def find_by_news_id(db: DbDependency, news_id: int = Path(gt=0)):
 
 @router.get("", response_model=AllResponseBody, status_code=status.HTTP_200_OK)
 async def get_receipt(db: DbDependency, page: int, limit: int):
+    """
+    ニュース一覧取得
+    Parameters
+    ----------
+    page: int
+        表示するページ
+    limit: int
+        1ページに表示するニュース数
 
+    Returns
+    -------
+    re_di: AllResponseBody
+        news[], page, limit, total_page, total_news
+    """
     news = news_crud.find_news(db)
 
     li = []
@@ -61,24 +86,36 @@ async def get_receipt(db: DbDependency, page: int, limit: int):
 
 @router.post("", response_model=CreateResponseBody, status_code=status.HTTP_201_CREATED)
 async def create_news(db: DbDependency, param: CreateRequestBody):
+    """
+    ニュース作成
+    Parameters
+    ----------
+    param: CreateRequestBody
+        title, content, is_published, published_at        
 
-	try:
+    Returns
+    -------
+    re_di: CreateResponseBody
+        id, title, content, is_published, published_at, created_at
+    """
 
-		new_news = news_crud.create_news(db, param)
-		db.commit()
+    try:
 
-		re_di = {
-			"id": new_news.id,
-			"title": new_news.title,
-			"content": new_news.content,
-			"is_published": new_news.is_published,
-			"published_at": new_news.published_at.isoformat(),
-			"created_at": new_news.created_at.isoformat()
-		}
+        new_news = news_crud.create_news(db, param)
+        db.commit()
+
+        re_di = {
+            "id": new_news.id,
+            "title": new_news.title,
+            "content": new_news.content,
+            "is_published": new_news.is_published,
+            "published_at": new_news.published_at.isoformat(),
+            "created_at": new_news.created_at.isoformat()
+        }
+
+        return re_di
 	
-	except Exception as e:
-		logger.error(e)
-		db.rollback()
-		raise HTTPException(status_code=400, detail="Invalid input data.")
-
-	return re_di
+    except Exception as e:
+        logger.error(e)
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid input data.")

@@ -17,7 +17,19 @@ router = APIRouter(prefix="/receipts", tags=["Receipts"])
 
 
 @router.get("/{receipt_id}", response_model=ResponseBody, status_code=status.HTTP_200_OK)
-async def get_receipt(db: DbDependency, receipt_id: int = Path(gt=0)):
+async def find_receipt(db: DbDependency, receipt_id: int = Path(gt=0)):
+    """
+    領収書出力
+    Parameters
+    ----------
+    receipt_id: int
+        出力する領収書のID
+
+    Returns
+    -------
+    re_di: ResponseBody
+        receipt_id, company_id, billing_id, date, amount, received_from, payment_method
+    """
 
     company_receipt = receipts_crud.find_by_receipt_id(db, receipt_id)
 
