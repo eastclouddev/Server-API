@@ -19,7 +19,7 @@ class Companies(Base):
     address = Column(String(255), nullable=False)
     postal_code = Column(String(10), nullable=False)
     phone_number = Column(String(20), nullable=False)
-    email = Column(String(255), nullable=False)
+    email = Column(String(255), nullable=False, unique=True)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 
