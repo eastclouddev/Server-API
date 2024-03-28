@@ -105,7 +105,7 @@ async def find_company_detail(db: DbDependency, company_id: int = Path(gt=0)):
 
 
 @router.get("",response_model=AllResponseBody, status_code=status.HTTP_200_OK)
-def find_companies(db: DbDependency):
+async def find_companies(db: DbDependency):
 
     """
     会社情報一覧取得
