@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
+from schemas.news import ResponseBody,AllResponseBody,RequestBody,UpdateResponseBody
 from schemas.news import DetailResponseBody, AllResponseBody, CreateRequestBody, CreateResponseBody
 from cruds import news as news_crud
 
@@ -83,6 +84,37 @@ async def get_receipt(db: DbDependency, page: int, limit: int):
     }
 
     return re_di
+
+@router.patch("/{news_id}", response_model= UpdateResponseBody, status_code=status.HTTP_200_OK)
+async def update_news(db: DbDependency, news_id: int, param:RequestBody):
+
+    logger.info(param)
+
+    found_news = news_crud.find_by_news_id(db, news_id)
+
+    if not found_news:
+        raise HTTPException(status_code=404,detail="News not found.")
+
+    try:
+        news = news_crud.update_by_news_id(db, news_id, param.title, param.content, param.is_published, param.published_at)
+        db.commit()
+
+        re_di ={
+                "news_id": news.id,
+                "title": news.title,
+                "content": news.content,
+                "is_published": news.is_published,
+                "published_at": news.published_at.isoformat(),
+                "updated_at": news.updated_at.isoformat()
+
+        }
+
+        return re_di
+
+    except Exception as e:
+        logger.error(str(e)) 
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid input data.")  
 
 @router.post("", response_model=CreateResponseBody, status_code=status.HTTP_201_CREATED)
 async def create_news(db: DbDependency, param: CreateRequestBody):
