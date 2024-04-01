@@ -63,6 +63,8 @@ async def create_company(db: DbDependency, param: CreateRequestBody):
         メールアドレス
     """
 
+    # TODO:メールアドレスの重複チェックが入る予定（emailがuniqueになったため）
+
     try:
         new_company = companies_cruds.create_company(db, param)
         
@@ -102,7 +104,7 @@ async def find_company_details(db: DbDependency, company_id: int = Path(gt=0)):
     Return
     ----------------------
     company_id: int
-        会社のID（
+        会社のID
     name: str
         会社の名前
     prefecture: str
@@ -159,8 +161,28 @@ async def find_company_list(db: DbDependency):
 
     Returns
     -------
-    {"companies": companies_list} : dic{}
-                    会社情報一覧
+    companies: array
+        以下の情報を含む。
+        company_id: int
+            会社のID（int）
+        name: str
+            会社名
+        prefecture: str
+            都道府県
+        city: str
+            市区町村
+        town: str
+            町名、番地等
+        address: str
+            建物名、部屋番号等
+        postal_code: str
+            郵便番号
+        phone_number: str
+            電話番号
+        email: str
+            メールアドレス
+        created_at: str
+            会社情報が作成された日時（ISO 8601形式）
     
     """
 
@@ -169,4 +191,22 @@ async def find_company_list(db: DbDependency):
     if not found_companies:
         raise HTTPException(status_code=500,detail="Internal server error.")
     
-    return compamies_services.create_companies_list(found_companies)
+    companies_list = []
+
+    for company in found_companies:
+        one_company = {
+            "company_id": company.id,
+            "name": company.name,
+            "prefecture": company.prefecture,
+            "city": company.city,
+            "town": company.town,
+            "address": company.address,
+            "postal_code": company.postal_code,
+            "phone_number": company.phone_number,
+            "email": company.email,
+            "created_at": company.created_at.isoformat()
+        }
+
+        companies_list.append(one_company)
+    
+    return {"companies": companies_list}

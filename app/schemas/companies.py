@@ -45,7 +45,7 @@ class Company(BaseModel):
     prefecture: str
     city: str
     town: str
-    address: str
+    address: Optional[str]
     postal_code: str
     phone_number: str
     email: str
