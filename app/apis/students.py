@@ -49,9 +49,30 @@ async def find_my_question_list(db: DbDependency, student_id: int = Path(gt=0)):
     
     """
 
-    found_question = students_crud.find_by_question(db, student_id)
+    found_question = students_crud.find_by_user_id(db, student_id)
 
     if not found_question:
         raise HTTPException(status_code=404, detail="question not found")
 
-    return  students_crud.cereate_question_list(db, found_question)
+    question_list = []
+
+    for question in found_question:
+        one_question = {
+            "id": question.id,
+            "title": question.title,
+            "content": question.content,
+            "curriculum_id": question.curriculum_id,
+            "created_at": question.created_at,
+            "is_closed": question.is_closed
+        }
+        answer = students_crud.find_by_question_id(db, question.id)
+        if answer:
+            find_is_read = {"is_read": answer.is_read}
+            one_question.update(find_is_read)
+        else:
+            find_is_read = {"is_read": False}
+            one_question.update(find_is_read)
+        
+        question_list.append(one_question)
+    
+    return {"questions": question_list}
