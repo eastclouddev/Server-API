@@ -48,13 +48,3 @@ async def get_all_reviews(request: Request,db: DbDependency, mentor_id: int):
 
     return {"reviews": reviews_list} 
 
-
-
-@router.post("/{mentor_id}/students/reviews")
-async def create_mentorship(db: DbDependency, mentor_id: int, student_id: int):
-    new_mentorship = Mentorships(
-        mentor_id = mentor_id,
-        student_id = student_id
-    )
-    db.add(new_mentorship)
-    db.commit()
