@@ -14,7 +14,7 @@ class Course(BaseModel):
     title: str
     description: str
     created_user: int
-    thumbnail_url: str
+    thumbnail_url: Optional[str]
     created_at: str
 
 class AllResponseBody(BaseModel):
@@ -23,12 +23,12 @@ class AllResponseBody(BaseModel):
 class Curriculum(BaseModel):
     curriculum_id: int
     title: str
-    description: str
+    description: Optional[str]
 
 class Section(BaseModel):
     section_id: int
     title: str
-    description: str
+    description: Optional[str]
     curriculums: list[Curriculum]
 
 class DetailResponseBody(BaseModel):

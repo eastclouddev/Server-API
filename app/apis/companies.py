@@ -19,6 +19,49 @@ router = APIRouter(prefix="/companies", tags=["Companies"])
 
 @router.post("", response_model=CreateResponseBody, status_code=status.HTTP_200_OK)
 async def create_companies(db: DbDependency, param: CreateRequestBody):
+    """
+    会社情報作成
+
+    Parameter
+    -----------------------
+    name: str
+        会社名
+    prefecture: str
+        都道府県
+    city: str
+        市区町村
+    town: str
+        町名、番地等
+    address: str
+        建物名、部屋番号等
+    postal_code: str
+        郵便番号
+    phone_number: str
+        電話番号
+    email: str
+        メールアドレス
+
+    Return
+    ----------------------
+    company_id: int
+        新しく作成された会社のID
+    name: str
+        会社名
+    prefecture: str
+        都道府県
+    city: str
+        市区町村
+    town: str
+        町名、番地等
+    address: str
+        建物名、部屋番号等
+    postal_code: str
+        郵便番号
+    phone_number: str
+        電話番号
+    email: str
+        メールアドレス
+    """
 
     try:
         new_company = companies_cruds.create_company(db, param)

@@ -18,6 +18,34 @@ router = APIRouter(prefix="/curriculums", tags=["Curriculums"])
 
 @router.get("/{curriculum_id}/reviews", response_model=ReviewsResponseBody, status_code=status.HTTP_200_OK)
 async def find_curriculum_reviews(db: DbDependency, curriculum_id: int = Path(gt=0)):
+    """
+    カリキュラムのレビュー一覧
+
+    Parameter
+    -----------------------
+    curriculum_id: int
+        レビュー一覧を取得したいカリキュラムのID
+
+    Return
+    ----------------------
+    id: int
+        レビューリクエストのID
+    curriculum_id: int
+        関連するカリキュラムのID
+    user_id: int
+        レビューリクエストを投稿したユーザーのID
+    title: str
+        レビューリクエストのタイトル
+    content: str
+        レビューリクエストの内容
+    is_closed: bool
+        レビューリクエストがクローズされているかどうか
+    created_at: str
+        レビューリクエストが作成された日時（ISO 8601形式）
+    updated_at: str
+        レビューリクエストが最後に更新された日時（ISO 8601形式）
+    """
+
     reviews = curriculums_crud.find_reviews(db, curriculum_id)
 
     li = []

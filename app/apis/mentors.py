@@ -18,7 +18,25 @@ router = APIRouter(prefix="/mentors", tags=["Mentors"])
 
 @router.get("/{mentor_id}/rewards", response_model=RewardsResponseBody, status_code=status.HTTP_200_OK)
 async def find_by_mentor_id(db: DbDependency, mentor_id: int = Path(gt=0)):
+    """
+    送金履歴一覧
 
+    Parameter
+    -----------------------
+    mentor_id: int
+        送金先履歴を取得したいメンターのID
+
+    Return
+    ----------------------
+    reward_id: int
+        送金履歴のID
+    date: str
+        送金日(YYYY-MM-DD形式)
+    amount: float
+        送金額
+    to_mentor_id: int
+        送金先のメンターID
+    """
     user_rewards = mentors_crud.find_rewards_by_mentor_id(db, mentor_id)
 
     if not user_rewards:
@@ -74,27 +92,26 @@ async def find_info_detail(db: DbDependency, mentor_id: int = Path(gt=0)):
 
 @router.post("/{mentor_id}/accounts", response_model=CreateResponseBody, status_code=status.HTTP_201_CREATED)
 async def create_info(db: DbDependency, create_model: RequestBody, mentor_id: int = Path(gt=0)):
-
     """
-        送金先の作成
+    送金先の作成
 
     Parameter
     -----------------------
     mentor_id: int
         送金先情報を作成したいメンターのユーザーID
-    bank_name: str 
+    bank_name: str
         銀行名
     branch_name: str
         支店名
-    bank_code: str 
+    bank_code: str
         銀行コード
-    branch_code: str 
+    branch_code: str
         支店コード
-    account_type: str 
+    account_type: str
         口座種別  ordinary (普通), current (当座), savings (貯蓄)
-    account_number: str 
+    account_number: str
         口座番号 
-    account_name: str 
+    account_name: str
         口座名義
 
     Return
@@ -103,19 +120,19 @@ async def create_info(db: DbDependency, create_model: RequestBody, mentor_id: in
         新しく作成された送金先情報のID
     mentor_id: int
         送金先情報を作成したいメンターのユーザーID
-    bank_name: str 
+    bank_name: str
         銀行名
     branch_name: str
         支店名
-    bank_code: str 
+    bank_code: str
         銀行コード
-    branch_code: str 
+    branch_code: str
         支店コード
-    account_type: str 
+    account_type: str
         口座種別  ordinary (普通), current (当座), savings (貯蓄)
-    account_number: str 
+    account_number: str
         口座番号 
-    account_name: str 
+    account_name: str
         口座名義
     """
 
