@@ -17,7 +17,7 @@ router = APIRouter(prefix="/students", tags=["Students"])
 
 
 @router.get("/{student_id}/questions", response_model=ResponseBody, status_code=status.HTTP_200_OK)
-async def find_my_questions(db: DbDependency, student_id: int = Path(gt=0)):
+async def find_my_question_list(db: DbDependency, student_id: int = Path(gt=0)):
 
     """
     自分の質問を取得する

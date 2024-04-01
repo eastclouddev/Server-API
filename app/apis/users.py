@@ -17,7 +17,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.patch("/{user_id}", status_code=status.HTTP_200_OK)
-async def update_account(db: DbDependency, param: UpdateRequestBody, user_id: int = Path(gt=0)):
+async def update_user(db: DbDependency, param: UpdateRequestBody, user_id: int = Path(gt=0)):
     """
     アカウント更新
     Parameters
@@ -51,7 +51,7 @@ async def update_account(db: DbDependency, param: UpdateRequestBody, user_id: in
         raise HTTPException(status_code=401, detail="Authentication failed.")
 	
 @router.get("/{user_id}", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
-async def find_user_detail(db: DbDependency, user_id: int = Path(gt=0)):
+async def find_user_details(db: DbDependency, user_id: int = Path(gt=0)):
     """
     アカウント詳細取得
     Parameters
