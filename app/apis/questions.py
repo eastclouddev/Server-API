@@ -79,12 +79,40 @@ async def find_question_thread_details(db: DbDependency, question_id: int):
     
     """
 
-    found_question = questions_crud.find_question(db,question_id)
-    found_answers = questions_crud.find_answers(db,question_id)    
-    answer_list = questions_service.create_answers_list(found_answers)
+    found_question = questions_crud.find_question(db, question_id)
+
+    if not found_question:
+        raise HTTPException(status_code=404,detail="Question not found.")
+    
+    question = {
+        "id":found_question.id,
+        "curriculum_id":found_question.curriculum_id,
+        "user_id":found_question.user_id,
+        "title":found_question.title,
+        "content":found_question.content,
+        "media_content":found_question.media_content,
+        "is_closed":found_question.is_closed,
+        "created_at":found_question.created_at.isoformat()
+    }
+
+    found_answers = questions_crud.find_answers(db, question_id)
+    answer_list = []
+    for answer in found_answers:
+        one_answer = {
+            "id": answer.id,
+            "question_id": answer.question_id,
+            "user_id": answer.user_id,
+            "parent_answer_id": answer.parent_answer_id,
+            "content": answer.content,
+            "media_content": answer.media_content,
+            "is_read": answer.is_read,
+            "created_at": answer.created_at.isoformat()
+        }
+
+        answer_list.append(one_answer)
     
     re_di = {
-        "question": found_question,
+        "question": question,
         "answer": answer_list
     }
     
