@@ -14,7 +14,6 @@ def find_rewards_by_mentor_id(db: Session, mentor_id: int):
 def find_bank_info(db: Session, mentor_id: int):
 
     mentor_info = db.query(Mentorships).filter(Mentorships.mentor_id == mentor_id).first()
-
     if not mentor_info:
         return None
 
@@ -41,12 +40,10 @@ def find_bank_info(db: Session, mentor_id: int):
 def create(db: Session, create_model: CreateResponseBody, mentor_id: int):
 
     mentor = db.query(Users).filter(Users.id == mentor_id).first()
-
     if not mentor:
         return None
 
     account_type = db.query(UserAccountTypes).filter(UserAccountTypes.name == create_model.account_type).first()
-
     if not account_type:
         return None
 

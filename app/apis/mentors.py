@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.mentors import DetailResponseBody, CreateResponseBody, RequestBody, RewardsResponseBody
+from schemas.mentors import DetailResponseBody, CreateResponseBody, CreateRequestBody, RewardsResponseBody
 from cruds import mentors as mentors_crud
 
 logger = getLogger("uvicorn.app")
@@ -91,7 +91,7 @@ async def find_user_account_details(db: DbDependency, mentor_id: int = Path(gt=0
 
 
 @router.post("/{mentor_id}/accounts", response_model=CreateResponseBody, status_code=status.HTTP_201_CREATED)
-async def create_user_account(db: DbDependency, create_model: RequestBody, mentor_id: int = Path(gt=0)):
+async def create_user_account(db: DbDependency, create_model: CreateRequestBody, mentor_id: int = Path(gt=0)):
     """
     送金先の作成
 
@@ -136,7 +136,7 @@ async def create_user_account(db: DbDependency, create_model: RequestBody, mento
         口座名義
     """
 
-    new_transfer = mentors_crud.create(db, create_model,mentor_id)
+    new_transfer = mentors_crud.create(db, create_model, mentor_id)
     if not new_transfer:
         raise HTTPException(status_code=404, detail="Mentor not found.")
 
