@@ -13,8 +13,8 @@ class DetailResponseBody(BaseModel):
     curriculum_id: int
     title: str
     description: str
-    video_url: str
-    content: str 
+    video_url: Optional[str] = None
+    content: Optional[str] = None
     is_test: bool
     display_no: int
 
