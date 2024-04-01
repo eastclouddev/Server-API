@@ -17,7 +17,7 @@ router = APIRouter(prefix="/courses", tags=["Courses"])
 
 
 @router.get("", response_model=AllResponseBody, status_code=status.HTTP_200_OK)
-async def find_courses(db: DbDependency):
+async def find_course_list(db: DbDependency):
     """
     コース一覧取得
 
@@ -62,7 +62,7 @@ async def find_courses(db: DbDependency):
     return re_di
 
 @router.get("/{course_id}", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
-async def find_course(db: DbDependency, course_id: int = Path(gt=0)):
+async def find_course_details(db: DbDependency, course_id: int = Path(gt=0)):
     """
     コース詳細取得
 

@@ -17,7 +17,7 @@ router = APIRouter(prefix="/mentors", tags=["Mentors"])
 
 
 @router.get("/{mentor_id}/rewards", response_model=RewardsResponseBody, status_code=status.HTTP_200_OK)
-async def find_by_mentor_id(db: DbDependency, mentor_id: int = Path(gt=0)):
+async def find_reward_list(db: DbDependency, mentor_id: int = Path(gt=0)):
     """
     送金履歴一覧
 
@@ -59,7 +59,7 @@ async def find_by_mentor_id(db: DbDependency, mentor_id: int = Path(gt=0)):
     return re_di
 
 @router.get("/{mentor_id}/accounts", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
-async def find_info_detail(db: DbDependency, mentor_id: int = Path(gt=0)):
+async def find_user_account_details(db: DbDependency, mentor_id: int = Path(gt=0)):
     """
     送金先の情報詳細を取得
 
@@ -91,7 +91,7 @@ async def find_info_detail(db: DbDependency, mentor_id: int = Path(gt=0)):
 
 
 @router.post("/{mentor_id}/accounts", response_model=CreateResponseBody, status_code=status.HTTP_201_CREATED)
-async def create_info(db: DbDependency, create_model: RequestBody, mentor_id: int = Path(gt=0)):
+async def create_user_account(db: DbDependency, create_model: RequestBody, mentor_id: int = Path(gt=0)):
     """
     送金先の作成
 

@@ -17,7 +17,7 @@ router = APIRouter(prefix="/curriculums", tags=["Curriculums"])
 
 
 @router.get("/{curriculum_id}/reviews", response_model=ReviewsResponseBody, status_code=status.HTTP_200_OK)
-async def find_curriculum_reviews(db: DbDependency, curriculum_id: int = Path(gt=0)):
+async def find_review_list(db: DbDependency, curriculum_id: int = Path(gt=0)):
     """
     カリキュラムのレビュー一覧
 
@@ -69,7 +69,7 @@ async def find_curriculum_reviews(db: DbDependency, curriculum_id: int = Path(gt
     return re_di
 
 @router.get("/{curriculum_id}", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
-async def find_curriculum_detail(db: DbDependency, curriculum_id: int = Path(gt=0)):
+async def find_curriculum_details(db: DbDependency, curriculum_id: int = Path(gt=0)):
     """
     カリキュラム詳細取得
 

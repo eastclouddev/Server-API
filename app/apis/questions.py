@@ -18,7 +18,7 @@ router = APIRouter(prefix="/questions", tags=["Questions"])
 
 
 @router.post("/{question_id}/answers", response_model=CreateResponseBody, status_code=status.HTTP_201_CREATED)
-async def create_answers(db: DbDependency, param: CreateRequestBody, question_id: int = Path(gt=0)):
+async def create_question_answer(db: DbDependency, param: CreateRequestBody, question_id: int = Path(gt=0)):
     """
     質問回答投稿作成
     Parameters
@@ -60,9 +60,9 @@ async def create_answers(db: DbDependency, param: CreateRequestBody, question_id
         raise HTTPException(status_code=400, detail="Invalid input data.")
 
 @router.get("/{question_id}", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
-async def find_questions_thread(db: DbDependency, question_id: int):
+async def find_question_thread_details(db: DbDependency, question_id: int):
     """
-    質問スレッド一覧取得
+    質問スレッド詳細取得
     
     Parameters
     ----------

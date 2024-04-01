@@ -18,7 +18,7 @@ router = APIRouter(prefix="/companies", tags=["Companies"])
 
 
 @router.post("", response_model=CreateResponseBody, status_code=status.HTTP_200_OK)
-async def create_companies(db: DbDependency, param: CreateRequestBody):
+async def create_company(db: DbDependency, param: CreateRequestBody):
     """
     会社情報作成
 
@@ -90,7 +90,7 @@ async def create_companies(db: DbDependency, param: CreateRequestBody):
 
 
 @router.get("/{company_id}", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
-async def find_company_detail(db: DbDependency, company_id: int = Path(gt=0)):
+async def find_company_details(db: DbDependency, company_id: int = Path(gt=0)):
     """
     会社詳細取得
 
@@ -148,7 +148,7 @@ async def find_company_detail(db: DbDependency, company_id: int = Path(gt=0)):
 
 
 @router.get("",response_model=AllResponseBody, status_code=status.HTTP_200_OK)
-async def find_companies(db: DbDependency):
+async def find_company_list(db: DbDependency):
 
     """
     会社情報一覧取得

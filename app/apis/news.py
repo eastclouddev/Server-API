@@ -18,7 +18,7 @@ router = APIRouter(prefix="/news", tags=["News"])
 
 
 @router.get("/{news_id}", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
-async def find_by_news_id(db: DbDependency, news_id: int = Path(gt=0)):
+async def find_news_details(db: DbDependency, news_id: int = Path(gt=0)):
     """
     ニュース詳細取得
     Parameters
@@ -47,7 +47,7 @@ async def find_by_news_id(db: DbDependency, news_id: int = Path(gt=0)):
     return re_di
 
 @router.get("", response_model=AllResponseBody, status_code=status.HTTP_200_OK)
-async def get_receipt(db: DbDependency, page: int, limit: int):
+async def find_news_list(db: DbDependency, page: int, limit: int):
     """
     ニュース一覧取得
     Parameters
