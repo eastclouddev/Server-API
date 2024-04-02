@@ -24,7 +24,7 @@ def find_by_curriculum_id(db: Session, curriculum_id: int):
             "video_url": curriculum_info.video_url
         }
         info.update(find_video_url)
-        
+
     if curriculum_info.content:
         find_content = {
             "content": curriculum_info.content

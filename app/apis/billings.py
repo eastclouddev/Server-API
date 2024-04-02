@@ -16,7 +16,7 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/billings", tags=["Billings"])
 
 @router.get("/{billing_id}", response_model=DetailonseBody, status_code=status.HTTP_200_OK)
-async def find_billing_detail(db: DbDependency, billing_id: int = Path(gt=0)):
+async def find_billing_details(db: DbDependency, billing_id: int = Path(gt=0)):
     """
     請求履歴詳細取得
 

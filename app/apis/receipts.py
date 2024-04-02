@@ -17,7 +17,7 @@ router = APIRouter(prefix="/receipts", tags=["Receipts"])
 
 
 @router.get("/{receipt_id}", response_model=ResponseBody, status_code=status.HTTP_200_OK)
-async def find_receipt(db: DbDependency, receipt_id: int = Path(gt=0)):
+async def find_receipt_details(db: DbDependency, receipt_id: int = Path(gt=0)):
     """
     領収書出力
     Parameters

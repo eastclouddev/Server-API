@@ -14,10 +14,10 @@ router = APIRouter(prefix="/password_reset", tags=["PasswordReset"])
 
 
 @router.post("", status_code=status.HTTP_200_OK)
-async def reset(db: DbDependency):
+async def password_reset(db: DbDependency):
 	return {}
 
 
 @router.post("/confirm", status_code=status.HTTP_200_OK)
-async def confirm(db: DbDependency):
+async def password_setting(db: DbDependency):
 	return {}
