@@ -4,6 +4,7 @@ from models.users import Users
 from schemas.reviews import UpdateResponseRequestBody, UpdateReviewRequestBody
 from models.review_responses import ReviewResponses
 from models.review_requests import ReviewRequests
+from models.mentorships import Mentorships
 
 
 def find_response(db: Session, response_id: int):
@@ -54,3 +55,14 @@ def update_review(db: Session, update:UpdateReviewRequestBody ,review_id: int):
     }
 
     return update_review
+
+def find_reviews(db:Session,user_id: int):
+    mentorships = db.query(Mentorships).filter(Mentorships.mentor_id == user_id).first()
+    return db.query(ReviewRequests).filter(ReviewRequests.user_id == mentorships.student_id).all()
+
+def find_is_read(db:Session,id: int):
+    info =  db.query(ReviewResponses).filter(ReviewResponses.review_request_id == id).first()
+    if not info:
+        return False
+    return info.is_read
+
