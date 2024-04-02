@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.curriculums import ReviewsResponseBody, DetailResponseBody
+from schemas.curriculums import ReviewsResponseBody, DetailResponseBody, ReviewResponse, ReviewRequestBody
 from cruds import curriculums as curriculums_crud
 
 logger = getLogger("uvicorn.app")
@@ -14,7 +14,6 @@ logger = getLogger("uvicorn.app")
 DbDependency = Annotated[Session, Depends(get_db)]
 
 router = APIRouter(prefix="/curriculums", tags=["Curriculums"])
-
 
 @router.get("/{curriculum_id}/reviews", response_model=ReviewsResponseBody, status_code=status.HTTP_200_OK)
 async def find_curriculum_reviews(db: DbDependency, curriculum_id: int = Path(gt=0)):
@@ -72,3 +71,32 @@ async def find_curriculum_detail(db: DbDependency, curriculum_id: int = Path(gt=
     if not info:
         raise HTTPException(status_code=404, detail="Curriculum not found.")
     return info
+
+@router.post("/{curriculums_id}/reviews", response_model=ReviewResponse, status_code=status.HTTP_201_CREATED)
+async def create_curriculum_id(db: DbDependency, curriculum_id: int, param: ReviewRequestBody):
+
+    found_curriculum = curriculums_crud.find_by_reviews(db,curriculum_id)
+
+    if not found_curriculum:
+        raise HTTPException(status_code=404, detail="Curriculum not found.")
+
+    try:
+        reviews = curriculums_crud.create_reviews(db, curriculum_id, param.user_id, param.title, param.content, param.is_closed)
+        db.commit()
+
+    except Exception as e:
+        logger.error(str(e)) 
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid input data.") 
+
+    di = {
+            "id": reviews.id,
+            "curriculum_id": reviews.curriculum_id,
+            "user_id": reviews.user_id,
+            "title": reviews.title,
+            "content": reviews.content,
+            "is_closed": reviews.is_closed,
+            "created_at": reviews.created_at.isoformat()
+            }
+    
+    return di

@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from models.review_requests import ReviewRequests
 from models.curriculums import Curriculums
 
-
 def find_reviews(db: Session, curriculum_id: int):
     return db.query(ReviewRequests).filter(ReviewRequests.curriculum_id == curriculum_id).all()
 
@@ -33,3 +32,19 @@ def find_by_curriculum_id(db: Session, curriculum_id: int):
         info.update(find_content)
 
     return info
+
+def find_by_reviews(db: Session, curriculum_id: int):
+    return db.query(ReviewRequests).filter(ReviewRequests.curriculum_id == curriculum_id).first()
+
+def create_reviews(db: Session, curriculum_id: int, user_id:int, title: str, content: str, is_closed: bool):
+        
+    new_review = ReviewRequests(
+        curriculum_id = curriculum_id,
+        user_id = user_id,
+        title = title,
+        content = content,
+        is_closed = is_closed
+    )    
+    db.add(new_review)
+
+    return new_review
