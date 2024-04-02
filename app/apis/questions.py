@@ -22,14 +22,24 @@ async def create_question_answer(db: DbDependency, param: CreateRequestBody, que
     """
     質問回答投稿作成
     Parameters
-    ----------
-    param: CreateRequestBody
-        user_id, content
+    -----------------------
+    dict
+        user_id: int
+            回答するユーザーのID
+        content: str
+            回答
 
     Returns
-    -------
-    re_di: CreateResponseBody
-        answer_id, question_id, user_id, content
+    -----------------------
+    dict
+        answer_id: int
+            作成された回答のID
+        question_id: int
+            回答に紐づく質問のID
+        user_id: int
+            回答したユーザーのID
+        content: str
+            回答
     """
 
     question = questions_crud.find_by_question(db, question_id)
@@ -64,19 +74,47 @@ async def find_question_thread_details(db: DbDependency, question_id: int):
     """
     質問スレッド詳細取得
     
-    Parameters
-    ----------
+    Parameter
+    -----------------------
     なし
 
     Returns
-    -------
-    {
-        {"question":}
-        {"answers": answers_list}
-    }
-            : dic{}
-            質問スレッド一覧
-    
+    -----------------------
+    dict
+        question: dict
+            id: int
+                質問のID
+            curriculum_id: int
+                質問が含まれるカリキュラムのID
+            user_id: int
+                質問を投稿したユーザーのID
+            title: int
+                質問のタイトル
+            content: str
+                質問の内容
+            media_content: json
+                質問に関するメディアコンテンツの情報
+            is_closed: bool
+                質問がクローズされているか
+            created_at: str
+                作成日（ISO 8601形式）
+        answer: array
+            id: int
+                回答のID
+            question_id: int
+                回答が紐づく質問のID
+            user_id: int
+                回答を投稿したユーザーのID
+            parent_answer_id: int or None
+                返信先の回答ID（返信先がない場合はNoneが返る）
+            content: str
+                回答の内容
+            media_content: json
+                回答に関するメディアコンテンツの情報
+            is_read: bool
+                回答が既読かどうかを示すフラグ
+            created_at: str
+                作成日（ISO 8601形式）
     """
 
     found_question = questions_crud.find_question(db, question_id)
