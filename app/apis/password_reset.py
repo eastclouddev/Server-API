@@ -1,16 +1,16 @@
-
 import base64
 import json
 import re
-
-from typing import Annotated
-from fastapi import APIRouter, Path, Query, HTTPException, Depends
-from schemas.password_reset import PasswordResetRequest, PasswordResetConfirm
-from starlette import status
-from sqlalchemy.orm import Session
-from database.database import get_db
-from cruds import password_reset as password_reset_crud
 from logging import getLogger
+from typing import Annotated
+
+from database.database import get_db
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from sqlalchemy.orm import Session
+from starlette import status
+
+from schemas.password_reset import PasswordResetRequest, PasswordResetConfirm
+from cruds import password_reset as password_reset_crud
 
 logger = getLogger("uvicorn.app")
 
@@ -18,8 +18,9 @@ DbDependency = Annotated[Session, Depends(get_db)]
 
 router = APIRouter(prefix="/password_reset", tags=["PasswordReset"])
 
-@router.post("/request", status_code=status.HTTP_200_OK)
-async def find_by_email(db: DbDependency, param: PasswordResetRequest):
+
+@router.post("", status_code=status.HTTP_200_OK)
+async def password_reset(db: DbDependency, param: PasswordResetRequest):
     user = password_reset_crud.find_by_email(db, param.email)
     # TODO:emailのフォーマットエラー
     
@@ -30,7 +31,7 @@ async def find_by_email(db: DbDependency, param: PasswordResetRequest):
 
 
 @router.post("/confirm", status_code=status.HTTP_200_OK)
-async def update_password(db: DbDependency, param: PasswordResetConfirm):
+async def password_setting(db: DbDependency, param: PasswordResetConfirm):
     try:
         # Token解析
         token = param.token
