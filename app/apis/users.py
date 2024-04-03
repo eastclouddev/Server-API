@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.users import UpdateRequestBody, DetailResponseBody
+from schemas.users import UpdateRequestBody, DetailResponseBody, EmailRequestBody
 from cruds import users as users_crud
 from services import users as users_service
 
@@ -110,8 +110,37 @@ async def find_user_details(db: DbDependency, user_id: int = Path(gt=0)):
 
     return re_di
 
+
+@router.post("/{user_id}/email/change_request", status_code=status.HTTP_200_OK)
+async def confirm_change_email(db: DbDependency, new_email: EmailRequestBody, user_id: int = Path(gt=0)):
+    """
+    メールアドレス変更
+
+    Parameters
+    -----------------------
+    user_id: int
+        メールアドレスを変更するユーザーのID
+    new_email: str
+        新しく登録するメールアドレス
+
+    Return
+    -----------------------
+    なし
+    """
+
+    # 登録したいメールアドレスが既に使われているかチェック
+    user = users_crud.find_by_email(db, new_email, user_id)
+    if user:
+        raise HTTPException(status_code=400, detail="The email address is already in use.")
+
+    # TODO:メールアドレスの更新前と更新後が同じ場合はどうするか？
+    # TODO:トークンを生成し、メールが送信される
+
+    return
+
+
 @router.get("/{user_id}/email/confirm_change", status_code=status.HTTP_200_OK)
-async def confirm_change_email(token,db: DbDependency, user_id: int = Path(gt=0),):
+async def confirm_change_email(token, db: DbDependency, user_id: int = Path(gt=0)):
     """
     メールアドレス認証と更新
 
@@ -131,8 +160,6 @@ async def confirm_change_email(token,db: DbDependency, user_id: int = Path(gt=0)
     found_user = users_crud.find_user(db,user_id)
     if not found_user:
         raise HTTPException(status_code = 400,detail="Invalid or expired token.")
-    
-    
 
     #アクセストークンからemailを取得
     token_info = users_service.get_email(token)

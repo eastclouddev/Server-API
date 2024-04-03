@@ -20,4 +20,7 @@ class DetailResponseBody(BaseModel):
     last_name_kana: str
     email: str
     role: str
-    last_login: str  
+    last_login: str
+
+class EmailRequestBody(BaseModel):
+    new_email: str
