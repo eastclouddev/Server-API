@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 from schemas.news import ResponseBody,AllResponseBody,RequestBody,UpdateResponseBody
-from schemas.news import DetailResponseBody, AllResponseBody, CreateRequestBody, CreateResponseBody
+from schemas.news import DetailResponseBody, CreateRequestBody, CreateResponseBody
 from cruds import news as news_crud
 
 logger = getLogger("uvicorn.app")
@@ -109,26 +109,58 @@ async def find_news_list(db: DbDependency, page: int, limit: int):
 
 @router.patch("/{news_id}", response_model= UpdateResponseBody, status_code=status.HTTP_200_OK)
 async def update_news(db: DbDependency, news_id: int, param:RequestBody):
+    """
+    ニュース更新
 
+    Parameters
+    -----------------------
+    news_id: int
+        編集したいニュースのid
+    dict
+        title: str
+            更新するニュースのタイトル
+        content: str
+            更新するニュースの本文
+        is_published: bool
+            公開フラグ
+        published_at: str
+            公開日（ISO 8601形式）
+
+    Returns
+    -----------------------
+    dict
+        news_id: int
+            更新されたニュースのID
+        title: str
+            更新されたニュースのタイトル
+        content: str
+            更新されたニュースの内容
+        is_published: bool
+            ニュースの公開フラグ
+        published_at: str
+            ニュースの公開日（ISO 8601形式）
+        updated_at: str
+            ニュースの更新日（ISO 8601形式）
+    
+    """
     logger.info(param)
 
     found_news = news_crud.find_by_news_id(db, news_id)
 
     if not found_news:
-        raise HTTPException(status_code=404,detail="News not found.")
+        raise HTTPException(status_code=404, detail="News not found.")
 
     try:
         news = news_crud.update_by_news_id(db, news_id, param.title, param.content, param.is_published, param.published_at)
         db.commit()
 
-        re_di ={
-                "news_id": news.id,
-                "title": news.title,
-                "content": news.content,
-                "is_published": news.is_published,
-                "published_at": news.published_at.isoformat(),
-                "updated_at": news.updated_at.isoformat()
-
+        re_di = {
+            "news_id": news.id,
+            "title": news.title,
+            "content": news.content,
+            "is_published": news.is_published,
+            "published_at": news.published_at.isoformat(),
+            "updated_at": news.updated_at.isoformat()
         }
 
         return re_di

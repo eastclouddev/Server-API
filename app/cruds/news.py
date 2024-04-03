@@ -31,7 +31,6 @@ def update_by_news_id(db:Session, news_id: int, title: str, content: str, is_pub
     news.title = title
     news.content = content
     news.is_published = is_published
-
-    news.published_at =  dt.datetime.strptime(published_at,"%Y-%m-%dT%H:%M:%SZ")
+    news.published_at =  dt.datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%SZ")
     db.add(news)
     return news
