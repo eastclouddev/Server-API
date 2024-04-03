@@ -104,6 +104,43 @@ async def find_curriculum_details(db: DbDependency, curriculum_id: int = Path(gt
 @router.post("/{curriculum_id}/reviews", response_model=ReviewResponse, status_code=status.HTTP_201_CREATED)
 async def create_curriculum_id(db: DbDependency, param: ReviewRequestBody, curriculum_id: int):
 
+    """
+    レビュー作成
+
+    Parameter
+    -----------------------
+    curriculum_id: int
+        詳細を取得したいカリキュラムのID
+    dict
+        user_id: int
+            ユーザーのID
+        title: str
+            レビューリクエストのタイトル
+        content: str 
+            レビューリクエストの内容
+        is_closed: boolean
+            レビューリクエストの初期状態（通常はfalseで未クローズ状態）
+
+    Returns
+    -----------------------
+    dict
+        id: int
+            レビューリクエストのID
+        curriculum_id: int
+            カリキュラムのID
+        user_id: int
+            ユーザーのID
+        title: str
+            レビューリクエストのタイトル
+        content: str 
+            レビューリクエストの内容
+        is_closed: boolean
+            レビューリクエストがクローズされているかどうか（boolean）
+        created_at: str
+            作成された日時
+    """
+
+
     found_curriculum = curriculums_crud.find_by_reviews(db,curriculum_id)
 
     if not found_curriculum:
@@ -112,13 +149,7 @@ async def create_curriculum_id(db: DbDependency, param: ReviewRequestBody, curri
     try:
         reviews = curriculums_crud.create_reviews(db, curriculum_id, param.user_id, param.title, param.content, param.is_closed)
         db.commit()
-
-    except Exception as e:
-        logger.error(str(e)) 
-        db.rollback()
-        raise HTTPException(status_code=400, detail="Invalid input data.") 
-
-    di = {
+        di = {
             "id": reviews.id,
             "curriculum_id": reviews.curriculum_id,
             "user_id": reviews.user_id,
@@ -127,5 +158,9 @@ async def create_curriculum_id(db: DbDependency, param: ReviewRequestBody, curri
             "is_closed": reviews.is_closed,
             "created_at": reviews.created_at.isoformat()
             }
-    
-    return di
+        
+        return di
+    except Exception as e:
+        logger.error(str(e)) 
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid input data.") 
