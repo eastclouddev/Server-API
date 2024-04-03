@@ -100,8 +100,8 @@ async def find_curriculum_details(db: DbDependency, curriculum_id: int = Path(gt
         raise HTTPException(status_code=404, detail="Curriculum not found.")
     return info
 
-@router.post("/{curriculums_id}/reviews", response_model=ReviewResponse, status_code=status.HTTP_201_CREATED)
-async def create_curriculum_id(db: DbDependency, curriculum_id: int, param: ReviewRequestBody):
+@router.post("/{curriculum_id}/reviews", response_model=ReviewResponse, status_code=status.HTTP_201_CREATED)
+async def create_curriculum_id(db: DbDependency, param: ReviewRequestBody, curriculum_id: int):
 
     found_curriculum = curriculums_crud.find_by_reviews(db,curriculum_id)
 
