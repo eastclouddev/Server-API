@@ -21,16 +21,26 @@ router = APIRouter(prefix="/users", tags=["Users"])
 async def update_user(db: DbDependency, param: UpdateRequestBody, user_id: int = Path(gt=0)):
     """
     アカウント更新
+
     Parameters
-    ----------
-    param: UpdateRequestBody
-        first_name, last_name, first_name_kana, last_name_kana, email
+    -----------------------
+    dict
+        first_name: str
+            名前
+        last_name: str
+            姓
+        first_name_kana: str
+            名前（カナ）
+        last_name_kana: str
+            姓（カナ）
+        email: str
+            メールアドレス
     user_id: int
         更新するユーザーのID
 
     Returns
-    -------
-    戻り値: なし
+    -----------------------
+    なし
     """
     # メールアドレスの重複チェック
     duplication_user = users_crud.find_by_email(db, param.email, user_id)
@@ -55,15 +65,31 @@ async def update_user(db: DbDependency, param: UpdateRequestBody, user_id: int =
 async def find_user_details(db: DbDependency, user_id: int = Path(gt=0)):
     """
     アカウント詳細取得
-    Parameters
-    ----------
+
+    Parameter
+    -----------------------
     user_id: int
         取得するユーザーのID
 
     Returns
-    -------
-    re_di: ResponseBody
-        user_id, first_name, last_name, first_name_kana, last_name_kana, email, role, last_login
+    -----------------------
+    dict
+        user_id: str
+            取得したユーザーのID
+        first_name: str
+            名前
+        last_name: str
+            姓
+        first_name_kana: str
+            名前（カナ）
+        last_name_kana: str
+            姓（カナ）
+        email: str
+            メールアドレス
+        role: str
+            ユーザーのロール
+        last_login: str
+            最終ログイン日時（ISO 8601形式）
     """
     user = users_crud.find_by_user_id(db, user_id)
     if not user:
@@ -88,17 +114,18 @@ async def find_user_details(db: DbDependency, user_id: int = Path(gt=0)):
 async def confirm_change_email(token,db: DbDependency, user_id: int = Path(gt=0),):
     """
     メールアドレス認証と更新
+
     Parameters
-    ----------
+    -----------------------
     user_id: int
         メールアドレスを変更しようとしているユーザーのID
     token: str
         メールアドレス変更を認証するための一意のトークン
 
-    Returns
-    -------
-    {"message": "Your email address has been successfully updated."}
-    
+    Return
+    -----------------------
+    message: str
+        "Your email address has been successfully updated."}
     """
     #一致するユーザーを取得
     found_user = users_crud.find_user(db,user_id)

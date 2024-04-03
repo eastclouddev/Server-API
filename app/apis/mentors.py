@@ -26,16 +26,17 @@ async def find_reward_list(db: DbDependency, mentor_id: int = Path(gt=0)):
     mentor_id: int
         送金先履歴を取得したいメンターのID
 
-    Return
-    ----------------------
-    reward_id: int
-        送金履歴のID
-    date: str
-        送金日(YYYY-MM-DD形式)
-    amount: float
-        送金額
-    to_mentor_id: int
-        送金先のメンターID
+    Returns
+    -----------------------
+    rewards: array
+        reward_id: int
+            送金履歴のID
+        date: str
+            送金日(YYYY-MM-DD形式)
+        amount: float
+            送金額
+        to_mentor_id: int
+            送金先のメンターID
     """
     user_rewards = mentors_crud.find_rewards_by_mentor_id(db, mentor_id)
 
@@ -68,20 +69,21 @@ async def find_user_account_details(db: DbDependency, mentor_id: int = Path(gt=0
     mentor_id: int
         口座情報を取得したいメンターのID
 
-    Return
-    ----------------------
-    mentor_id: int
-        メンターのID
-    account_name: str
-        口座名義
-    bank_name: str
-        銀行名
-    branch_name: str
-        支店名
-    account_number: str
-        口座番号
-    account_type: str
-        口座の種類（例: "普通", "当座", "貯蓄"）
+    Returns
+    -----------------------
+    dict
+        mentor_id: int
+            メンターのID
+        account_name: str
+            口座名義
+        bank_name: str
+            銀行名
+        branch_name: str
+            支店名
+        account_number: str
+            口座番号
+        account_type: str
+            口座の種類（例: "普通", "当座", "貯蓄"）
     """
 
     info = mentors_crud.find_bank_info(db, mentor_id)
@@ -114,26 +116,27 @@ async def create_user_account(db: DbDependency, create_model: CreateRequestBody,
     account_name: str
         口座名義
 
-    Return
-    ----------------------
-    account_id: int
-        新しく作成された送金先情報のID
-    mentor_id: int
-        送金先情報を作成したいメンターのユーザーID
-    bank_name: str
-        銀行名
-    branch_name: str
-        支店名
-    bank_code: str
-        銀行コード
-    branch_code: str
-        支店コード
-    account_type: str
-        口座種別  ordinary (普通), current (当座), savings (貯蓄)
-    account_number: str
-        口座番号 
-    account_name: str
-        口座名義
+    Returns
+    -----------------------
+    dict
+        account_id: int
+            新しく作成された送金先情報のID
+        mentor_id: int
+            送金先情報を作成したいメンターのユーザーID
+        bank_name: str
+            銀行名
+        branch_name: str
+            支店名
+        bank_code: str
+            銀行コード
+        branch_code: str
+            支店コード
+        account_type: str
+            口座種別  ordinary (普通), current (当座), savings (貯蓄)
+        account_number: str
+            口座番号 
+        account_name: str
+            口座名義
     """
 
     new_transfer = mentors_crud.create(db, create_model, mentor_id)

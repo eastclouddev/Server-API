@@ -21,16 +21,23 @@ async def state_progresses(db: DbDependency, reqeust: Request):
     """
     現在の学習進捗
     Parameters
-    ----------
+    -----------------------
     request: Request
         headersから情報を取得する
 
     Returns
-    -------
-    re_di: ResponseBody
-        progresses: [
-            {course_id, course_title, progress_percentage, status, last_accessed_at}
-        ]
+    -----------------------
+    progresses: array
+        course_id: int
+            コースのID
+        course_title: str
+            コースのタイトル
+        progress_percentage: int
+            コースの進捗率
+        status: str
+            コースのステータス
+        last_accessed_at: str
+            最終アクセス日（ISO 8601形式）
     """
     # TODO:ヘッダー情報から必要なパラメータを取得する
     user_id = 1

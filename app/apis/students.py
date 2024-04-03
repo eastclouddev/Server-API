@@ -22,31 +22,28 @@ async def find_my_question_list(db: DbDependency, student_id: int = Path(gt=0)):
     """
     自分の質問を取得する
     
-    Parameters
-    ----------
+    Parameter
+    -----------------------
     user_id: int
         取得するユーザーのID 
 
     Returns
-    -------
-    id: int 
-        質問のID
-    title: str
-        質問のタイトル
-    content: text
-        質問の内容
-    curriculum_id: int
-        紐づいたカリキュラムのID
-    created_at: datetime
-        質問作成日
-    is_read: bool
-        未読コメントの有無
-    is_closed: bool
-        完了しているかどうか
-
-    {"questions": question_list} : dict{}
-        自分の質問すべての情報
-    
+    -----------------------
+    questions: array
+        id: int
+            質問のID
+        title: str
+            質問のタイトル
+        content: str
+            質問の内容
+        curriculum_id: int
+            紐づいたカリキュラムのID
+        created_at: str
+            質問作成日
+        is_read: bool
+            未読コメントの有無
+        is_closed: bool
+            完了しているかどうか
     """
 
     found_question = students_crud.find_by_user_id(db, student_id)

@@ -24,14 +24,27 @@ async def login(db: DbDependency, request: RequestBody):
     ログイン認証
     
     Parameters
-    ----------
-    request: RequestBody
-        email
-        password
-        device_info: device_type
-                     device_name
-                     uuid
-                    
+    -----------------------
+    email: str
+        ログインするユーザーのメールアドレス
+    password: str
+        ログインするユーザーのパスワード
+    device_info: dict
+        device_info: str
+        device_name: str
+        uuid: str
+
+    Returns
+    -----------------------
+    dict
+        user_id: int
+            ログインしたユーザーのID
+        access_token: str
+            生成したトークン
+        expires_in: int
+            トークン有効期限
+        role: str
+            ユーザーのロール(役割)
     """
     # emailが一致するユーザーを取得
     user = login_crud.find_by_user(db, request.email)
