@@ -168,14 +168,41 @@ async def create_user_account(db: DbDependency, create_model: CreateRequestBody,
 
 @router.get("/{mentor_id}/students/questions", response_model=ResponseBody, status_code=status.HTTP_200_OK)
 async def find_questions(db: DbDependency, request: Request, mentor_id: int = Path(gt=0)):
+    """
+    受講生からの質問一覧取得
+
+    Parameter
+    -----------------------
+    mentor_id: int
+        質問を取得するメンターのユーザーID
+
+    Returns
+    -----------------------
+    questions: array
+        id: int
+            新しく作成された送金先情報のID
+        title: str
+            質問のタイトル
+        content: str
+            質問の内容
+        curriculum_id: str
+            質問が紐づくカリキュラムのID
+        created_at: str
+            質問作成日
+        is_read: str
+            未読コメントの有無
+        is_closed: str
+            完了しているかどうか
+    """
 	
     # TODO:ヘッダー情報をどう使うか
     header = request.headers
 	
-    questions = mentors_crud.find_by_questions(db, mentor_id)
+    questions = mentors_crud.find_questions_by_mentor_id(db, mentor_id)
 
     li = []
     for question in questions:
+        # answer = mentors_crud.find_answer_by_question_id(db, question.id)
         di = {
             "id": question.id,
             "title": question.title,

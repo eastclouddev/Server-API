@@ -5,8 +5,9 @@ from models.user_account_info import UserAccountInfo
 from models.users import Users
 from models.user_account_types import UserAccountTypes
 from models.mentorships import Mentorships
-from models.user_rewards import UserRewards 
+from models.user_rewards import UserRewards
 from models.questions import Questions
+from models.answers import Answers
 
 
 def find_rewards_by_mentor_id(db: Session, mentor_id: int):
@@ -63,5 +64,8 @@ def create(db: Session, create_model: CreateResponseBody, mentor_id: int):
 
     return new_transfer
 
-def find_by_questions(db: Session, mentor_id: int):
+def find_questions_by_mentor_id(db: Session, mentor_id: int):
     return db.query(Questions).filter(Questions.user_id == mentor_id).all()
+
+# def find_answer_by_question_id(db: Session, question_id: int):
+#     return db.query(Answers).filter(Answers.question_id == question_id).all()
