@@ -12,7 +12,7 @@ class DetailResponseBody(BaseModel):
     account_number: str
     account_type: str
 
-class RequestBody(BaseModel):
+class CreateRequestBody(BaseModel):
     bank_name: str = Field(examples=["銀行名"])
     branch_name: str = Field(examples=["支店名"])
     bank_code: str = Field(examples=["銀行コード"])

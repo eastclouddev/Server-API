@@ -17,7 +17,30 @@ router = APIRouter(prefix="/courses", tags=["Courses"])
 
 
 @router.get("", response_model=AllResponseBody, status_code=status.HTTP_200_OK)
-async def find_courses(db: DbDependency):
+async def find_course_list(db: DbDependency):
+    """
+    コース一覧取得
+
+    Parameter
+    -----------------------
+    なし
+
+    Return
+    ----------------------
+    course_id: int
+        コースのID
+    title: str
+        コースのタイトル
+    description: str
+        コースの説明
+    created_user: int
+        コースを作成したユーザーのID
+    thumbnail_url: str
+        コースのサムネイル画像のURL
+    created_at: str
+        コースの作成日時（ISO 8601形式）
+    """
+
     courses = courses_crud.find_courses(db)
 
     li = []
@@ -39,7 +62,44 @@ async def find_courses(db: DbDependency):
     return re_di
 
 @router.get("/{course_id}", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
-async def find_course(db: DbDependency, course_id: int = Path(gt=0)):
+async def find_course_details(db: DbDependency, course_id: int = Path(gt=0)):
+    """
+    コース詳細取得
+
+    Parameter
+    -----------------------
+    course_id: int
+        取得するコースのID
+
+    Return
+    ----------------------
+    course_id: int
+        コースのID
+    title: str
+        コースのタイトル
+    description: str
+        コースの詳細な説明
+    created_user_id: int
+        コースを作成したユーザーのID
+    created_at: str
+        コースの作成日時（ISO 8601形式）
+    sections: array
+        コースのセクション一覧。各セクションは以下の情報を含みます
+        section_id: int
+            セクションのID
+        title: str
+            セクションのタイトル
+        description: str
+            セクションの説明
+        curriculums: array
+            セクションに紐づくカリキュラムの一覧。各カリキュラムは以下の情報を含みます
+            curriculum_id: int
+                カリキュラムのID
+            title: str
+                カリキュラムのタイトル
+            description: str
+                カリキュラムの説明
+    """
     course = courses_crud.find_by_course_id(db, course_id)
     sections = courses_crud.find_sections(db, course_id)
 
