@@ -22,32 +22,33 @@ async def update_review_response(db: DbDependency, update: UpdateResponseRequest
     """
     レビュー回答更新
 
-    Parameter
+    Parameters
     -----------------------
-    response_id: int
-        更新したい回答のID
-    content: text
-		回答の更新された内容
-    is_read: bool
-		回答が既読かどうかを更新するフラグ
+    dict
+        response_id: int
+            更新したい回答のID
+        content: str
+            回答の更新された内容
+        is_read: bool
+            回答が既読かどうかを更新するフラグ
 
-    Return
-    ----------------------
-    id: int
-		更新された回答のID
-    review_request_id: int
-		回答が紐づくレビューリクエストのID
-    user_id: int
-		回答を投稿したユーザーのID
-    parent_response_id: int
-		返信先の回答ID
-    content: text
-		更新された回答の内容
-    is_read: bool
-		回答が既読かどうかを示すフラグ
-    updated_at: str
-		回答が最後に更新された日時
-
+    Returns
+    -----------------------
+    dict
+        id: int
+            更新された回答のID
+        review_request_id: int
+            回答が紐づくレビューリクエストのID
+        user_id: int
+            回答を投稿したユーザーのID
+        parent_response_id: int
+            返信先の回答ID
+        content: str
+            更新された回答の内容
+        is_read: bool
+            回答が既読かどうかを示すフラグ
+        updated_at: str
+            回答が最後に更新された日時
     """
     
     new_response = reviews_crud.update_response(db, update,response_id)
@@ -69,29 +70,31 @@ async def update_review(db: DbDependency, update: UpdateReviewRequestBody, revie
     """
     レビュー更新（受講生）
 
-    Parameter
+    Parameters
     -----------------------
-    review_id: int
-        更新したいレビューのID
-    title: str
-        レビューリクエストのタイトル
-    content: str
-		レビューの更新された内容
-    is_read: bool
-		レビューが既読かどうかを更新するフラグ
+    dict
+        review_id: int
+            更新したいレビューのID
+        title: str
+            レビューリクエストのタイトル
+        content: str
+            レビューの更新された内容
+        is_read: bool
+            レビューが既読かどうかを更新するフラグ
 
-    Return
-    ----------------------
-    id: int
-		更新されたレビューリクエストのID
-    title: str
-        レビューリクエストのタイトル
-    content: text
-		更新されたレビューの内容
-    is_read: bool
-		レビューが既読かどうかを示すフラグ
-    updated_at: str
-		レビューが最後に更新された日時
+    Returns
+    -----------------------
+    dict
+        id: int
+            更新されたレビューリクエストのID
+        title: str
+            レビューリクエストのタイトル
+        content: text
+            更新されたレビューの内容
+        is_read: bool
+            レビューが既読かどうかを示すフラグ
+        updated_at: str
+            レビューが最後に更新された日時
 
     """
     
@@ -114,15 +117,28 @@ async def get_all_reviews(request: Request,db: DbDependency, mentor_id: int):
     """
     受講生のレビュー一覧取得
     
-    Parameters
-    ----------
-    user_id
+    Parameter
+    -----------------------
+    mentor_id: int
+        取得するメンターのユーザーID
 
     Returns
-    -------
-    {"reviews": reviews_list} : dic{}
-                    レビュー一覧
-    
+    -----------------------
+    reviews: array
+        id: int
+            レビューのID
+        title: str
+            レビューのタイトル
+        content: str
+            レビューの内容
+        curriculum_id: int
+            レビューに紐づくカリキュラムのID
+        created_at:str
+            レビューの作成日（ISO 8601形式）
+        is_read: bool
+            未読コメントの有無
+        is_closed: bool
+            完了しているかどうか
     """
     found_reviews = reviews_crud.find_reviews(db,mentor_id)
 

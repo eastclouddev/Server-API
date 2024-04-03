@@ -25,24 +25,25 @@ async def find_review_list(db: DbDependency, curriculum_id: int = Path(gt=0)):
     curriculum_id: int
         レビュー一覧を取得したいカリキュラムのID
 
-    Return
-    ----------------------
-    id: int
-        レビューリクエストのID
-    curriculum_id: int
-        関連するカリキュラムのID
-    user_id: int
-        レビューリクエストを投稿したユーザーのID
-    title: str
-        レビューリクエストのタイトル
-    content: str
-        レビューリクエストの内容
-    is_closed: bool
-        レビューリクエストがクローズされているかどうか
-    created_at: str
-        レビューリクエストが作成された日時（ISO 8601形式）
-    updated_at: str
-        レビューリクエストが最後に更新された日時（ISO 8601形式）
+    Returns
+    -----------------------
+    reviews: array
+        id: int
+            レビューリクエストのID
+        curriculum_id: int
+            関連するカリキュラムのID
+        user_id: int
+            レビューリクエストを投稿したユーザーのID
+        title: str
+            レビューリクエストのタイトル
+        content: str
+            レビューリクエストの内容
+        is_closed: bool
+            レビューリクエストがクローズされているかどうか
+        created_at: str
+            レビューリクエストが作成された日時（ISO 8601形式）
+        updated_at: str
+            レビューリクエストが最後に更新された日時（ISO 8601形式）
     """
 
     reviews = curriculums_crud.find_reviews(db, curriculum_id)
@@ -77,23 +78,23 @@ async def find_curriculum_details(db: DbDependency, curriculum_id: int = Path(gt
     curriculum_id: int
         詳細を取得したいカリキュラムのID
 
-    Return
-    ----------------------
-    curriculum_id: int
-        カリキュラムのID
-    title: str
-        カリキュラムのタイトル
-    description: str
-        カリキュラムの詳細な説明
-    video_url: str
-        ビデオコンテンツのURL(ビデオが存在する場合のみ）
-    content: str 
-        カリキュラムのテキストコンテンツ(テキストコンテンツが存在する場合のみ）
-    is_test: boolean
-        このカリキュラムがテストかどうかを示すフラグ（boolean）
-    display_no: int
-        カリキュラムの表示順
-
+    Returns
+    -----------------------
+    dict
+        curriculum_id: int
+            カリキュラムのID
+        title: str
+            カリキュラムのタイトル
+        description: str
+            カリキュラムの詳細な説明
+        video_url: str
+            ビデオコンテンツのURL(ビデオが存在する場合のみ）
+        content: str 
+            カリキュラムのテキストコンテンツ(テキストコンテンツが存在する場合のみ）
+        is_test: boolean
+            このカリキュラムがテストかどうかを示すフラグ（boolean）
+        display_no: int
+            カリキュラムの表示順
     """
     info = curriculums_crud.find_by_curriculum_id(db, curriculum_id)
     if not info:

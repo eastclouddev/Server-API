@@ -22,45 +22,47 @@ async def create_company(db: DbDependency, param: CreateRequestBody):
     """
     会社情報作成
 
-    Parameter
+    Parameters
     -----------------------
-    name: str
-        会社名
-    prefecture: str
-        都道府県
-    city: str
-        市区町村
-    town: str
-        町名、番地等
-    address: str
-        建物名、部屋番号等
-    postal_code: str
-        郵便番号
-    phone_number: str
-        電話番号
-    email: str
-        メールアドレス
+    dict
+        name: str
+            会社名
+        prefecture: str
+            都道府県
+        city: str
+            市区町村
+        town: str
+            町名、番地等
+        address: str
+            建物名、部屋番号等
+        postal_code: str
+            郵便番号
+        phone_number: str
+            電話番号
+        email: str
+            メールアドレス
 
-    Return
-    ----------------------
-    company_id: int
-        新しく作成された会社のID
-    name: str
-        会社名
-    prefecture: str
-        都道府県
-    city: str
-        市区町村
-    town: str
-        町名、番地等
-    address: str
-        建物名、部屋番号等
-    postal_code: str
-        郵便番号
-    phone_number: str
-        電話番号
-    email: str
-        メールアドレス
+    Returns
+    -----------------------
+    dict
+        company_id: int
+            新しく作成された会社のID
+        name: str
+            会社名
+        prefecture: str
+            都道府県
+        city: str
+            市区町村
+        town: str
+            町名、番地等
+        address: str
+            建物名、部屋番号等
+        postal_code: str
+            郵便番号
+        phone_number: str
+            電話番号
+        email: str
+            メールアドレス
     """
 
     # TODO:メールアドレスの重複チェックが入る予定（emailがuniqueになったため）
@@ -101,30 +103,31 @@ async def find_company_details(db: DbDependency, company_id: int = Path(gt=0)):
     company_id: int
         詳細情報を取得したい会社のID
 
-    Return
-    ----------------------
-    company_id: int
-        会社のID
-    name: str
-        会社の名前
-    prefecture: str
-        所在地の都道府県
-    city: str
-        所在地の市区町村
-    town: str
-        所在地の町名・番地等
-    address: str
-        会社の詳細な住所
-    postal_code: str
-        郵便番号
-    phone_number: str
-        電話番号
-    email: str
-        会社のメールアドレス
-    created_at: str
-        レコードの作成日時（ISO 8601形式）
-    updated_at: str
-        レコードの最終更新日時（ISO 8601形式）
+    Returns
+    -----------------------
+    dict
+        company_id: int
+            会社のID
+        name: str
+            会社の名前
+        prefecture: str
+            所在地の都道府県
+        city: str
+            所在地の市区町村
+        town: str
+            所在地の町名・番地等
+        address: str
+            会社の詳細な住所
+        postal_code: str
+            郵便番号
+        phone_number: str
+            電話番号
+        email: str
+            会社のメールアドレス
+        created_at: str
+            レコードの作成日時（ISO 8601形式）
+        updated_at: str
+            レコードの最終更新日時（ISO 8601形式）
 
     """
     company_info = companies_cruds.find_by_company_id(db, company_id)
@@ -156,13 +159,12 @@ async def find_company_list(db: DbDependency):
     会社情報一覧取得
     
     Parameters
-    ----------
+    -----------------------
     なし
 
     Returns
-    -------
+    -----------------------
     companies: array
-        以下の情報を含む。
         company_id: int
             会社のID（int）
         name: str

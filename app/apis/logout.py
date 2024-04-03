@@ -15,6 +15,18 @@ router = APIRouter(prefix="/logout", tags=["Logout"])
 
 @router.post("", status_code=status.HTTP_200_OK)
 async def logout(request: Request):
+    """
+    ログアウト機能
+
+    Parameter
+    -----------------------
+    header
+        認証情報が含まれているリクエストヘッダ
+
+    Return
+    -----------------------
+    なし
+    """
 
     req_headers = dict(request.headers)
     auth = req_headers.get("authorization")

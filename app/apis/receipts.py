@@ -20,15 +20,29 @@ router = APIRouter(prefix="/receipts", tags=["Receipts"])
 async def find_receipt_details(db: DbDependency, receipt_id: int = Path(gt=0)):
     """
     領収書出力
-    Parameters
-    ----------
+
+    Parameter
+    -----------------------
     receipt_id: int
         出力する領収書のID
 
     Returns
-    -------
-    re_di: ResponseBody
-        receipt_id, company_id, billing_id, date, amount, received_from, payment_method
+    -----------------------
+    dict
+        receipt_id: int
+            領収書のID
+        company_id: int
+            会社のID
+        billing_id: int
+            関連する請求履歴のID
+        date: str
+            領収書の日付（YYYY-MM-DD形式）
+        amount: float
+            支払金額
+        received_from: str
+            支払いを受けた会社または個人の名前
+        payment_method: str
+            支払い方法
     """
 
     company_receipt = receipts_crud.find_by_receipt_id(db, receipt_id)
