@@ -1,5 +1,4 @@
-import base64
-import json
+import jwt
 import re
 from logging import getLogger
 from typing import Annotated
@@ -22,29 +21,21 @@ router = APIRouter(prefix="/password_reset", tags=["PasswordReset"])
 @router.post("", status_code=status.HTTP_200_OK)
 async def password_reset(db: DbDependency, param: PasswordResetRequest):
     user = password_reset_crud.find_by_email(db, param.email)
-    # TODO:emailのフォーマットエラー
     
     if not user:
-        logger.error("ユーザーが存在しません")
         raise HTTPException(status_code=404, detail="Email address not found in the system.")
-    return {"message": "If an account with that email exists, we have sent a password reset email."}
+    
+    # TODO:トークンを生成し、メールに送信する
 
+    return
 
 @router.post("/confirm", status_code=status.HTTP_200_OK)
 async def password_setting(db: DbDependency, param: PasswordResetConfirm):
     try:
         # Token解析
-        token = param.token
-        header, payload, signature = token.split('.')
-        header = json.loads(base64.urlsafe_b64decode(header + '=' * (-len(header) % 4)).decode(encoding='utf-8'))
-        payload = json.loads(base64.urlsafe_b64decode(payload + '=' * (-len(payload) % 4)).decode(encoding='utf-8'))
-
-        # TODO:リセットトークンが無効かどうか、期限切れかどうかチェック
-
-        # メールアドレスの取得
+        payload = jwt.decode(param.token, key='SECRET_KEY123', algorithms='HS256')
         email = payload.get("email")
         if not email:
-            logger.error("メールアドレスが存在しません")
             raise HTTPException(status_code=401, detail="Invalid token or password does not meet the security requirements.")
         
         # パスワードのポリシー判定
@@ -60,15 +51,22 @@ async def password_setting(db: DbDependency, param: PasswordResetConfirm):
 
         user = password_reset_crud.update_by_password(db, email, param.new_password)
         if not user:
-            logger.error("ユーザーが存在しません")
             raise HTTPException(status_code=401, detail="Invalid token or password does not meet the security requirements.")
 
         db.commit()
         return {"message": "Your password has been reset successfully."}
     
+    except jwt.ExpiredSignatureError as e: # 期限切れ
+        logger.error(str(e))
+        raise HTTPException(status_code=401, detail="Invalid token or password does not meet the security requirements.")
+
+    except jwt.InvalidTokenError as e: # 無効なトークン
+        logger.error(str(e))
+        raise HTTPException(status_code=401, detail="Invalid token or password does not meet the security requirements.")
+
     except Exception as e:
         db.rollback()
-        logger.error(e)
+        logger.error(str(e))
         raise HTTPException(status_code=401, detail="Invalid token or password does not meet the security requirements.")
 
 

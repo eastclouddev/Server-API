@@ -13,7 +13,7 @@ class ResponseBody(BaseModel):
     pass
 
 class PasswordResetRequest(BaseModel):
-    email: Optional[str] = Field(None, examples=["Sample@mail.com"])
+    email: Optional[str]
 
 
 class PasswordResetConfirm(BaseModel):
