@@ -6,7 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query,Request
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.reviews import UpdateResponseRequestBody, UpdateResponseResponseBody, UpdateReviewRequestBody, UpdateReviewResponseBody,AllResponseBody
+from schemas.reviews import UpdateResponseRequestBody, UpdateResponseResponseBody, UpdateReviewRequestBody, UpdateReviewResponseBody, \
+    AllResponseBody, AllReviewResponse
 
 from cruds import reviews as reviews_crud
 
@@ -160,3 +161,94 @@ async def get_all_reviews(request: Request,db: DbDependency, mentor_id: int):
 
     return {"reviews": reviews_list} 
 
+@router.get("/{review_request_id}", response_model=AllReviewResponse, status_code=status.HTTP_200_OK)
+async def get_reviews_thread(db: DbDependency, review_request_id: int):
+    """
+    レビュースレッド詳細
+    
+    Parameter
+    -----------------------
+    dict
+        review_request_id: int
+            スレッド詳細を取得したいレビューリクエストのID
+
+    Returns
+    -----------------------
+    dict
+        id: int
+            レビューリクエストのID
+        curriculum_id: int
+            関連するカリキュラムのID
+        user_id: int
+            レビューリクエストを投稿したユーザーのID
+        title: str
+            レビューリクエストのタイトル
+        content: str
+            レビューリクエストの内容
+        is_closed: bool
+            レビューリクエストがクローズされているかどうか
+        created_at: str
+            レビューリクエストが作成された日時 
+        updated_at:str
+            レビューリクエストが最後に更新された日時
+        id: int
+            回答のID
+        review_request_id: int
+            回答が紐づくレビューリクエストのID
+        user_id: int
+            回答を投稿したユーザーのID
+        parent_response_id: int
+            返信先の回答ID
+        content: str
+            回答の内容
+        is_read: bool
+            回答が既読かどうかを示すフラグ
+        created_at: str
+            回答が作成された日時
+    """
+
+    review_request = reviews_crud.find_review_request_by_review_request_id(db, review_request_id)
+
+    review_responses = reviews_crud.find_review_response_by_review_request_id(db, review_request_id)
+
+    if not review_request:
+        raise HTTPException(status_code=404, detail="Review request not found.")
+
+    request = {
+        "id": review_request.id,
+        "curriculum_id": review_request.curriculum_id,
+        "user_id": review_request.user_id,
+        "title": review_request.title,
+        "content": review_request.content,
+        "is_closed": review_request.is_closed,
+        "created_at": review_request.created_at.isoformat(),
+        "updated_at": review_request.updated_at.isoformat()
+    }
+
+    li = []
+    for review_response in review_responses:
+        di = {
+            "id": review_response.id,
+            "review_request_id": review_response.id,
+            "user_id": review_response.id,
+            "parent_response_id": review_response.parent_response_id,
+            "content": review_response.content,
+            "is_read": review_response.is_read,
+            "created_at": review_response.created_at.isoformat()
+        }
+        li.append(di)
+
+    re_di = {
+        "review_request": request,
+        "responses": li
+    }
+
+    return re_di
+
+
+
+
+
+
+
+    
