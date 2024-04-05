@@ -67,5 +67,5 @@ def create(db: Session, create_model: CreateResponseBody, mentor_id: int):
 def find_questions_by_mentor_id(db: Session, mentor_id: int):
     return db.query(Questions).filter(Questions.user_id == mentor_id).all()
 
-# def find_answer_by_question_id(db: Session, question_id: int):
-#     return db.query(Answers).filter(Answers.question_id == question_id).all()
+def find_answers_by_question_id(db: Session, question_id: int):
+    return db.query(Answers).filter(Answers.question_id == question_id).all()

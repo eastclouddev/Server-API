@@ -202,14 +202,16 @@ async def find_questions(db: DbDependency, request: Request, mentor_id: int = Pa
 
     li = []
     for question in questions:
-        # answer = mentors_crud.find_answer_by_question_id(db, question.id)
+        answers = mentors_crud.find_answers_by_question_id(db, question.id)
+        read_flag = all([answer.is_read for answer in answers]) # 全てtrueだった場合にはtrue、1つでもfalseがあればfalse
+        
         di = {
             "id": question.id,
             "title": question.title,
             "content": question.content,
             "curriculum_id": question.curriculum_id,
             "created_at": question.created_at.isoformat(),
-            "is_read": True, # TODO:どこから取得?
+            "is_read": read_flag,
             "is_closed": question.is_closed
         }
         li.append(di)
