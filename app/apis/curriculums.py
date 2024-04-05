@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.curriculums import ReviewsResponseBody, DetailResponseBody
+from schemas.curriculums import ReviewsResponseBody, DetailResponseBody, QuizResponseBody
 from cruds import curriculums as curriculums_crud
 
 logger = getLogger("uvicorn.app")
@@ -101,3 +101,53 @@ async def find_curriculum_details(db: DbDependency, curriculum_id: int = Path(gt
     if not info:
         raise HTTPException(status_code=404, detail="Curriculum not found.")
     return info
+
+@router.get("/{curriculum_id}/test", response_model=QuizResponseBody, status_code=status.HTTP_200_OK)
+async def find_test_details(db: DbDependency, curriculum_id: int = Path(gt=0)):
+    """
+    テスト詳細取得
+    Parameter
+    -----------------------
+    curriculum_id: int
+        テストを取得したいカリキュラムのID
+    Returns
+    -----------------------
+    dict
+        curriculum_id: int
+            カリキュラムのID
+        tests: array
+            test_id: int
+                テストのID
+            question: str
+                質問文
+            options: array of str
+                選択肢
+            correct_answer: str
+                正解の選択肢
+            explanation: str
+                正解の解説
+            media_content_url: str
+                メディアコンテンツのURL
+    """
+    quizzes = curriculums_crud.find_quiz_contents(db, curriculum_id)
+    if not quizzes:
+        raise HTTPException(status_code=404, detail="Test content not found for the specified curriculum.")
+    li = []
+    for quiz in quizzes:
+        option_list = []
+        for option in quiz.options.values():
+            option_list.append(option)
+        di = {
+            "test_id": quiz.id,
+            "question": quiz.question,
+            "options": option_list,
+            "correct_answer": quiz.correct_answer,
+            "explanation": quiz.explanation,
+            "media_content_url": quiz.media_content.get("url", "")
+        }
+        li.append(di)
+    re_di = {
+        "curriculum_id": curriculum_id,
+        "tests": li
+    }
+    return re_di

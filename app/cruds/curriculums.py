@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 
 from models.review_requests import ReviewRequests
 from models.curriculums import Curriculums
-
+from models.quiz_contents import QuizContents
 
 def find_reviews(db: Session, curriculum_id: int):
     return db.query(ReviewRequests).filter(ReviewRequests.curriculum_id == curriculum_id).all()
@@ -33,3 +33,6 @@ def find_by_curriculum_id(db: Session, curriculum_id: int):
         info.update(find_content)
 
     return info
+
+def find_quiz_contents(db: Session, curriculum_id: int):
+    return db.query(QuizContents).filter(QuizContents.curriculum_id == curriculum_id).all()
