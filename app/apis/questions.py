@@ -156,8 +156,6 @@ async def find_question_thread_details(db: DbDependency, question_id: int):
     
     return re_di
 
-
-#####################################
 @router.patch("/{question_id}", response_model=UpdateQuestionResponseBody, status_code=status.HTTP_200_OK)
 async def update_question(db: DbDependency, param: UpdateQuestioinRequestBody, question_id: int):
     """

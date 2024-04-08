@@ -39,7 +39,6 @@ def find_question(db: Session, question_id: int):
 def find_answers(db: Session, question_id: int):
     return db.query(Answers).filter(Answers.question_id == question_id).all()
 
-#####################################
 def update_question(db: Session, param: UpdateQuestioinRequestBody, question_id: int):
 
     question = db.query(Questions).filter(Questions.id == question_id).first()

@@ -39,7 +39,6 @@ class DetailResponseBody(BaseModel):
     question: ResponseQuestion
     answer: list[ResponseList]
 
-    ##################################3
 class UpdateQuestioinRequestBody(BaseModel):
     title: Optional[str] = Field(examples=["更新されたタイトル"])
     content: Optional[str] = Field(examples=["更新する内容"])

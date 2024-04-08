@@ -4,7 +4,6 @@ from fastapi.testclient import TestClient
 def test_xxx_01(client_fixture: TestClient):
     pass
 
-###########################################
 def test_update_question_01(client_fixture: TestClient):
     response = client_fixture.patch(
         "questions/1",
