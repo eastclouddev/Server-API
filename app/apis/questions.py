@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.questions import CreateRequestBody, CreateResponseBody, DetailResponseBody
+from schemas.questions import CreateRequestBody, CreateResponseBody, DetailResponseBody,UpdateQuestioinRequestBody,UpdateQuestionResponseBody
 from cruds import questions as questions_crud
 from services import questions as questions_service
 
@@ -155,3 +155,69 @@ async def find_question_thread_details(db: DbDependency, question_id: int):
     }
     
     return re_di
+
+
+#####################################
+@router.patch("/{question_id}", response_model=UpdateQuestionResponseBody, status_code=status.HTTP_200_OK)
+async def update_question(db: DbDependency, param: UpdateQuestioinRequestBody, question_id: int):
+    """
+    質問編集
+
+    Parameter
+    -----------------------
+    question_id: int
+        更新したい質問のID
+    title: str
+        更新された質問のタイトル
+    content: str
+        更新したい質問の内容
+    media_content: json
+        更新したい質問に関連するメディアコンテンツの情報
+    is_closed: bool
+        完了しているかどうかを表すフラグ
+
+    Returns
+    -----------------------
+    dict
+        id: int
+            更新された質問のID
+        curriculum_id: int
+            回答が紐づくカリキュラムのID
+        user_id: int
+            回答を投稿したユーザーのID
+        title: str
+            更新された質問のタイトル
+        content: str
+            更新された質問の内容
+        media_content: Optional[json]
+            更新されたメディアコンテンツの情報
+        is_closed: bool
+            質問が完了しているかどうかを示すフラグ（boolean）
+        updated_at: str
+            質問が最後に更新された日時（ISO 8601形式）
+    """
+
+    question = questions_crud.update_question(db, param, question_id)
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found.")
+    
+    try:
+        db.commit()
+
+        info = {
+            "id": question.id,
+            "curriculum_id": question.curriculum_id,
+            "user_id": question.user_id,
+            "title": question.title,
+            "content": question.content,
+            "media_content": question.media_content,
+            "is_closed": question.is_closed,
+            "updated_at": question.updated_at.isoformat()
+        }
+
+        return info
+
+    except Exception as e:
+        logger.error(str(e))
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid input data.")
