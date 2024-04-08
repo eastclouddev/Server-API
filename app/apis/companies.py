@@ -2,11 +2,11 @@ from logging import getLogger
 from typing import Annotated
 
 from database.database import get_db
-from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query,Request
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.companies import CreateRequestBody, CreateResponseBody, DetailResponseBody,AllResponseBody
+from schemas.companies import CreateRequestBody, CreateResponseBody, DetailResponseBody,AllResponseBody,ResponseBody
 from cruds import companies as companies_cruds
 from services import companies as compamies_services
 
@@ -212,3 +212,37 @@ async def find_company_list(db: DbDependency):
         companies_list.append(one_company)
     
     return {"companies": companies_list}
+
+
+@router.get("/{company_id}/users",response_model=ResponseBody, status_code=status.HTTP_200_OK)
+
+def get_user(db: DbDependency,company_id:int, role: str,  page: int, limit: int):
+
+    """
+    受講生一覧（法人、法人代行)
+    
+    Parameters
+    ----------
+    role: str,  
+        ユーザーの役割
+    page: int, 
+        取得するページ番号
+    limit: int
+        1ページ当たりの記事数
+
+
+    Returns
+    -------
+    {"users": users_list} : dic{}
+                    受け取ったroleと一致するユーザー全員の情報
+    
+    """
+    users = companies_cruds.get_user(db,company_id,role)
+    if not users:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    found_user = []
+    for user in users[(page - 1)*limit : page*limit]:
+        found_user.append(user)
+
+    return  compamies_services.cereate_users_list(role, found_user)
