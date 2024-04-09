@@ -30,3 +30,17 @@ class Review(BaseModel):
 
 class ReviewsResponseBody(BaseModel):
     reviews: list[Review]
+
+class MediaContent(BaseModel):
+    url: str
+
+class ResponseBody(BaseModel):
+    question_id: int
+    curriculum_id: int
+    user_id: int
+    title: str
+    content: str
+    media_content: list[MediaContent]
+
+class QuestionResponseBody(BaseModel):
+    questions: list[ResponseBody]
