@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.companies import CreateRequestBody, CreateResponseBody, DetailResponseBody,AllResponseBody
+from schemas.companies import CreateRequestBody, CreateResponseBody, DetailResponseBody,AllResponseBody,ProgressesResponseBody
 from cruds import companies as companies_cruds
 from services import companies as compamies_services
 
@@ -212,3 +212,37 @@ async def find_company_list(db: DbDependency):
         companies_list.append(one_company)
     
     return {"companies": companies_list}
+
+@router.get("/{company_id}/progresses",response_model= ProgressesResponseBody,status_code=status.HTTP_200_OK)
+async def get_all_progresses(db: DbDependency):
+    """
+    進捗管理一覧
+    
+    Parameters
+    ----------
+
+    Returns
+    -------
+    {"progresses": progresses_list} : dic{}
+                    進捗一覧
+    
+    """
+    found_course_progresses = companies_cruds.find_course_progresses(db)
+
+
+    progresses_list = []
+
+    for progress in found_course_progresses:
+        one_progress = {
+            "progress_id": progress.id,
+            "user_id": progress.user_id,
+            "course_id": progress.course_id,
+            "section_id": companies_cruds.find_section_id(db,progress.course_id),
+            "curriculum_id": companies_cruds.find_curriculum_id(db,progress.course_id),
+            "progress_percentage": progress.progress_percentage,
+            "status": companies_cruds.find_status_name(db,progress.status_id)
+        }
+
+        progresses_list.append(one_progress)
+
+    return {"progresses": progresses_list} 
