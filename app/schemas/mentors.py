@@ -40,3 +40,15 @@ class CreateResponseBody(BaseModel):
     account_type: str
     account_number: str
     account_name: str
+
+class ProgressesResponseList(BaseModel):
+    progress_id: int
+    user_id: int
+    course_id: int
+    section_id:Optional[int]
+    curriculum_id:Optional[int]
+    progress_percentage: int
+    status: str
+
+class ProgressesResponseBody(BaseModel):
+    progresses: list[ProgressesResponseList]
