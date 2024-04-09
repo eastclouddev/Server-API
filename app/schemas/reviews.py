@@ -41,3 +41,26 @@ class AllResponseList(BaseModel):
 
 class AllResponseBody(BaseModel):
     reviews: list[AllResponseList]
+
+class ReviewRequestBody(BaseModel):
+    id: int
+    curriculum_id: int
+    user_id: int
+    title: str
+    content: str
+    is_closed: bool
+    created_at: str
+    updated_at: str
+
+class ReviewResponseBody(BaseModel):
+    id: int
+    review_request_id: int
+    user_id: int
+    parent_response_id: Optional[int]
+    content: str
+    is_read: bool
+    created_at: str
+
+class AllReviewResponse(BaseModel):
+    review_request: ReviewRequestBody
+    responses: list[ReviewResponseBody]

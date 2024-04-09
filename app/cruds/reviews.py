@@ -66,3 +66,8 @@ def find_is_read(db:Session,id: int):
         return False
     return info.is_read
 
+def find_review_request_by_review_request_id(db: Session, review_request_1d: int):
+    return db.query(ReviewRequests).filter(ReviewRequests.id == review_request_1d).first()
+
+def find_review_response_by_review_request_id(db:Session, review_request_id:int):
+    return db.query(ReviewResponses).filter(ReviewResponses.review_request_id == review_request_id).all()
