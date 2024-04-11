@@ -1,5 +1,8 @@
-from pydantic import Field, BaseModel
+from datetime import datetime
+from enum import Enum
 from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DeviceInfo(BaseModel):
@@ -17,4 +20,3 @@ class ResponseBody(BaseModel):
     access_token: str
     expires_in: int
     role: str
-

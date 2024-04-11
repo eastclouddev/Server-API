@@ -8,7 +8,7 @@ from database.database import Base
 class SectionTags(Base):
     __tablename__ = "section_tags"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    id = Column(Integer, primary_key=True, nullable=False) # 中間テーブルのため、明示的にautoincrementを外す
     course_id = Column(Integer, ForeignKey("courses.id"), primary_key=True, nullable=False)
     tag_id = Column(Integer, ForeignKey("tags.id"), primary_key=True, nullable=False)
     created_at = Column(DateTime, default=datetime.now())
