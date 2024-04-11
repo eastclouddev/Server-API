@@ -67,12 +67,22 @@ async def login(db: DbDependency, request: RequestBody):
         if user_device.device_type != request.device_info.device_type or user_device.device_name != request.device_info.device_name :
             logger.warning("他のデバイスlogin中")
             raise HTTPException(status_code=409, detail="User already logged in on another device.")
+    #　新規デバイス情報の作成
+    else :
+        try:
+            new_device = login_crud.create_device_info(db,request,user.id)
+            db.commit()
+    
+        except Exception as e:
+            logger.error(str(e)) 
+            db.rollback()
+            raise HTTPException(status_code=400, detail="Invalid input data.")  
    
     # ユーザーのロールを取得
     role = login_crud.find_by_role(db, user.role_id)
     if not role:
         raise HTTPException(status_code=401, detail="Invalid email or password.")
-    
+
     return {
             "user_id": user.id,
             "access_token": access_token,
