@@ -1,19 +1,9 @@
 from fastapi.testclient import TestClient
+from tests.conftest import session_fixture
 
-# from sqlalchemy.orm import Session, sessionmaker
-# from sqlalchemy import create_engine
-# from sqlalchemy.pool import StaticPool
-# from database.database import Base
 from models.devices import Devices
 from models.users import Users
 
-# engine = create_engine(
-#         url="sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
-#     )
-# # Base.metadata.create_all(engine)
-
-# SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-# # db = SessionLocal()
 
 """取得成功パターン"""
 def test_login_01(client_fixture: TestClient):
@@ -60,7 +50,7 @@ def test_login_02(client_fixture: TestClient):
     assert response.json() == {"detail":"Invalid email or password."}
 
 """新規デバイス情報作成パターン"""
-def test_login_03(client_fixture: TestClient):
+def test_login_03(client_fixture: TestClient,session_fixture):
     """リクエストボディのデバイス情報を追加"""
     response = client_fixture.post(
         "/login",
@@ -83,12 +73,11 @@ def test_login_03(client_fixture: TestClient):
     assert "role" in response.json()
 
    
-    # user = db.query(Users).filter(Users.email == "test@mail.com").first()
-    # # user = db.query(Users).all()
-    # # assert user == ""
-    # device = db.query(Devices).filter(Devices.user_id == user.id).first()
+    user = session_fixture.query(Users).filter(Users.email == "test@mail.com").first()
 
-    # assert device.user_id == user.id
-    # assert device.device_type == "ひとり"
-    # assert device.device_name == "いちだい"
-    # assert device.uuid == "test1"
+    device = session_fixture.query(Devices).filter(Devices.user_id == user.id).first()
+
+    assert device.user_id == user.id
+    assert device.device_type == "ひとり"
+    assert device.device_name == "いちだい"
+    assert device.uuid == "test3"
