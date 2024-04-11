@@ -5,14 +5,15 @@ from sqlalchemy.orm import relationship
 from database.database import Base
 
 
-class LearningRecords(Base):
-    __tablename__ = "learning_records"
+class QuizContents(Base):
+    __tablename__ = "quiz_contents"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
-    duration = Column(Integer, nullable=False)
-    details = Column(String(255), nullable=False)
-    study_date = Column(DateTime, nullable=False)
+    curriculum_id = Column(Integer, ForeignKey("curriculums.id"), nullable=False)
+    question = Column(Text, nullable=False)
+    media_content = Column(JSON)
+    options = Column(JSON, nullable=False)
+    correct_answer = Column(String(255), nullable=False)
+    explanation = Column(Text)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())

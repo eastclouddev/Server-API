@@ -54,7 +54,7 @@ from models.section_progresses import SectionProgresses
 from models.section_tags import SectionTags
 from models.sections import Sections
 from models.tags import Tags
-from models.test_contents import TestContents
+from models.quiz_contents import QuizContents
 from models.user_account_info import UserAccountInfo
 from models.user_account_types import UserAccountTypes
 from models.user_reward_histories import UserRewardHistories
