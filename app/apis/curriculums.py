@@ -145,10 +145,16 @@ async def create_question(db: DbDependency, param:RequestBody, curriculum_id: in
     if not found_curriculum:
         raise HTTPException(status_code=404,detail="Curriculum not found.")
 
-    di = {
-            "url": param.media_content.url
-        }
-    media_json = json.dumps(di)
+    li = []
+    datas = param.media_content
+    for data in datas:
+        if hasattr(data,"url"):
+            dict = {
+                "url": data.url
+            }
+            li.append(dict)
+
+    media_json = li
 
     try:
         new_question = curriculums_crud.create_question(db, param.user_id, param.title, param.content, media_json, curriculum_id)
@@ -160,9 +166,7 @@ async def create_question(db: DbDependency, param:RequestBody, curriculum_id: in
             "user_id": new_question.user_id,
             "title": new_question.title,
             "content": new_question.content,
-            "media_content": [
-                json.loads(new_question.media_content)
-            ]
+            "media_content": new_question.media_content
         }
 
         return re_di
@@ -171,5 +175,3 @@ async def create_question(db: DbDependency, param:RequestBody, curriculum_id: in
         logger.error(str(e)) 
         db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")     
-
-    
