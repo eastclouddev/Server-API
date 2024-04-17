@@ -21,3 +21,14 @@ class DetailResponseBody(BaseModel):
     email: str
     role: str
     last_login: str  
+
+class ResponseBody(BaseModel):
+    user_id: int
+    first_name: str
+    last_name: str
+    email: str
+    role: str
+    last_login: str 
+
+class UserResponseBody(BaseModel):
+    users: list[ResponseBody]
