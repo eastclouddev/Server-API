@@ -48,6 +48,23 @@ def test_users_02(client_fixture: TestClient):
     )
 
     assert response.status_code == 400
+
+def test_users_manage_01(client_fixture: TestClient):
+
+    response = client_fixture.get("/users/?role=student&page=1&limit=5")
+    assert response.status_code == 200
+    assert "user_id" in response.json()["users"][0]
+    assert "first_name" in response.json()["users"][0]
+    assert "last_name" in response.json()["users"][0]
+    assert "email" in response.json()["users"][0]
+    assert "role" in response.json()["users"][0]
+    assert "last_login" in response.json()["users"][0]
+
+def test_no_users_manage_01(client_fixture: TestClient):
+
+    response = client_fixture.get("/users/?role=hoge&page=1&limit=5")
+    assert response.status_code == 200
+    assert response.json()["users"] == []
     
 
 
