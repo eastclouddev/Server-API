@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.users import UpdateRequestBody, DetailResponseBody
+from schemas.users import UpdateRequestBody, DetailResponseBody, UserResponseBody
 from cruds import users as users_crud
 from services import users as users_service
 
@@ -150,3 +150,51 @@ async def confirm_change_email(token,db: DbDependency, user_id: int = Path(gt=0)
         db.rollback()
         logger.error(e)
         raise HTTPException(status_code = 400,detail="Invalid or expired token.")
+    
+@router.get("", response_model=UserResponseBody, status_code=status.HTTP_200_OK)
+async def get_student(db:DbDependency, role: str, page: int, limit: int):
+
+    """
+    受講生一覧(管理者)
+
+    Parameters
+    -----------------------
+    role: str,  
+        ユーザーの役割
+    page: int, 
+        取得するページ番号
+    limit: int
+        1ページ当たりの記事数
+
+    Return
+    -----------------------
+    user_id: int
+            ユーザーのID
+        first_name: str
+            名前
+        last_name: str
+            姓
+        email: str
+            メールアドレス
+        role: str
+            ユーザーの役割
+        last_login: str
+            最終ログイン日時（ISO 8601形式）
+    """
+
+    users = users_crud.find_by_user(db, role)
+
+    li = []
+
+    for user in users[(page-1)*limit:page*limit]:
+        di = {
+            "user_id": user.id,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "role": role,
+            "last_login": user.last_login.isoformat()
+        }
+        li.append(di)
+
+    return {"users":li}

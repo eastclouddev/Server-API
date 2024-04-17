@@ -45,3 +45,10 @@ def update_address(db,found_user,token_info):
 
     db.add(found_user)
     return found_user
+
+def find_by_user(db: Session, role: str):
+    find_role = db.query(Roles).filter(Roles.name == role).first()
+    if not find_role:
+        return []
+    users = db.query(Users).filter(Users.role_id == find_role.id).all()
+    return users
