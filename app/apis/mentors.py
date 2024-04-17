@@ -2,11 +2,11 @@ from logging import getLogger
 from typing import Annotated
 
 from database.database import get_db
-from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.mentors import DetailResponseBody, CreateResponseBody, CreateRequestBody, RewardsResponseBody
+from schemas.mentors import DetailResponseBody, CreateResponseBody, CreateRequestBody, RewardsResponseBody, ResponseBody
 from cruds import mentors as mentors_crud
 
 logger = getLogger("uvicorn.app")
@@ -164,3 +164,60 @@ async def create_user_account(db: DbDependency, create_model: CreateRequestBody,
         logger.error(str(e))
         db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")
+
+
+@router.get("/{mentor_id}/students/questions", response_model=ResponseBody, status_code=status.HTTP_200_OK)
+async def find_questions(db: DbDependency, request: Request, mentor_id: int = Path(gt=0)):
+    """
+    受講生からの質問一覧取得
+
+    Parameter
+    -----------------------
+    mentor_id: int
+        質問を取得するメンターのユーザーID
+
+    Returns
+    -----------------------
+    questions: array
+        id: int
+            新しく作成された送金先情報のID
+        title: str
+            質問のタイトル
+        content: str
+            質問の内容
+        curriculum_id: str
+            質問が紐づくカリキュラムのID
+        created_at: str
+            質問作成日
+        is_read: str
+            未読コメントの有無
+        is_closed: str
+            完了しているかどうか
+    """
+	
+    # TODO:ヘッダー情報をどう使うか
+    header = request.headers
+	
+    questions = mentors_crud.find_questions_by_mentor_id(db, mentor_id)
+
+    li = []
+    for question in questions:
+        answers = mentors_crud.find_answers_by_question_id(db, question.id)
+        read_flag = all([answer.is_read for answer in answers]) # 全てtrueだった場合にはtrue、1つでもfalseがあればfalse
+        
+        di = {
+            "id": question.id,
+            "title": question.title,
+            "content": question.content,
+            "curriculum_id": question.curriculum_id,
+            "created_at": question.created_at.isoformat(),
+            "is_read": read_flag,
+            "is_closed": question.is_closed
+        }
+        li.append(di)
+
+    re_di = {
+        "questions": li
+    }
+
+    return re_di

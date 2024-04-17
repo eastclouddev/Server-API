@@ -19,3 +19,15 @@ class Questions(BaseModel):
       
 class ResponseBody(BaseModel):
     questions: list[Questions]
+
+class ReviewResponse(BaseModel):
+    id: int 
+    title: str
+    content: str
+    curriculum_id: int
+    created_at: str
+    is_read: bool
+    is_closed: bool
+
+class AllResponseBody(BaseModel):
+    reviews: list[ReviewResponse]
