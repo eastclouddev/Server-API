@@ -4,11 +4,6 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-
-class RequestBody(BaseModel):
-    pass
-
-
 class DetailResponseBody(BaseModel):
     curriculum_id: int
     title: str
@@ -30,3 +25,20 @@ class Review(BaseModel):
 
 class ReviewsResponseBody(BaseModel):
     reviews: list[Review]
+
+class MediaContent(BaseModel):
+    url: str
+
+class RequestBody(BaseModel):
+    user_id: int
+    title: str
+    content: str
+    media_content: MediaContent
+
+class ResponseBody(BaseModel):
+    question_id: int
+    curriculum_id: int
+    user_id: int
+    title: str
+    content: str
+    media_content: list    

@@ -11,7 +11,8 @@ from models.course_progresses import CourseProgresses
 from models.sections import Sections
 from models.curriculums import Curriculums
 from models.learning_statuses import LearningStatuses
-
+from models.questions import Questions
+from models.answers import Answers
 
 def find_rewards_by_mentor_id(db: Session, mentor_id: int):
     return db.query(UserRewards).filter(UserRewards.user_id == mentor_id).all()
@@ -66,7 +67,7 @@ def create(db: Session, create_model: CreateResponseBody, mentor_id: int):
     db.add(new_transfer)
 
     return new_transfer
-
+  
 def find_course_progresses(db:Session):
     progresses =  db.query(CourseProgresses).all()
     if not progresses:
@@ -93,3 +94,9 @@ def find_status_name(db: Sections,status_id: int):
     if not status:
         return None
     return status.name
+
+def find_questions_by_mentor_id(db: Session, mentor_id: int):
+    return db.query(Questions).filter(Questions.user_id == mentor_id).all()
+
+def find_answers_by_question_id(db: Session, question_id: int):
+    return db.query(Answers).filter(Answers.question_id == question_id).all()

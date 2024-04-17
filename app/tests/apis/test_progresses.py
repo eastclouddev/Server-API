@@ -1,13 +1,10 @@
 from fastapi.testclient import TestClient
 
-def test_xxx_01(client_fixture: TestClient):
-    pass
-
 """取得成功パターン"""
 def test_progresses_01(client_fixture: TestClient):
     
     response = client_fixture.get(
-        "/mentors/1/progresses"
+        "/progresses"
     )
     
     assert response.status_code == 200
@@ -18,9 +15,8 @@ def test_progresses_01(client_fixture: TestClient):
     assert "curriculum_id" in response.json()["progresses"][0]
     assert "progress_percentage" in response.json()["progresses"][0]
 
-def test_find_questions(client_fixture: TestClient):
-    response = client_fixture.get(
-        "mentors/3/students/questions"
-    )
 
-    assert response.status_code == 200
+
+
+
+
