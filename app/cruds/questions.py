@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from models.users import Users
 from models.questions import Questions
 from models.answers import Answers
-from schemas.questions import CreateRequestBody
+from schemas.questions import CreateRequestBody, UpdateAnswerRequestBody
 
 
 def find_by_question(db: Session, question_id: int):
@@ -38,3 +38,16 @@ def find_question(db: Session, question_id: int):
 
 def find_answers(db: Session, question_id: int):
     return db.query(Answers).filter(Answers.question_id == question_id).all()
+
+def update_answer(db: Session, param: UpdateAnswerRequestBody, answer_id: int):
+
+    answer = db.query(Answers).filter(Answers.id == answer_id).first()
+    if not answer:
+        return None
+    
+    answer.content = param.content
+    answer.media_content = param.media_content
+    answer.is_read = param.is_read
+    db.add(answer)
+
+    return answer
