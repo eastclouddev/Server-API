@@ -2,11 +2,11 @@ from logging import getLogger
 from typing import Annotated
 
 from database.database import get_db
-from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.students import ResponseBody
+from schemas.students import ResponseBody, ProgressesResponse
 from cruds import students as students_crud
 
 logger = getLogger("uvicorn.app")
@@ -73,3 +73,53 @@ async def find_my_question_list(db: DbDependency, student_id: int = Path(gt=0)):
         question_list.append(one_question)
     
     return {"questions": question_list}
+
+@router.get("/{student_id}/progresses", response_model=ProgressesResponse, status_code=status.HTTP_200_OK)
+async def state_progresses(db: DbDependency, reqeust: Request):
+    """
+    現在の学習進捗
+    Parameters
+    -----------------------
+    request: Request
+        headersから情報を取得する
+
+    Returns
+    -----------------------
+    progresses: array
+        course_id: int
+            コースのID
+        course_title: str
+            コースのタイトル
+        progress_percentage: int
+            コースの進捗率
+        status: str
+            コースのステータス
+        last_accessed_at: str
+            最終アクセス日（ISO 8601形式）
+    """
+    # TODO:ヘッダー情報から必要なパラメータを取得する
+    user_id = 1
+
+    progresses = students_crud.find_course_progresses(db, user_id)
+                
+    li = []
+
+    for progress in progresses:
+        course = students_crud.find_by_course_id(db, progress.course_id)
+        status = students_crud.find_by_status_id(db, progress.status_id)
+
+        if course and status:
+            di = {
+                "course_id": progress.course_id,
+                "course_title": course.title,
+                "progress_percentage": progress.progress_percentage,
+                "status": status.name,
+                "last_accessed_at": progress.last_accessed_at.isoformat()
+            }
+            li.append(di)
+
+    re_di = {
+        "progresses": li
+    }
+
+    return re_di

@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette import status
 
 from apis import \
-    login, logout, password_reset, news, state_progresses, \
+    login, logout, password_reset, news, \
     students, mentors, reviews, companies, users, \
     courses, curriculums, questions, billings, receipts, \
     rewards, progresses
@@ -28,7 +28,6 @@ app.include_router(login.router)
 app.include_router(logout.router)
 app.include_router(password_reset.router)
 app.include_router(news.router)
-app.include_router(state_progresses.router)
 app.include_router(students.router)
 app.include_router(mentors.router)
 app.include_router(reviews.router)

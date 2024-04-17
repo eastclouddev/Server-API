@@ -19,3 +19,13 @@ class Questions(BaseModel):
       
 class ResponseBody(BaseModel):
     questions: list[Questions]
+
+class Progress(BaseModel):
+    course_id: int
+    course_title: str
+    progress_percentage: int
+    status: str
+    last_accessed_at: str
+
+class ProgressesResponse(BaseModel):
+    progresses: list[Progress]
