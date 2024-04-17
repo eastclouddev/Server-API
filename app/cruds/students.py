@@ -5,6 +5,8 @@ from models.answers import Answers
 from models.courses import Courses
 from models.learning_statuses import LearningStatuses
 from models.course_progresses import CourseProgresses
+from models.review_requests import ReviewRequests 
+from models.review_responses import ReviewResponses
 
 def find_by_user_id(db: Session, user_id: int):
     return db.query(Questions).filter(Questions.user_id == user_id).all()
@@ -20,3 +22,9 @@ def find_by_status_id(db: Session, status_id: int):
 
 def find_course_progresses(db: Session, user_id: int):
     return db.query(CourseProgresses).filter(CourseProgresses.user_id == user_id).all()
+
+def find_reviews(db:Session, user_id: int):
+    return db.query(ReviewRequests).filter(ReviewRequests.user_id == user_id).all()
+
+def find_is_read(db:Session, id: int):
+    return db.query(ReviewResponses).filter(ReviewResponses.review_request_id == id).all()
