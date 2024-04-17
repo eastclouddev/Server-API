@@ -8,12 +8,12 @@ from pydantic import BaseModel, ConfigDict, Field
 class RequestBody(BaseModel):
     pass
 
-class Progress(BaseModel):
-    course_id: int
-    course_title: str
-    progress_percentage: int
-    status: str
-    last_accessed_at: str
 
 class ResponseBody(BaseModel):
-    progresses: list[Progress]
+    receipt_id: int
+    company_id: int
+    billing_id: int
+    date: str
+    amount: float
+    received_from: str
+    payment_method: str
