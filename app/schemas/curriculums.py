@@ -26,6 +26,33 @@ class Review(BaseModel):
 class ReviewsResponseBody(BaseModel):
     reviews: list[Review]
 
+class Quizzes(BaseModel):
+    test_id: int
+    question: str
+    options: list[str]
+    correct_answer: str
+    explanation: str
+    media_content_url: str
+
+class QuizResponseBody(BaseModel):
+    curriculum_id: int
+    tests: list[Quizzes]
+
+class ReviewResponse(BaseModel):
+    id: int
+    curriculum_id: int
+    user_id: int
+    title: str
+    content: str
+    is_closed: bool
+    created_at: str
+
+class ReviewRequestBody(BaseModel):
+    user_id: int = Field(examples=[1])
+    title: str = Field(examples=["Reviewのタイトル"])
+    content: str = Field(examples=["Reviewの内容"])
+    is_closed: bool = Field(examples=[False])
+
 class MediaContent(BaseModel):
     url: str
 

@@ -7,7 +7,9 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.curriculums import ReviewsResponseBody, DetailResponseBody, RequestBody, ResponseBody, QuestionResponseBody
+from schemas.curriculums import ReviewsResponseBody, DetailResponseBody, RequestBody, ResponseBody, ReviewResponse, ReviewRequestBody, QuizResponseBody
+from schemas.curriculums import ReviewsResponseBody, DetailResponseBody, RequestBody, ResponseBody,\
+                                ReviewResponse, ReviewRequestBody, QuizResponseBody, QuestionResponseBody
 from cruds import curriculums as curriculums_crud
 
 logger = getLogger("uvicorn.app")
@@ -15,7 +17,6 @@ logger = getLogger("uvicorn.app")
 DbDependency = Annotated[Session, Depends(get_db)]
 
 router = APIRouter(prefix="/curriculums", tags=["Curriculums"])
-
 
 @router.get("/{curriculum_id}/reviews", response_model=ReviewsResponseBody, status_code=status.HTTP_200_OK)
 async def find_review_list(db: DbDependency, curriculum_id: int = Path(gt=0)):
@@ -103,6 +104,56 @@ async def find_curriculum_details(db: DbDependency, curriculum_id: int = Path(gt
         raise HTTPException(status_code=404, detail="Curriculum not found.")
     return info
 
+
+@router.get("/{curriculum_id}/test", response_model=QuizResponseBody, status_code=status.HTTP_200_OK)
+async def find_test_details(db: DbDependency, curriculum_id: int = Path(gt=0)):
+    """
+    テスト詳細取得
+    Parameter
+    -----------------------
+    curriculum_id: int
+        テストを取得したいカリキュラムのID
+    Returns
+    -----------------------
+    dict
+        curriculum_id: int
+            カリキュラムのID
+        tests: array
+            test_id: int
+                テストのID
+            question: str
+                質問文
+            options: array of str
+                選択肢
+            correct_answer: str
+                正解の選択肢
+            explanation: str
+                正解の解説
+            media_content_url: str
+                メディアコンテンツのURL
+    """
+    quizzes = curriculums_crud.find_quiz_contents(db, curriculum_id)
+    if not quizzes:
+        raise HTTPException(status_code=404, detail="Test content not found for the specified curriculum.")
+    li = []
+    for quiz in quizzes:
+        option_list = []
+        for option in quiz.options.values():
+            option_list.append(option)
+        di = {
+            "test_id": quiz.id,
+            "question": quiz.question,
+            "options": option_list,
+            "correct_answer": quiz.correct_answer,
+            "explanation": quiz.explanation,
+            "media_content_url": quiz.media_content.get("url", "")
+        }
+        li.append(di)
+    re_di = {
+        "curriculum_id": curriculum_id,
+        "tests": li
+    }
+    return re_di
 
 @router.post("/{curriculum_id}/questions", response_model=ResponseBody, status_code=status.HTTP_201_CREATED)
 async def create_question(db: DbDependency, param:RequestBody, curriculum_id: int = Path(gt=0)):
@@ -235,3 +286,66 @@ async def find_questions(db: DbDependency, curriculum_id: int):
     }
     return re_di
 
+
+@router.post("/{curriculum_id}/reviews", response_model=ReviewResponse, status_code=status.HTTP_201_CREATED)
+async def create_curriculum_id(db: DbDependency, param: ReviewRequestBody, curriculum_id: int):
+
+    """
+    レビュー作成
+    
+    Parameter
+    -----------------------
+    curriculum_id: int
+        詳細を取得したいカリキュラムのID
+    dict
+        user_id: int
+            ユーザーのID
+        title: str
+            レビューリクエストのタイトル
+        content: str 
+            レビューリクエストの内容
+        is_closed: boolean
+            レビューリクエストの初期状態（通常はfalseで未クローズ状態）
+     Returns
+    -----------------------
+    dict
+        id: int
+            レビューリクエストのID
+        curriculum_id: int
+            カリキュラムのID
+        user_id: int
+            ユーザーのID
+        title: str
+            レビューリクエストのタイトル
+        content: str 
+            レビューリクエストの内容
+        is_closed: boolean
+            レビューリクエストがクローズされているかどうか（boolean）
+        created_at: str
+            作成された日時
+    """
+
+
+    found_curriculum = curriculums_crud.find_by_reviews(db,curriculum_id)
+
+    if not found_curriculum:
+        raise HTTPException(status_code=404, detail="Curriculum not found.")
+
+    try:
+        reviews = curriculums_crud.create_reviews(db, curriculum_id, param.user_id, param.title, param.content, param.is_closed)
+        db.commit()
+        di = {
+            "id": reviews.id,
+            "curriculum_id": reviews.curriculum_id,
+            "user_id": reviews.user_id,
+            "title": reviews.title,
+            "content": reviews.content,
+            "is_closed": reviews.is_closed,
+            "created_at": reviews.created_at.isoformat()
+            }
+        
+        return di
+    except Exception as e:
+        logger.error(str(e)) 
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid input data.") 
