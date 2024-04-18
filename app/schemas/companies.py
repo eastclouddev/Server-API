@@ -54,6 +54,17 @@ class Company(BaseModel):
 class AllResponseBody(BaseModel):
     companies: list[Company]
 
+class ProgressesResponseList(BaseModel):
+    progress_id: int
+    user_id: int
+    course_id: int
+    section_id:Optional[int]
+    curriculum_id:Optional[int]
+    progress_percentage: int
+    status: str
+
+class ProgressesResponseBody(BaseModel):
+    progresses: list[ProgressesResponseList]
 
 class RequestList(BaseModel):
     role:Optional[str] = Field(default=None, examples=["student"])
@@ -70,4 +81,3 @@ class ResponseList(BaseModel):
 
 class ResponseBody(BaseModel):
     users: list[ResponseList]
-  

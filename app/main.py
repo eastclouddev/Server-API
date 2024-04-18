@@ -18,7 +18,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# for Health heck
 @app.get("/", status_code=status.HTTP_200_OK)
 async def read_root():
     return "OK"

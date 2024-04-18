@@ -5,7 +5,6 @@ from models.curriculums import Curriculums
 
 from models.quiz_contents import QuizContents
 from models.questions import Questions
-from models.curriculums import Curriculums
 from models.users import Users
 
 def find_reviews(db: Session, curriculum_id: int):
@@ -41,6 +40,7 @@ def find_by_curriculum_id(db: Session, curriculum_id: int):
 def find_quiz_contents(db: Session, curriculum_id: int):
     return db.query(QuizContents).filter(QuizContents.curriculum_id == curriculum_id).all()
 
+
 def create_question(db: Session, user_id:int, title: str, content: str, media_json, curriculum_id: int):
     new_question = Questions(
         curriculum_id = curriculum_id,
@@ -56,3 +56,18 @@ def create_question(db: Session, user_id:int, title: str, content: str, media_js
 def find_curriculum(db: Session, curriculum_id: int):
     return db.query(Curriculums).filter(Curriculums.id == curriculum_id).first()
 
+
+def find_by_reviews(db: Session, curriculum_id: int):
+    return db.query(ReviewRequests).filter(ReviewRequests.curriculum_id == curriculum_id).first()
+
+def create_reviews(db: Session, curriculum_id: int, user_id:int, title: str, content: str, is_closed: bool):
+    new_review = ReviewRequests(
+        curriculum_id = curriculum_id,
+        user_id = user_id,
+        title = title,
+        content = content,
+        is_closed = is_closed
+    )    
+    db.add(new_review)
+
+    return new_review
