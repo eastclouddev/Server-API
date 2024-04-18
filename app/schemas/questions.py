@@ -39,6 +39,22 @@ class DetailResponseBody(BaseModel):
     question: ResponseQuestion
     answer: list[ResponseList]
 
+class UpdateQuestioinRequestBody(BaseModel):
+    title: Optional[str] = Field(examples=["更新されたタイトル"])
+    content: Optional[str] = Field(examples=["更新する内容"])
+    media_content: Optional[dict] = Field(examples=[])
+    is_closed: bool
+
+class UpdateQuestionResponseBody(BaseModel):
+    id: int
+    curriculum_id: int
+    user_id: int
+    title: str
+    content: str
+    media_content: Optional[dict]
+    is_closed: bool
+    updated_at: str
+
 class UpdateAnswerRequestBody(BaseModel):
     content: Optional[str] = Field(examples=["更新する内容"])
     media_content: Optional[dict] = Field(examples=[])
