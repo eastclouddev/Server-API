@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.mentors import DetailResponseBody, CreateResponseBody, CreateRequestBody, RewardsResponseBody, ResponseBody
+from schemas.mentors import DetailResponseBody, CreateResponseBody, CreateRequestBody, RewardsResponseBody, ResponseBody, ProgressesResponseBody
 from cruds import mentors as mentors_crud
 
 logger = getLogger("uvicorn.app")
@@ -165,6 +165,39 @@ async def create_user_account(db: DbDependency, create_model: CreateRequestBody,
         db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")
 
+@router.get("/{mentor_id}/progresses",response_model= ProgressesResponseBody,status_code=status.HTTP_200_OK)
+async def get_all_progresses(db: DbDependency):
+    """
+    進捗管理一覧
+    
+    Parameters
+    ----------
+
+    Returns
+    -------
+    {"progresses": progresses_list} : dic{}
+                    進捗一覧
+    
+    """
+    found_course_progresses = mentors_crud.find_course_progresses(db)
+
+
+    progresses_list = []
+
+    for progress in found_course_progresses:
+        one_progress = {
+            "progress_id": progress.id,
+            "user_id": progress.user_id,
+            "course_id": progress.course_id,
+            "section_id": mentors_crud.find_section_id(db,progress.course_id),
+            "curriculum_id": mentors_crud.find_curriculum_id(db,progress.course_id),
+            "progress_percentage": progress.progress_percentage,
+            "status": mentors_crud.find_status_name(db,progress.status_id)
+        }
+
+        progresses_list.append(one_progress)
+
+    return {"progresses": progresses_list} 
 
 @router.get("/{mentor_id}/students/questions", response_model=ResponseBody, status_code=status.HTTP_200_OK)
 async def find_questions(db: DbDependency, request: Request, mentor_id: int = Path(gt=0)):
@@ -220,4 +253,4 @@ async def find_questions(db: DbDependency, request: Request, mentor_id: int = Pa
         "questions": li
     }
 
-    return re_di
+    return re_di 

@@ -54,3 +54,18 @@ class UpdateQuestionResponseBody(BaseModel):
     media_content: Optional[dict]
     is_closed: bool
     updated_at: str
+
+class UpdateAnswerRequestBody(BaseModel):
+    content: Optional[str] = Field(examples=["更新する内容"])
+    media_content: Optional[dict] = Field(examples=[])
+    is_read: bool
+
+class UpdateAnswerResponseBody(BaseModel):
+    id: int
+    question_id: int
+    user_id: int
+    parent_answer_id: Optional[int]
+    content: str
+    media_content: Optional[dict]
+    is_read: bool
+    updated_at: str
