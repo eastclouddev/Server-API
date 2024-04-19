@@ -57,10 +57,10 @@ class MediaContent(BaseModel):
     url: str
 
 class RequestBody(BaseModel):
-    user_id: int
+    user_id: int = Field(default=1)
     title: str
     content: str
-    media_content: MediaContent
+    media_content: list[MediaContent]
 
 class ResponseBody(BaseModel):
     question_id: int
@@ -73,3 +73,4 @@ class ResponseBody(BaseModel):
 class QuestionResponseBody(BaseModel):
     questions: list[ResponseBody]
     media_content: list
+
