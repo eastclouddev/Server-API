@@ -9,7 +9,6 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import Session, sessionmaker
-from models import product
 from main import app
 from database.database import get_db
 from database.database import Base
@@ -25,12 +24,7 @@ def session_fixture():
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     db = SessionLocal()
 
-    # common test_data
     try:
-        # product1 = product.Product(name="product1", price=9999, description="test1")
-        # product2 = product.Product(name="product2", price=8900, description="test2")
-        # db.add(product1)
-        # db.add(product2)
         db.commit()
         yield db
     finally:
