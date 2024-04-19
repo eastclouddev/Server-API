@@ -68,4 +68,8 @@ class ResponseBody(BaseModel):
     user_id: int
     title: str
     content: str
+    media_content: list[MediaContent]
+
+class QuestionResponseBody(BaseModel):
+    questions: list[ResponseBody]
     media_content: list
