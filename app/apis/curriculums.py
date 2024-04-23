@@ -139,13 +139,17 @@ async def find_test_details(db: DbDependency, curriculum_id: int = Path(gt=0)):
         option_list = []
         for option in quiz.options.values():
             option_list.append(option)
+        url_list = []
+        for media_content in quiz.media_content:
+            if "url" in media_content:
+                url_list.append(media_content.get("url", ""))
         di = {
             "test_id": quiz.id,
             "question": quiz.question,
             "options": option_list,
             "correct_answer": quiz.correct_answer,
             "explanation": quiz.explanation,
-            "media_content_url": quiz.media_content.get("url", "")
+            "media_content_url": url_list
         }
         li.append(di)
     re_di = {
