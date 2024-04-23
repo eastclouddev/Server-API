@@ -13,12 +13,9 @@ from apis import \
     students, mentors, reviews, companies, users, \
     courses, curriculums, questions, billings, receipts, \
     rewards, progresses
-from authenticate import authenticate_user
-from authenticate import create_access_token
-from authenticate import create_refresh_token
-from authenticate import get_user_id
-from authenticate import get_current_user
-from authenticate import Token
+from authenticate import \
+    authenticate_user, create_access_token, create_refresh_token, \
+    find_user_by_id, get_current_user, Token, TokenData
 
 DbDependency = Annotated[Session, Depends(get_db)]
 app = FastAPI()
@@ -57,8 +54,8 @@ app.include_router(progresses.router)
 @app.post("/token")
 async def login_for_access_token(
     db: DbDependency,
-    form_data: OAuth2PasswordRequestForm = Depends(),
-):                                   # uesrnameにemailを入れる
+    form_data: OAuth2PasswordRequestForm = Depends()
+): # TODO:ログイン画面に応じてform_dataのスキーマが変更になる
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -66,23 +63,20 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token = create_access_token(db, data=user    )
-    refresh_token = create_refresh_token(db, data=user)
-    return Token(access_token=access_token,refresh_token = refresh_token, token_type="bearer")
+    access_token = create_access_token(user.user_id)
+    refresh_token = create_refresh_token(db, user.user_id)
+    return Token(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
 
 
+# 認証の使い方サンプル
+# 処理をまとめて関数化する
 @app.get("/users/me/")
-async def read_users_me(db: DbDependency,  token_info= Depends(get_current_user)):
-    current_user_payload, token = token_info
-    token_type: str = current_user_payload["token_type"]
-    user_id: int = current_user_payload["user_id"]
-    #リフレッシュトークンの場合、アクセストークンを発行
-    if token_type == "refresh_token":
-        refresh_token = token
-        user = {"user_id": user_id}
-        access_token = create_access_token(db, data=user)
+async def read_users_me(db: DbDependency,  token_data: TokenData = Depends(get_current_user)):
+    if token_data.token_type == "refresh_token":
+        access_token = create_access_token(token_data.user_id)
+        refresh_token = create_refresh_token(db, token_data.user_id)
 
-    user = get_user_id(db, user_id)
+    user = find_user_by_id(db, token_data.user_id)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -91,8 +85,3 @@ async def read_users_me(db: DbDependency,  token_info= Depends(get_current_user)
         )
 
     return user
-
-
-@app.get("/users/me/items/")
-async def read_own_items(db: DbDependency, current_user = Depends(get_current_user)):
-    return [{"item_id": "Foo", "owner": current_user.username}]
