@@ -67,7 +67,7 @@ async def update_review_response(db: DbDependency, update: UpdateResponseRequest
 
 
 @router.patch("/{review_id}", response_model=UpdateReviewResponseBody, status_code=status.HTTP_200_OK)
-async def update_review(db: DbDependency, update: UpdateReviewRequestBody, review_id: int = Path(gt=0)):
+async def update_review_request(db: DbDependency, update: UpdateReviewRequestBody, review_id: int = Path(gt=0)):
     """
     レビュー更新（受講生）
 
@@ -112,9 +112,9 @@ async def update_review(db: DbDependency, update: UpdateReviewRequestBody, revie
         db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")
 
-
+# TODO:記述するファイル違くない？
 @router.get("/{mentor_id}/students/reviews",response_model= AllResponseBody,status_code=status.HTTP_200_OK)
-async def get_all_reviews(request: Request,db: DbDependency, mentor_id: int):
+async def find_review_list_from_student(request: Request,db: DbDependency, mentor_id: int):
     """
     受講生のレビュー一覧取得
     
@@ -143,7 +143,6 @@ async def get_all_reviews(request: Request,db: DbDependency, mentor_id: int):
     """
     found_reviews = reviews_crud.find_reviews(db,mentor_id)
 
-
     reviews_list = []
 
     for review in found_reviews:
@@ -162,7 +161,7 @@ async def get_all_reviews(request: Request,db: DbDependency, mentor_id: int):
     return {"reviews": reviews_list} 
 
 @router.get("/{review_request_id}", response_model=AllReviewResponse, status_code=status.HTTP_200_OK)
-async def get_reviews_thread(db: DbDependency, review_request_id: int):
+async def find_review_thread_details(db: DbDependency, review_request_id: int):
     """
     レビュースレッド詳細
     

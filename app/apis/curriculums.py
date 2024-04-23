@@ -7,7 +7,6 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.curriculums import ReviewsResponseBody, DetailResponseBody, RequestBody, ResponseBody, ReviewResponse, ReviewRequestBody, QuizResponseBody
 from schemas.curriculums import ReviewsResponseBody, DetailResponseBody, RequestBody, ResponseBody,\
                                 ReviewResponse, ReviewRequestBody, QuizResponseBody, QuestionResponseBody
 from cruds import curriculums as curriculums_crud
@@ -200,11 +199,11 @@ async def create_question(db: DbDependency, param:RequestBody, curriculum_id: in
     li = []
     datas = param.media_content
     for data in datas:
-        if hasattr(data,"url"):
-            dict = {
+        if hasattr(data, "url"):
+            di = {
                 "url": data.url
             }
-            li.append(dict)
+            li.append(di)
 
     media_json = li
 
@@ -229,7 +228,7 @@ async def create_question(db: DbDependency, param:RequestBody, curriculum_id: in
         raise HTTPException(status_code=400, detail="Invalid input data.")
 
 @router.get("/{curriculum_id}/questions", response_model= QuestionResponseBody, status_code=status.HTTP_200_OK)
-async def find_questions(db: DbDependency, curriculum_id: int):
+async def find_question_list_in_curriculum(db: DbDependency, curriculum_id: int):
     """
     カリキュラムの質問一覧
     
@@ -270,10 +269,10 @@ async def find_questions(db: DbDependency, curriculum_id: int):
         
         for data in datas:
             if "url" in data:
-                dict = {
-                    "url": data.get("url","")
+                di = {
+                    "url": data.get("url", "")
                 }
-                media_content_list.append(dict)
+                media_content_list.append(di)
         
         di = {
             "question_id": question.id,
@@ -292,7 +291,7 @@ async def find_questions(db: DbDependency, curriculum_id: int):
 
 
 @router.post("/{curriculum_id}/reviews", response_model=ReviewResponse, status_code=status.HTTP_201_CREATED)
-async def create_curriculum_id(db: DbDependency, param: ReviewRequestBody, curriculum_id: int):
+async def create_review(db: DbDependency, param: ReviewRequestBody, curriculum_id: int):
 
     """
     レビュー作成
@@ -346,7 +345,7 @@ async def create_curriculum_id(db: DbDependency, param: ReviewRequestBody, curri
             "content": reviews.content,
             "is_closed": reviews.is_closed,
             "created_at": reviews.created_at.isoformat()
-            }
+        }
         
         return di
     except Exception as e:
