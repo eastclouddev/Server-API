@@ -9,9 +9,9 @@ def test_questions_01(client_fixture: TestClient):
             "user_id": 1,
             "title": "string",
             "content": "string",
-            "media_content": {
+            "media_content": [{
                 "url": "string"
-            }
+            }]
         }  
     )
 
@@ -32,9 +32,9 @@ def test_questions_02(client_fixture: TestClient):
             "user_id": 1,
             "title": "string",
             "content": "string",
-            "media_content": {
+            "media_content": [{
                 "url": "string"
-            }
+            }]
         } 
     )
 

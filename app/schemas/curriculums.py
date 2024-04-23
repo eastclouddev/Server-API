@@ -72,5 +72,4 @@ class ResponseBody(BaseModel):
 
 class QuestionResponseBody(BaseModel):
     questions: list[ResponseBody]
-    media_content: list
 
