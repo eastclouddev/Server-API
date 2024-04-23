@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-"""取得成功パターン"""
+# ファイルが違う
 def test_reviews_01(client_fixture: TestClient):
     
     response = client_fixture.get(
@@ -16,7 +16,13 @@ def test_reviews_01(client_fixture: TestClient):
     assert "is_read" in response.json()["reviews"][0]
     assert "is_closed" in response.json()["reviews"][0]
 
-def test_review_thread_01(client_fixture: TestClient):
+
+"""レビュー回答更新"""
+
+"""レビュー更新（受講生）"""
+
+"""レビュースレッド詳細"""
+def test_find_review_thread_details_01(client_fixture: TestClient):
 
     response = client_fixture.get("/reviews/1/")
 
@@ -37,7 +43,7 @@ def test_review_thread_01(client_fixture: TestClient):
     assert "is_read" in response.json()["responses"][0]
     assert "created_at" in response.json()["responses"][0]
 
-def test_review_thread_ABNORMAL_01(client_fixture: TestClient):
+def test_find_review_thread_details_ABNORMAL_01(client_fixture: TestClient):
 
     response = client_fixture.get("/reviews/123/")
 

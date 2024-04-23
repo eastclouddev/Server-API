@@ -1,17 +1,23 @@
 from fastapi.testclient import TestClient
 
+"""カリキュラムのレビュー一覧"""
+
+"""カリキュラム詳細取得"""
+
+"""質問投稿作成"""
+
+
 """レビュー投稿作成"""
-"""成功パターン"""
-def test_reviews_01(client_fixture: TestClient):
+def test_create_review_01(client_fixture: TestClient):
     response = client_fixture.post(
-         "/curriculums/1/reviews",
-         json={
-                 "user_id": 1,
-                 "title": "string",
-                "content": "string",
-                "is_closed": False
-            }
-        )
+        "/curriculums/1/reviews",
+        json={
+                "user_id": 1,
+                "title": "string",
+            "content": "string",
+            "is_closed": False
+        }
+    )
 
     assert response.status_code == 201
     assert "user_id" in response.json()
@@ -19,8 +25,7 @@ def test_reviews_01(client_fixture: TestClient):
     assert "content" in response.json()
     assert "is_closed" in response.json()
 
-"""失敗パターン"""
-def test_rus_02(client_fixture: TestClient):
+def test_create_review_ABNORMAL_01(client_fixture: TestClient):
 
     response = client_fixture.post(
         "/curriculums/123/reviews",
@@ -34,6 +39,7 @@ def test_rus_02(client_fixture: TestClient):
 
     assert response.status_code == 404 
 
+"""テスト詳細取得"""
 def test_find_test_details_01(client_fixture: TestClient):
     response = client_fixture.get(
         "curriculums/1/test"
@@ -55,7 +61,8 @@ def test_find_test_details_ABNORMAL_01(client_fixture: TestClient):
     assert response.status_code == 404
     assert response.json()["detail"] == "Test content not found for the specified curriculum."
 
-def test_curriculums_01(client_fixture: TestClient):
+"""カリキュラムの質問一覧"""
+def test_find_question_list_in_curriculum_01(client_fixture: TestClient):
 
     response = client_fixture.get("/curriculums/1/questions")
     
@@ -68,7 +75,7 @@ def test_curriculums_01(client_fixture: TestClient):
     assert "media_content" in response.json()["questions"][0]
     assert "url" in response.json()["questions"][0]["media_content"][0]
 
-def test_curriculums_ABNORMAL_01(client_fixture: TestClient):
+def test_find_question_list_in_curriculum_ABNORMAL_01(client_fixture: TestClient):
 
     response = client_fixture.get("/curriculums/123/questions")
 

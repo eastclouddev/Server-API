@@ -1,7 +1,6 @@
 from fastapi.testclient import TestClient
 
-"""質問投稿作成"""
-"""成功パターン"""
+# 他のAPIのテスト
 def test_questions_01(client_fixture: TestClient):
     response = client_fixture.post(
        "/curriculums/1/questions",
@@ -22,8 +21,6 @@ def test_questions_01(client_fixture: TestClient):
     assert "media_content" in response.json()
     assert "url" in response.json()["media_content"][0]
 
-
-"""失敗パターン"""
 def test_questions_02(client_fixture: TestClient):
 
     response = client_fixture.post(
@@ -40,7 +37,11 @@ def test_questions_02(client_fixture: TestClient):
 
     assert response.status_code == 404
 
+"""質問回答投稿作成"""
 
+"""質問スレッド詳細取得"""
+
+"""質問回答更新（受講生、メンター）"""
 def test_update_answer_01(client_fixture: TestClient):
     response = client_fixture.patch(
         "questions/answers/1",
@@ -81,6 +82,7 @@ def test_update_answer_ABNORMAL_01(client_fixture: TestClient):
     assert response.status_code == 404
     assert response.json()["detail"] == "Answer not found."
 
+"""質問編集"""
 def test_update_question_01(client_fixture: TestClient):
     response = client_fixture.patch(
         "questions/1",
@@ -108,7 +110,7 @@ def test_update_question_01(client_fixture: TestClient):
     assert response.json()["is_closed"] == True
     assert "updated_at" in response.json()
 
-def test_update_question_02(client_fixture: TestClient):
+def test_update_question_ABNORMAL_01(client_fixture: TestClient):
     response = client_fixture.patch(
         "questions/999",
         json={
