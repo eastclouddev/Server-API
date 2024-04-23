@@ -7,6 +7,22 @@ from fastapi.testclient import TestClient
 """アカウント更新"""
 
 """アカウント詳細取得"""
+def test_find_user_details_01(client_fixture: TestClient):
+    response = client_fixture.get("/users/1")
+    assert response.status_code == 200
+    assert "user_id" in response.json()
+    assert "first_name" in response.json()
+    assert "last_name" in response.json()
+    assert "first_name_kana" in response.json()
+    assert "last_name_kana" in response.json()
+    assert "email" in response.json()
+    assert "role" in response.json()
+    assert "last_login" in response.json()
+
+def test_find_user_details_ABNORMAL_01(client_fixture: TestClient):
+     response = client_fixture.get("/users/500")
+     assert response.status_code == 404
+     assert response.json()["detail"] == "User not found."
 
 """メールアドレス認証と更新"""
 def test_email_confirm_change_01(client_fixture: TestClient):
