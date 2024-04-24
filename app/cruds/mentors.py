@@ -29,11 +29,11 @@ def find_bank_info(db: Session, mentor_id: int):
     if not bank_info:
         return None
 
-    account_type = db.query(UserAccountTypes).filter(UserAccountTypes.id == bank_info.user_id).first()
+    account_type = db.query(UserAccountTypes).filter(UserAccountTypes.id == bank_info.account_type_id).first()
     if not account_type:
         return None
 
-    #請求履歴詳細
+    #送金先情報詳細
     info = {
         "mentor_id":  mentor_id,
         "account_name": bank_info.account_name,
