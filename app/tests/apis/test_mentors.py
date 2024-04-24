@@ -21,23 +21,22 @@ def test_find_reward_list_ABNORMAL_01(client_fixture: TestClient):
     assert response.json()["detail"] == "Mentor not found."
 
 """送金先情報詳細"""
-# TODO:APIが修正されたらコメントアウトを解除
-# def test_find_account_info_details_01(client_fixture: TestClient):
-#     response = client_fixture.get("/mentors/6/accounts")
+def test_find_account_info_details_01(client_fixture: TestClient):
+    response = client_fixture.get("/mentors/6/accounts")
 
-#     assert response.status_code == 200
-#     assert "mentor_id" in response.json()
-#     assert "account_name" in response.json()
-#     assert "bank_name" in response.json()
-#     assert "branch_name" in response.json()
-#     assert "account_number" in response.json()
-#     assert "account_type" in response.json()
+    assert response.status_code == 200
+    assert "mentor_id" in response.json()
+    assert "account_name" in response.json()
+    assert "bank_name" in response.json()
+    assert "branch_name" in response.json()
+    assert "account_number" in response.json()
+    assert "account_type" in response.json()
 
-# def test_find_account_info_details_ABNORMAL_01(client_fixture: TestClient):
-#     response = client_fixture.get("/mentors/999/accounts")
+def test_find_account_info_details_ABNORMAL_01(client_fixture: TestClient):
+    response = client_fixture.get("/mentors/999/accounts")
 
-#     assert response.status_code == 404
-#     assert response.json()["detail"] == "Mentor not found."
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Mentor not found."
 
 """送金先情報作成"""
 def test_create_account_info_01(client_fixture: TestClient):
