@@ -5,6 +5,63 @@ from fastapi.testclient import TestClient
 
 
 """アカウント更新"""
+def test_update_user_01(client_fixture: TestClient):
+    response = client_fixture.patch(
+        "/users/1",
+        json={
+            "first_name": "華子",
+            "last_name": "田中",
+            "first_name_kana": "ハナコ",
+            "last_name_kana": "タナカ",
+            "email": "aaa@mail.com"
+        }
+    )
+    assert response.status_code == 200
+    assert response.json() == None
+
+def test_update_user_02(client_fixture: TestClient):
+    response = client_fixture.patch(
+        "/users/1",
+        json={
+            "first_name": "華子",
+            "last_name": "田中",
+            "first_name_kana": "ハナコ",
+            "last_name_kana": "タナカ",
+            "email": "abcdefg@mail.com"
+        }
+    )
+    assert response.status_code == 200
+    assert response.json() == None
+
+
+def test_update_user_ABNORMAL_01(client_fixture: TestClient):
+    response = client_fixture.patch(
+        "/users/2",
+        json={
+            "first_name": "太郎!",
+            "last_name": "小林!",
+            "first_name_kana": "タロウ",
+            "last_name_kana": "コバヤシ",
+            "email": "aaa@mail.com"
+        }
+    )
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Email is already in use."}
+
+
+def test_update_user_ABNORMAL_02(client_fixture: TestClient):
+    response = client_fixture.patch(
+        "/users/123",
+        json={
+            "first_name": "華子",
+            "last_name": "田中",
+            "first_name_kana": "ハナコ",
+            "last_name_kana": "タナカ",
+            "email": "hanako123@example.com"
+        }
+    )
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Authentication failed."}
 
 """アカウント詳細取得"""
 def test_find_user_details_01(client_fixture: TestClient):

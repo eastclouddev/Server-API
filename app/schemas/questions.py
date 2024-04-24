@@ -21,7 +21,7 @@ class ResponseQuestion(BaseModel):
     user_id: int
     title: str
     content: str
-    media_content: dict
+    media_content: list
     is_closed: bool
     created_at: str
 
@@ -31,7 +31,7 @@ class ResponseList(BaseModel):
     user_id: int
     parent_answer_id: Optional[int]
     content: str
-    media_content: Optional[dict]
+    media_content: Optional[list]
     is_read: bool
     created_at: str
 

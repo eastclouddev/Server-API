@@ -1,11 +1,78 @@
 from fastapi.testclient import TestClient
 
 """カリキュラムのレビュー一覧"""
+def test_find_review_list_01(client_fixture: TestClient):
+    response = client_fixture.get("/curriculums/1/reviews")
+
+    assert response.status_code == 200
+    assert "reviews" in response.json()
+    assert "id" in response.json()["reviews"][0]
+    assert "curriculum_id" in response.json()["reviews"][0]
+    assert "user_id" in response.json()["reviews"][0]
+    assert "title" in response.json()["reviews"][0]
+    assert "content" in response.json()["reviews"][0]
+    assert "is_closed" in response.json()["reviews"][0]
+    assert "created_at" in response.json()["reviews"][0]
+    assert "updated_at" in response.json()["reviews"][0]
+
+def test_find_review_list_02(client_fixture: TestClient):
+    response = client_fixture.get("/curriculums/999/reviews")
+
+    assert response.status_code == 200
+    assert "reviews" in response.json()
+    assert response.json()["reviews"] == []
 
 """カリキュラム詳細取得"""
+def test_find_curriculum_details_01(client_fixture: TestClient):
+    response = client_fixture.get("/curriculums/1")
+
+    assert response.status_code == 200
+    assert "curriculum_id" in response.json()
+    assert "title" in response.json()
+    assert "description" in response.json()
+    assert "video_url" in response.json()
+    assert "content" in response.json()
+    assert "is_test" in response.json()
+    assert "display_no" in response.json()
+
+def test_find_curriculum_details_ABNORMAL_01(client_fixture: TestClient):
+    response = client_fixture.get("/curriculums/999")
+
+    assert response.status_code == 404
 
 """質問投稿作成"""
+def test_create_question_01(client_fixture: TestClient):
+    response = client_fixture.post(
+        "/curriculums/1/questions",
+        json={
+            "user_id": 1,
+            "title": "title",
+            "content": "content",
+            "media_content": [{"url": "sample1.com"}, {"url": "sample2.com"}]
+        }
+    )
 
+    assert response.status_code == 201
+    assert "question_id" in response.json()
+    assert "curriculum_id" in response.json()
+    assert "user_id" in response.json()
+    assert "title" in response.json()
+    assert "content" in response.json()
+    assert "media_content" in response.json()
+
+def test_create_question_ABNORMAL_01(client_fixture: TestClient):
+    response = client_fixture.post(
+        "/curriculums/999/questions",
+        json={
+            "user_id": 1,
+            "title": "title",
+            "content": "content",
+            "media_content": [{"url": "sample1.com"}, {"url": "sample2.com"}]
+        }
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Curriculum not found."
 
 """レビュー投稿作成"""
 def test_create_review_01(client_fixture: TestClient):
