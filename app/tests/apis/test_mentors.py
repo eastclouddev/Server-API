@@ -98,16 +98,15 @@ def test_progresses_01(client_fixture: TestClient):
 
 
 """受講生からの質問一覧取得"""
-def test_find_questions(client_fixture: TestClient):
+def test_find_question_list_from_student_01(client_fixture: TestClient):
     response = client_fixture.get(
         "mentors/3/students/questions"
     )
 
     assert response.status_code == 200
 
-
-def test_get_reviews_01(client_fixture: TestClient):
-    
+"""受講生のレビュー一覧取得"""
+def test_find_review_list_from_student_01(client_fixture: TestClient):
     response = client_fixture.get(
         "/mentors/6/students/reviews"
     )
