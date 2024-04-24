@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 from schemas.reviews import UpdateResponseRequestBody, UpdateResponseResponseBody, UpdateReviewRequestBody, UpdateReviewResponseBody, \
-    AllResponseBody, AllReviewResponse
+     AllReviewResponse
 
 from cruds import reviews as reviews_crud
 
@@ -111,54 +111,7 @@ async def update_review_request(db: DbDependency, update: UpdateReviewRequestBod
         logger.error(str(e)) # logger.warning,logger.info が使えます
         db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")
-
-# TODO:記述するファイル違くない？
-@router.get("/{mentor_id}/students/reviews",response_model= AllResponseBody,status_code=status.HTTP_200_OK)
-async def find_review_list_from_student(request: Request,db: DbDependency, mentor_id: int):
-    """
-    受講生のレビュー一覧取得
-    
-    Parameter
-    -----------------------
-    mentor_id: int
-        取得するメンターのユーザーID
-
-    Returns
-    -----------------------
-    reviews: array
-        id: int
-            レビューのID
-        title: str
-            レビューのタイトル
-        content: str
-            レビューの内容
-        curriculum_id: int
-            レビューに紐づくカリキュラムのID
-        created_at:str
-            レビューの作成日（ISO 8601形式）
-        is_read: bool
-            未読コメントの有無
-        is_closed: bool
-            完了しているかどうか
-    """
-    found_reviews = reviews_crud.find_reviews(db,mentor_id)
-
-    reviews_list = []
-
-    for review in found_reviews:
-        one_review = {
-            "id": review.id,
-            "title": review.title,
-            "content": review.content,
-            "curriculum_id": review.curriculum_id,
-            "created_at": review.created_at.isoformat(),
-            "is_read": reviews_crud.find_is_read(db,review.id),
-            "is_closed": review.is_closed
-        }
-
-        reviews_list.append(one_review)
-
-    return {"reviews": reviews_list} 
+ 
 
 @router.get("/{review_request_id}", response_model=AllReviewResponse, status_code=status.HTTP_200_OK)
 async def find_review_thread_details(db: DbDependency, review_request_id: int):
