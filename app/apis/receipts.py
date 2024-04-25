@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.receipts import ResponseBody
+from schemas.receipts import ReceiptDetailResponseBody
 from cruds import receipts as receipts_crud
 
 logger = getLogger("uvicorn.app")
@@ -16,7 +16,7 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/receipts", tags=["Receipts"])
 
 
-@router.get("/{receipt_id}", response_model=ResponseBody, status_code=status.HTTP_200_OK)
+@router.get("/{receipt_id}", response_model=ReceiptDetailResponseBody, status_code=status.HTTP_200_OK)
 async def find_receipt_details(db: DbDependency, receipt_id: int = Path(gt=0)):
     """
     領収書出力

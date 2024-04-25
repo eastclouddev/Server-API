@@ -5,14 +5,14 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class UpdateRequestBody(BaseModel):
+class UserUpdateRequestBody(BaseModel):
     first_name: Optional[str] = Field(None, examples=["花子"])
     last_name: Optional[str] = Field(None, examples=["山田"])
     first_name_kana: Optional[str] = Field(None, examples=["ハナコ"])
     last_name_kana: Optional[str] = Field(None, examples=["ヤマダ"])
     email: Optional[str] = Field(None, examples=["hanako@example.com"])
 
-class DetailResponseBody(BaseModel):
+class UserDetailResponseBody(BaseModel):
     user_id: int
     first_name: str
     last_name: str
@@ -22,7 +22,7 @@ class DetailResponseBody(BaseModel):
     role: str
     last_login: str  
 
-class ResponseBody(BaseModel):
+class User(BaseModel):
     user_id: int
     first_name: str
     last_name: str
@@ -30,5 +30,5 @@ class ResponseBody(BaseModel):
     role: str
     last_login: str 
 
-class UserResponseBody(BaseModel):
-    users: list[ResponseBody]
+class UserListResponseBody(BaseModel):
+    users: list[User]

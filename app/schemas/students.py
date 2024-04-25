@@ -17,7 +17,7 @@ class Questions(BaseModel):
     is_read: bool
     is_closed: bool
       
-class ResponseBody(BaseModel):
+class QuestionListResponseBody(BaseModel):
     questions: list[Questions]
 
 class Progress(BaseModel):
@@ -27,7 +27,7 @@ class Progress(BaseModel):
     status: str
     last_accessed_at: str
 
-class ProgressesResponse(BaseModel):
+class ProgressListResponseBody(BaseModel):
     progresses: list[Progress]
 
 class ReviewResponse(BaseModel):
@@ -39,5 +39,5 @@ class ReviewResponse(BaseModel):
     is_read: bool
     is_closed: bool
 
-class AllResponseBody(BaseModel):
+class ReviewRequestListResponseBody(BaseModel):
     reviews: list[ReviewResponse]
