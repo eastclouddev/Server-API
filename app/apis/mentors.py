@@ -195,6 +195,8 @@ async def find_progress_list_mentor(db: DbDependency, mentor_id: int):
             ステータス
     """
     found_course_progresses = mentors_crud.find_course_progresses(db, mentor_id)
+    if not found_course_progresses:
+        raise HTTPException(status_code=404, detail="progresses not found")
 
     progresses_list = []
     for progress in found_course_progresses:

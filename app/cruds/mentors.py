@@ -72,13 +72,19 @@ def create(db: Session, create_model: CreateResponseBody, mentor_id: int):
 
 def find_course_progresses(db:Session, mentor_id: int):
     mentor_ships = db.query(Mentorships).filter(Mentorships.mentor_id == mentor_id).all()
+    if not mentor_ships:
+        return None
     student_list = []
     for mentor in mentor_ships:
         found_student = db.query(Users).filter(Users.id == mentor.student_id).first()
+        if not found_student:
+            return None
         student_list.append(found_student)
     progresses_list = []
     for student in student_list:
         found_progresses = db.query(CourseProgresses).filter(CourseProgresses.user_id == student.id).all()
+        if not found_progresses:
+            return None
         for info in found_progresses:
             progresses_list.append(info)
     return progresses_list

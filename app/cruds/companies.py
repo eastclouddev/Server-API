@@ -24,9 +24,13 @@ def find_companies(db:Session):
 
 def find_course_progresses(db:Session, company_id:int):
     found_users =  db.query(Users).filter(Users.company_id == company_id).all()
+    if not found_users:
+        return None
     progresses_list = []
     for user in found_users:
         found_progresses = db.query(CourseProgresses).filter(CourseProgresses.user_id == user.id).all()
+        if not found_progresses:
+            return None
         for info in found_progresses:
             progresses_list.append(info)
     return progresses_list
