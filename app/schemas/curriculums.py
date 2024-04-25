@@ -32,7 +32,7 @@ class Quizzes(BaseModel):
     options: list[str]
     correct_answer: str
     explanation: str
-    media_content_url: str
+    media_content_url: list[str]
 
 class QuizResponseBody(BaseModel):
     curriculum_id: int
@@ -72,5 +72,4 @@ class ResponseBody(BaseModel):
 
 class QuestionResponseBody(BaseModel):
     questions: list[ResponseBody]
-    media_content: list
 

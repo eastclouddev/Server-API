@@ -18,21 +18,33 @@ router = APIRouter(prefix="/progresses", tags=["Progresses"])
 
 
 @router.get("",response_model= ProgressesResponseBody,status_code=status.HTTP_200_OK)
-async def get_all_progresses(db: DbDependency):
+async def find_progress_list_admin(db: DbDependency):
     """
     進捗管理一覧
     
     Parameters
-    ----------
+    -----------------------
+    なし
 
     Returns
-    -------
-    {"progresses": progresses_list} : dic{}
-                    進捗一覧
-    
+    -----------------------
+    progresses: array
+        progress_id: int
+            進捗のID
+        user_id: int
+            ユーザーのID
+        course_id: int
+            コースのID
+        section_id: int
+            セクションのID
+        curriculum_id: int
+            カリキュラムのID
+        progress_percentage: int
+            進捗のパーセンテージ
+        status: str
+            ステータス
     """
     found_course_progresses = progresses_crud.find_course_progresses(db)
-
 
     progresses_list = []
 

@@ -75,7 +75,7 @@ async def find_my_question_list(db: DbDependency, student_id: int = Path(gt=0)):
     return {"questions": question_list}
 
 @router.get("/{student_id}/progresses", response_model=ProgressesResponse, status_code=status.HTTP_200_OK)
-async def state_progresses(db: DbDependency, reqeust: Request):
+async def find_progress_list_student(db: DbDependency, reqeust: Request):
     """
     現在の学習進捗
     Parameters
@@ -125,7 +125,7 @@ async def state_progresses(db: DbDependency, reqeust: Request):
     return re_di
   
 @router.get("/{student_id}/reviews", response_model=AllResponseBody, status_code=status.HTTP_200_OK)
-async def find_review(db: DbDependency, student_id: int):
+async def find_my_review_list(db: DbDependency, student_id: int):
 
     """
     自分のレビュー一覧取得

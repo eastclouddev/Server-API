@@ -29,11 +29,11 @@ def find_bank_info(db: Session, mentor_id: int):
     if not bank_info:
         return None
 
-    account_type = db.query(UserAccountTypes).filter(UserAccountTypes.id == bank_info.user_id).first()
+    account_type = db.query(UserAccountTypes).filter(UserAccountTypes.id == bank_info.account_type_id).first()
     if not account_type:
         return None
 
-    #請求履歴詳細
+    #送金先情報詳細
     info = {
         "mentor_id":  mentor_id,
         "account_name": bank_info.account_name,
@@ -102,6 +102,16 @@ def find_questions_by_mentor_id(db: Session, mentor_id: int):
 
 def find_answers_by_question_id(db: Session, question_id: int):
     return db.query(Answers).filter(Answers.question_id == question_id).all()
+
+def find_reviews(db:Session,user_id: int):
+    mentorships = db.query(Mentorships).filter(Mentorships.mentor_id == user_id).first()
+    return db.query(ReviewRequests).filter(ReviewRequests.user_id == mentorships.student_id).all()
+
+def find_is_read(db:Session,id: int):
+    info =  db.query(ReviewResponses).filter(ReviewResponses.review_request_id == id).first()
+    if not info:
+        return False
+    return info.is_read
 
 def find_user_by_mentor_id(db: Session, mentor_id: int):
     return db.query(Users).filter(Users.id == mentor_id).first()

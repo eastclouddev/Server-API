@@ -14,6 +14,7 @@ class ReviewRequests(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     title = Column(String(255), nullable=False)
     content = Column(Text, nullable=False)
+    is_read = Column(Boolean, default=False)
     is_closed = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())

@@ -152,7 +152,7 @@ async def find_company_details(db: DbDependency, company_id: int = Path(gt=0)):
 
 
 
-@router.get("",response_model=AllResponseBody, status_code=status.HTTP_200_OK)
+@router.get("", response_model=AllResponseBody, status_code=status.HTTP_200_OK)
 async def find_company_list(db: DbDependency):
 
     """
@@ -214,18 +214,31 @@ async def find_company_list(db: DbDependency):
     return {"companies": companies_list}
 
 @router.get("/{company_id}/progresses",response_model= ProgressesResponseBody,status_code=status.HTTP_200_OK)
-async def get_all_progresses(db: DbDependency):
+async def find_progress_list_company(db: DbDependency):
     """
     進捗管理一覧
     
     Parameters
-    ----------
+    -----------------------
+    なし
 
     Returns
-    -------
-    {"progresses": progresses_list} : dic{}
-                    進捗一覧
-    
+    -----------------------
+    progresses: array
+        progress_id: int
+            進捗のID
+        user_id: int
+            ユーザーのID
+        course_id: int
+            コースのID
+        section_id: int
+            セクションのID
+        curriculum_id: int
+            カリキュラムのID
+        progress_percentage: int
+            進捗のパーセンテージ
+        status: str
+            ステータス
     """
     found_course_progresses = companies_cruds.find_course_progresses(db)
 
@@ -247,30 +260,41 @@ async def get_all_progresses(db: DbDependency):
 
     return {"progresses": progresses_list} 
 
-@router.get("/{company_id}/users",response_model=ResponseBody, status_code=status.HTTP_200_OK)
-
-def get_user(db: DbDependency,company_id:int, role: str,  page: int, limit: int):
+@router.get("/{company_id}/users", response_model=ResponseBody, status_code=status.HTTP_200_OK)
+async def find_student_list_company(db: DbDependency, company_id:int, role: str,  page: int, limit: int):
 
     """
     受講生一覧（法人、法人代行)
     
     Parameters
-    ----------
-    role: str,  
+    -----------------------
+    role: str
         ユーザーの役割
-    page: int, 
+    page: int
         取得するページ番号
     limit: int
         1ページ当たりの記事数
 
 
     Returns
-    -------
+    -----------------------
     {"users": users_list} : dic{}
                     受け取ったroleと一致するユーザー全員の情報
-    
+    users: array
+        user_id: int
+            ユーザーのID
+        first_name: str
+            ユーザーの名
+        last_name: str
+            ユーザーの姓
+        email: str
+            ユーザーのメールアドレス
+        role: str
+            ユーザーのロール
+        last_login: str
+            最終ログイン日（ISO 8601形式）
     """
-    users = companies_cruds.get_user(db,company_id,role)
+    users = companies_cruds.get_user(db, company_id, role)
     if not users:
         raise HTTPException(status_code=404, detail="User not found")
     
@@ -278,4 +302,4 @@ def get_user(db: DbDependency,company_id:int, role: str,  page: int, limit: int)
     for user in users[(page - 1)*limit : page*limit]:
         found_user.append(user)
 
-    return  compamies_services.cereate_users_list(role, found_user)
+    return compamies_services.cereate_users_list(role, found_user)

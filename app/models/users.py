@@ -34,6 +34,7 @@ class Users(Base):
     role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)
     last_login = Column(DateTime, default=None)
     is_enable = Column(Boolean, default=True)
+    disabled_at = Column(DateTime, default=None)
     is_logged_in = Column(Boolean,default=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
