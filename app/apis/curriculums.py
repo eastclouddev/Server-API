@@ -7,7 +7,8 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.curriculums import ReviewsResponseBody, DetailResponseBody, RequestBody, ResponseBody, ReviewResponse, ReviewRequestBody, QuizResponseBody
+from schemas.curriculums import ReviewsResponseBody, DetailResponseBody, RequestBody, ResponseBody,\
+                                ReviewResponse, ReviewRequestBody, QuizResponseBody, QuestionResponseBody
 from cruds import curriculums as curriculums_crud
 
 logger = getLogger("uvicorn.app")
@@ -102,6 +103,7 @@ async def find_curriculum_details(db: DbDependency, curriculum_id: int = Path(gt
         raise HTTPException(status_code=404, detail="Curriculum not found.")
     return info
 
+
 @router.get("/{curriculum_id}/test", response_model=QuizResponseBody, status_code=status.HTTP_200_OK)
 async def find_test_details(db: DbDependency, curriculum_id: int = Path(gt=0)):
     """
@@ -137,13 +139,17 @@ async def find_test_details(db: DbDependency, curriculum_id: int = Path(gt=0)):
         option_list = []
         for option in quiz.options.values():
             option_list.append(option)
+        url_list = []
+        for media_content in quiz.media_content:
+            if "url" in media_content:
+                url_list.append(media_content.get("url", ""))
         di = {
             "test_id": quiz.id,
             "question": quiz.question,
             "options": option_list,
             "correct_answer": quiz.correct_answer,
             "explanation": quiz.explanation,
-            "media_content_url": quiz.media_content.get("url", "")
+            "media_content_url": url_list
         }
         li.append(di)
     re_di = {
@@ -156,7 +162,7 @@ async def find_test_details(db: DbDependency, curriculum_id: int = Path(gt=0)):
 async def create_question(db: DbDependency, param:RequestBody, curriculum_id: int = Path(gt=0)):
     """
     質問投稿作成取得
-
+    
     Parameter
     -----------------------
     curriculum_id: int
@@ -194,10 +200,16 @@ async def create_question(db: DbDependency, param:RequestBody, curriculum_id: in
     if not found_curriculum:
         raise HTTPException(status_code=404,detail="Curriculum not found.")
 
-    di = {
-            "url": param.media_content.url
-        }
-    media_json = json.dumps(di)
+    li = []
+    datas = param.media_content
+    for data in datas:
+        if hasattr(data, "url"):
+            di = {
+                "url": data.url
+            }
+            li.append(di)
+
+    media_json = li
 
     try:
         new_question = curriculums_crud.create_question(db, param.user_id, param.title, param.content, media_json, curriculum_id)
@@ -209,9 +221,7 @@ async def create_question(db: DbDependency, param:RequestBody, curriculum_id: in
             "user_id": new_question.user_id,
             "title": new_question.title,
             "content": new_question.content,
-            "media_content": [
-                json.loads(new_question.media_content)
-            ]
+            "media_content": new_question.media_content
         }
 
         return re_di
@@ -219,10 +229,73 @@ async def create_question(db: DbDependency, param:RequestBody, curriculum_id: in
     except Exception as e:
         logger.error(str(e)) 
         db.rollback()
-        raise HTTPException(status_code=400, detail="Invalid input data.")     
+        raise HTTPException(status_code=400, detail="Invalid input data.")
+
+@router.get("/{curriculum_id}/questions", response_model= QuestionResponseBody, status_code=status.HTTP_200_OK)
+async def find_question_list_in_curriculum(db: DbDependency, curriculum_id: int):
+    """
+    カリキュラムの質問一覧
+    
+    Parameter
+    -----------------------
+    curriculum_id: int
+        質問一覧を取得したいカリキュラムのID
+
+    Returns
+    -----------------------
+    dict
+        question_id: int
+            質問のID
+        curriculum_id: int
+            カリキュラムのID
+        user_id: int
+            ユーザーのID
+        title: str
+            質問のタイトル
+        content: str 
+            質問の内容
+        media_content: str
+            関連するメディアコンテンツの情報
+            url: str
+                メディアコンテンツのURL
+    """
+
+    questions = curriculums_crud.find_by_questions(db, curriculum_id)
+
+    if not questions:
+        raise HTTPException(status_code=404, detail="Questions not found for the specified curriculum.")
+
+    li = []
+    for question in questions:
+        media_content_list = []
+
+        datas = question.media_content
+        
+        for data in datas:
+            if "url" in data:
+                di = {
+                    "url": data.get("url", "")
+                }
+                media_content_list.append(di)
+        
+        di = {
+            "question_id": question.id,
+            "curriculum_id": question.curriculum_id,
+            "user_id": question.user_id,
+            "title": question.title,
+            "content": question.content,
+            "media_content": media_content_list
+        }
+        li.append(di)
+    
+    re_di = {
+        "questions": li
+    }
+    return re_di
+
 
 @router.post("/{curriculum_id}/reviews", response_model=ReviewResponse, status_code=status.HTTP_201_CREATED)
-async def create_curriculum_id(db: DbDependency, param: ReviewRequestBody, curriculum_id: int):
+async def create_review(db: DbDependency, param: ReviewRequestBody, curriculum_id: int):
 
     """
     レビュー作成
@@ -276,11 +349,10 @@ async def create_curriculum_id(db: DbDependency, param: ReviewRequestBody, curri
             "content": reviews.content,
             "is_closed": reviews.is_closed,
             "created_at": reviews.created_at.isoformat()
-            }
+        }
         
         return di
     except Exception as e:
         logger.error(str(e)) 
         db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.") 
-

@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 import jwt
 
 from models.devices import Devices
+from models.access_token import AccessToken
 
 def analysis_access_token(access_token: str):
     decoded_jwt = jwt.decode(access_token, key='SECRET_KEY123', algorithms='HS256')
@@ -22,3 +23,13 @@ def delete(db: Session, user_id: int):
         return None
     db.delete(device_info)
     return device_info
+
+def find_refresh_token(db: Session, user_id: int):
+    return db.query(AccessToken).filter(AccessToken.user_id == user_id).first()
+
+def delete_refresh_token(db: Session, user_id: int):
+    found_token = find_refresh_token(db, user_id)
+    if not found_token:
+        return None
+    db.delete(found_token)
+    return found_token

@@ -111,7 +111,7 @@ async def find_user_details(db: DbDependency, user_id: int = Path(gt=0)):
     return re_di
 
 @router.get("/{user_id}/email/confirm_change", status_code=status.HTTP_200_OK)
-async def confirm_change_email(token,db: DbDependency, user_id: int = Path(gt=0),):
+async def email_confirm_change(token,db: DbDependency, user_id: int = Path(gt=0),):
     """
     メールアドレス認証と更新
 
@@ -152,23 +152,24 @@ async def confirm_change_email(token,db: DbDependency, user_id: int = Path(gt=0)
         raise HTTPException(status_code = 400,detail="Invalid or expired token.")
     
 @router.get("", response_model=UserResponseBody, status_code=status.HTTP_200_OK)
-async def get_student(db:DbDependency, role: str, page: int, limit: int):
+async def find_student_list(db:DbDependency, role: str, page: int, limit: int):
 
     """
     受講生一覧(管理者)
 
     Parameters
     -----------------------
-    role: str,  
+    role: str
         ユーザーの役割
-    page: int, 
+    page: int
         取得するページ番号
     limit: int
         1ページ当たりの記事数
 
     Return
     -----------------------
-    user_id: int
+    users: array
+        user_id: int
             ユーザーのID
         first_name: str
             名前

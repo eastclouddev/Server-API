@@ -16,8 +16,7 @@ router = APIRouter(prefix="/logout", tags=["Logout"])
 
 
 @router.post("", status_code=status.HTTP_200_OK)
-# async def logout(request: Request):
-async def logout(request: Request,db: DbDependency):
+async def logout(db: DbDependency, request: Request):
     """
     ログアウト機能
 
@@ -52,4 +51,12 @@ async def logout(request: Request,db: DbDependency):
             db.rollback()
             raise HTTPException(status_code=400, detail="Deletion data is invalid.") #（仮）
 
+    # リフレッシュトークンの削除
+    try:
+        delete_token = logout_crud.delete_refresh_token(db, user_id)
+        db.commit()
+    except Exception as e:
+        logger.error(str(e)) 
+        db.rollback()
+        raise HTTPException(status_code=500, detail="")
     return
