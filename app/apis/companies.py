@@ -214,7 +214,7 @@ async def find_company_list(db: DbDependency):
     return {"companies": companies_list}
 
 @router.get("/{company_id}/progresses",response_model= ProgressesResponseBody,status_code=status.HTTP_200_OK)
-async def find_progress_list_company(db: DbDependency):
+async def find_progress_list_company(db: DbDependency, company_id: int):
     """
     進捗管理一覧
     
@@ -240,7 +240,7 @@ async def find_progress_list_company(db: DbDependency):
         status: str
             ステータス
     """
-    found_course_progresses = companies_cruds.find_course_progresses(db)
+    found_course_progresses = companies_cruds.find_course_progresses(db, company_id)
 
 
     progresses_list = []

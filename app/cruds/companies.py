@@ -22,11 +22,14 @@ def find_by_company_id(db: Session, company_id: int):
 def find_companies(db:Session):
     return db.query(Companies).all()
 
-def find_course_progresses(db:Session):
-    progresses =  db.query(CourseProgresses).all()
-    if not progresses:
-        return None
-    return progresses
+def find_course_progresses(db:Session, company_id:int):
+    found_users =  db.query(Users).filter(Users.company_id == company_id).all()
+    progresses_list = []
+    for user in found_users:
+        found_progresses = db.query(CourseProgresses).filter(CourseProgresses.user_id == user.id).all()
+        for info in found_progresses:
+            progresses_list.append(info)
+    return progresses_list
 
 def find_section_id(db:Session,course_id:int):
     info =  db.query(Sections).filter(Sections.course_id == course_id).first()
