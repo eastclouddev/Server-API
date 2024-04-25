@@ -241,7 +241,8 @@ async def find_progress_list_company(db: DbDependency, company_id: int):
             ステータス
     """
     found_course_progresses = companies_cruds.find_course_progresses(db, company_id)
-
+    if not found_course_progresses:
+        raise HTTPException(status_code=404, detail="progresses not found")
 
     progresses_list = []
 
