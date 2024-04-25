@@ -167,7 +167,7 @@ async def create_account_info(db: DbDependency, create_model: CreateRequestBody,
         raise HTTPException(status_code=400, detail="Invalid input data.")
 
 @router.get("/{mentor_id}/progresses",response_model= ProgressesResponseBody,status_code=status.HTTP_200_OK)
-async def find_progress_list_mentor(db: DbDependency):
+async def find_progress_list_mentor(db: DbDependency, mentor_id: int):
     """
     進捗管理一覧
     
@@ -193,7 +193,7 @@ async def find_progress_list_mentor(db: DbDependency):
         status: str
             ステータス
     """
-    found_course_progresses = mentors_crud.find_course_progresses(db)
+    found_course_progresses = mentors_crud.find_course_progresses(db, mentor_id)
 
     progresses_list = []
     for progress in found_course_progresses:
