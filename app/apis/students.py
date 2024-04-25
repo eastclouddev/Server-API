@@ -234,7 +234,7 @@ async def find_notification(db: DbDependency, student_id: int):
             "related_answer_id": None,
             "related_review_request_id": None,
             "related_review_response_id": None,
-            "is_read": True,#TODO:db追加
+            "is_read": question.is_read,
             "created_at": question.created_at.isoformat()
         }
         li.append(di)
@@ -266,7 +266,7 @@ async def find_notification(db: DbDependency, student_id: int):
             "related_answer_id": None,
             "related_review_request_id": review_request.id,
             "related_review_response_id": None,
-            "is_read": True,#TODO:db追加
+            "is_read": review_request.is_read,
             "created_at": review_request.created_at.isoformat()
         }
         li.append(di)
