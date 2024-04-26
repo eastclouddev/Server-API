@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.students import ResponseBody, AllResponseBody, ProgressesResponse
+from schemas.students import QuestionListResponseBody, ReviewRequestListResponseBody, ProgressListResponseBody
 from cruds import students as students_crud
 
 logger = getLogger("uvicorn.app")
@@ -16,7 +16,7 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/students", tags=["Students"])
 
 
-@router.get("/{student_id}/questions", response_model=ResponseBody, status_code=status.HTTP_200_OK)
+@router.get("/{student_id}/questions", response_model=QuestionListResponseBody, status_code=status.HTTP_200_OK)
 async def find_my_question_list(db: DbDependency, student_id: int = Path(gt=0)):
 
     """
@@ -74,8 +74,8 @@ async def find_my_question_list(db: DbDependency, student_id: int = Path(gt=0)):
     
     return {"questions": question_list}
 
-@router.get("/{student_id}/progresses", response_model=ProgressesResponse, status_code=status.HTTP_200_OK)
-async def state_progresses(db: DbDependency, reqeust: Request):
+@router.get("/{student_id}/progresses", response_model=ProgressListResponseBody, status_code=status.HTTP_200_OK)
+async def find_progress_list_student(db: DbDependency, reqeust: Request):
     """
     現在の学習進捗
     Parameters
@@ -124,8 +124,8 @@ async def state_progresses(db: DbDependency, reqeust: Request):
 
     return re_di
   
-@router.get("/{student_id}/reviews", response_model=AllResponseBody, status_code=status.HTTP_200_OK)
-async def find_review(db: DbDependency, student_id: int):
+@router.get("/{student_id}/reviews", response_model=ReviewRequestListResponseBody, status_code=status.HTTP_200_OK)
+async def find_my_review_list(db: DbDependency, student_id: int):
 
     """
     自分のレビュー一覧取得
@@ -158,7 +158,7 @@ async def find_review(db: DbDependency, student_id: int):
 
     li = []
     for review in reviews:
-        review_responses = students_crud.find_is_read(db,review.id)
+        review_responses = students_crud.find_is_read(db, review.id)
         is_read = True
         for review_response in review_responses:
             data = review_response.is_read

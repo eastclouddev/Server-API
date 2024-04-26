@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.users import UpdateRequestBody, DetailResponseBody, UserResponseBody
+from schemas.users import UserUpdateRequestBody, UserDetailResponseBody, UserListResponseBody
 from cruds import users as users_crud
 from services import users as users_service
 
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.patch("/{user_id}", status_code=status.HTTP_200_OK)
-async def update_user(db: DbDependency, param: UpdateRequestBody, user_id: int = Path(gt=0)):
+async def update_user(db: DbDependency, param: UserUpdateRequestBody, user_id: int = Path(gt=0)):
     """
     アカウント更新
 
@@ -61,7 +61,7 @@ async def update_user(db: DbDependency, param: UpdateRequestBody, user_id: int =
         logger.error(e)
         raise HTTPException(status_code=401, detail="Authentication failed.")
 	
-@router.get("/{user_id}", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
+@router.get("/{user_id}", response_model=UserDetailResponseBody, status_code=status.HTTP_200_OK)
 async def find_user_details(db: DbDependency, user_id: int = Path(gt=0)):
     """
     アカウント詳細取得
@@ -111,7 +111,7 @@ async def find_user_details(db: DbDependency, user_id: int = Path(gt=0)):
     return re_di
 
 @router.get("/{user_id}/email/confirm_change", status_code=status.HTTP_200_OK)
-async def confirm_change_email(token,db: DbDependency, user_id: int = Path(gt=0),):
+async def email_confirm_change(token, db: DbDependency, user_id: int = Path(gt=0),):
     """
     メールアドレス認証と更新
 
@@ -131,15 +131,13 @@ async def confirm_change_email(token,db: DbDependency, user_id: int = Path(gt=0)
     found_user = users_crud.find_user(db,user_id)
     if not found_user:
         raise HTTPException(status_code = 400,detail="Invalid or expired token.")
-    
-    
 
     #アクセストークンからemailを取得
     token_info = users_service.get_email(token)
 
     try:
         # 該当のユーザーを更新
-        update_info = users_crud.update_address(db,found_user,token_info)
+        update_info = users_crud.update_address(db, found_user, token_info)
         if not update_info:
             raise HTTPException(status_code = 400,detail="Invalid or expired token.")
 
@@ -151,24 +149,25 @@ async def confirm_change_email(token,db: DbDependency, user_id: int = Path(gt=0)
         logger.error(e)
         raise HTTPException(status_code = 400,detail="Invalid or expired token.")
     
-@router.get("", response_model=UserResponseBody, status_code=status.HTTP_200_OK)
-async def get_student(db:DbDependency, role: str, page: int, limit: int):
+@router.get("", response_model=UserListResponseBody, status_code=status.HTTP_200_OK)
+async def find_student_list(db:DbDependency, role: str, page: int, limit: int):
 
     """
     受講生一覧(管理者)
 
     Parameters
     -----------------------
-    role: str,  
+    role: str
         ユーザーの役割
-    page: int, 
+    page: int
         取得するページ番号
     limit: int
         1ページ当たりの記事数
 
     Return
     -----------------------
-    user_id: int
+    users: array
+        user_id: int
             ユーザーのID
         first_name: str
             名前
@@ -186,7 +185,7 @@ async def get_student(db:DbDependency, role: str, page: int, limit: int):
 
     li = []
 
-    for user in users[(page-1)*limit:page*limit]:
+    for user in users[(page-1)*limit : page*limit]:
         di = {
             "user_id": user.id,
             "first_name": user.first_name,

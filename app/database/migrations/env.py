@@ -31,6 +31,7 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 from models.access_token import AccessToken
 from models.answers import Answers
+from models.board_invoices import BoardInvoices
 from models.companies import Companies
 from models.company_billing_info import CompanyBillingInfo
 from models.company_billing_statuses import CompanyBillingStatuses

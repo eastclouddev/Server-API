@@ -5,11 +5,11 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class UpdateResponseRequestBody(BaseModel):
+class ReviewResponseUpdateRequestBody(BaseModel):
     content: Optional[str] = Field(examples=["content"])
     is_read: Optional[bool] = Field(examples=[False])
 
-class UpdateResponseResponseBody(BaseModel):
+class ReviewResponseUpdateResponseBody(BaseModel):
     id: int
     review_request_id: int
     user_id: int
@@ -18,29 +18,17 @@ class UpdateResponseResponseBody(BaseModel):
     is_read: bool
     updated_at: str
 
-class UpdateReviewRequestBody(BaseModel):
+class ReviewRequestUpdateRequestBody(BaseModel):
     title: Optional[str] = Field(examples=["title"])
     content: Optional[str] = Field(examples=["content"])
     is_closed: Optional[bool] = Field(examples=[False])
 
-class UpdateReviewResponseBody(BaseModel):
+class ReviewRequestUpdateResponseBody(BaseModel):
     id: int
     title: str
     content: str
     is_closed: bool
     updated_at: str
-
-class AllResponseList(BaseModel):
-    id: int 
-    title: str
-    content: str
-    curriculum_id: int
-    created_at: str
-    is_read: bool
-    is_closed: bool
-
-class AllResponseBody(BaseModel):
-    reviews: list[AllResponseList]
 
 class ReviewRequestBody(BaseModel):
     id: int
@@ -61,6 +49,6 @@ class ReviewResponseBody(BaseModel):
     is_read: bool
     created_at: str
 
-class AllReviewResponse(BaseModel):
+class ReviewThreadDetailResponseBody(BaseModel):
     review_request: ReviewRequestBody
     responses: list[ReviewResponseBody]

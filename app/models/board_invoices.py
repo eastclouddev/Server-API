@@ -5,15 +5,13 @@ from sqlalchemy.orm import relationship
 from database.database import Base
 
 
-class TestContents(Base):
-    __tablename__ = "test_contents"
+class BoardInvoices(Base):
+    __tablename__ = "board_invoices"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    curriculum_id = Column(Integer, ForeignKey("curriculums.id"), nullable=False)
-    question = Column(Text, nullable=False)
-    media_content = Column(JSON)
-    options = Column(JSON, nullable=False)
-    correct_answer = Column(String(255), nullable=False)
-    explanation = Column(Text)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
+    invoice_id = Column(Integer)
+    project_id = Column(Integer)
+    client_id = Column(Integer)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())

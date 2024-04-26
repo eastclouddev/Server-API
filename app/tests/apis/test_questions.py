@@ -1,46 +1,63 @@
 from fastapi.testclient import TestClient
 
-"""質問投稿作成"""
-"""成功パターン"""
-def test_questions_01(client_fixture: TestClient):
+"""質問回答投稿作成"""
+def test_create_answers_01(client_fixture: TestClient):
     response = client_fixture.post(
-       "/curriculums/1/questions",
-       json={
-            "user_id": 1,
-            "title": "string",
-            "content": "string",
-            "media_content": {
-                "url": "string"
-            }
-        }  
+        "/questions/1/answers",
+        json={
+            "user_id": "1",
+            "content": "質問への回答です"
+        }
     )
 
     assert response.status_code == 201
+    assert "answer_id" in response.json()
+    assert "question_id" in response.json()
     assert "user_id" in response.json()
-    assert "title" in response.json()
     assert "content" in response.json()
-    assert "media_content" in response.json()
-    assert "url" in response.json()["media_content"][0]
 
-
-"""失敗パターン"""
-def test_questions_02(client_fixture: TestClient):
-
+def test_create_answers_ABNORMAL_01(client_fixture: TestClient):
     response = client_fixture.post(
-       "/curriculums/123/questions",
+        "/questions/999/answers",
         json={
-            "user_id": 1,
-            "title": "string",
-            "content": "string",
-            "media_content": {
-                "url": "string"
-            }
-        } 
+            "user_id": "1",
+            "content": "質問への回答です"
+        }
     )
 
     assert response.status_code == 404
+    assert "detail" in response.json()
+    assert response.json()["detail"] == "Question not found."
 
+"""質問スレッド詳細取得"""
+def test_find_question_thread_details_01(client_fixture: TestClient):
+    response = client_fixture.get("/questions/1")
 
+    assert response.status_code == 200
+    assert "id" in response.json()["question"]
+    assert "curriculum_id" in response.json()["question"]
+    assert "user_id" in response.json()["question"]
+    assert "title" in response.json()["question"]
+    assert "content" in response.json()["question"]
+    assert "media_content" in response.json()["question"]
+    assert "is_closed" in response.json()["question"]
+    assert "created_at" in response.json()["question"]
+    assert "id" in response.json()["answer"][0]
+    assert "question_id" in response.json()["answer"][0]
+    assert "user_id" in response.json()["answer"][0]
+    assert "parent_answer_id" in response.json()["answer"][0]
+    assert "content" in response.json()["answer"][0]
+    assert "media_content" in response.json()["answer"][0]
+    assert "is_read" in response.json()["answer"][0]
+    assert "created_at" in response.json()["answer"][0]
+
+def test_find_question_thread_details_ABNORMAL_01(client_fixture: TestClient):
+    response = client_fixture.get("/questions/999")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Question not found."
+
+"""質問回答更新（受講生、メンター）"""
 def test_update_answer_01(client_fixture: TestClient):
     response = client_fixture.patch(
         "questions/answers/1",
@@ -81,6 +98,7 @@ def test_update_answer_ABNORMAL_01(client_fixture: TestClient):
     assert response.status_code == 404
     assert response.json()["detail"] == "Answer not found."
 
+"""質問編集"""
 def test_update_question_01(client_fixture: TestClient):
     response = client_fixture.patch(
         "questions/1",
@@ -108,7 +126,7 @@ def test_update_question_01(client_fixture: TestClient):
     assert response.json()["is_closed"] == True
     assert "updated_at" in response.json()
 
-def test_update_question_02(client_fixture: TestClient):
+def test_update_question_ABNORMAL_01(client_fixture: TestClient):
     response = client_fixture.patch(
         "questions/999",
         json={

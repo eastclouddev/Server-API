@@ -13,6 +13,8 @@ from models.curriculums import Curriculums
 from models.learning_statuses import LearningStatuses
 from models.questions import Questions
 from models.answers import Answers
+from models.review_requests import ReviewRequests
+from models.review_responses import ReviewResponses
 
 def find_rewards_by_mentor_id(db: Session, mentor_id: int):
     return db.query(UserRewards).filter(UserRewards.user_id == mentor_id).all()
@@ -27,11 +29,11 @@ def find_bank_info(db: Session, mentor_id: int):
     if not bank_info:
         return None
 
-    account_type = db.query(UserAccountTypes).filter(UserAccountTypes.id == bank_info.user_id).first()
+    account_type = db.query(UserAccountTypes).filter(UserAccountTypes.id == bank_info.account_type_id).first()
     if not account_type:
         return None
 
-    #請求履歴詳細
+    #送金先情報詳細
     info = {
         "mentor_id":  mentor_id,
         "account_name": bank_info.account_name,
@@ -67,12 +69,25 @@ def create(db: Session, create_model: CreateResponseBody, mentor_id: int):
     db.add(new_transfer)
 
     return new_transfer
-  
-def find_course_progresses(db:Session):
-    progresses =  db.query(CourseProgresses).all()
-    if not progresses:
+
+def find_course_progresses(db:Session, mentor_id: int):
+    mentor_ships = db.query(Mentorships).filter(Mentorships.mentor_id == mentor_id).all()
+    if not mentor_ships:
         return None
-    return progresses
+    student_list = []
+    for mentor in mentor_ships:
+        found_student = db.query(Users).filter(Users.id == mentor.student_id).first()
+        if not found_student:
+            return None
+        student_list.append(found_student)
+    progresses_list = []
+    for student in student_list:
+        found_progresses = db.query(CourseProgresses).filter(CourseProgresses.user_id == student.id).all()
+        if not found_progresses:
+            return None
+        for info in found_progresses:
+            progresses_list.append(info)
+    return progresses_list
 
 def find_section_id(db:Session,course_id:int):
     info =  db.query(Sections).filter(Sections.course_id == course_id).first()
@@ -100,3 +115,13 @@ def find_questions_by_mentor_id(db: Session, mentor_id: int):
 
 def find_answers_by_question_id(db: Session, question_id: int):
     return db.query(Answers).filter(Answers.question_id == question_id).all()
+
+def find_reviews(db:Session,user_id: int):
+    mentorships = db.query(Mentorships).filter(Mentorships.mentor_id == user_id).first()
+    return db.query(ReviewRequests).filter(ReviewRequests.user_id == mentorships.student_id).all()
+
+def find_is_read(db:Session,id: int):
+    info =  db.query(ReviewResponses).filter(ReviewResponses.review_request_id == id).first()
+    if not info:
+        return False
+    return info.is_read

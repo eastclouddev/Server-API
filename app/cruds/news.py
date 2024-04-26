@@ -16,13 +16,13 @@ def create_news(db: Session, param: CreateRequestBody):
         title = param.title,
         content = param.content,
         is_published = param.is_published,
-        published_at = param.published_at
+        published_at = dt.datetime.strptime(param.published_at, "%Y-%m-%dT%H:%M:%S")
     )
     db.add(new_news)
 
     return new_news
 
-def update_by_news_id(db:Session, news_id: int, title: str, content: str, is_published: bool, published_at: str):
+def update_by_news_id(db: Session, news_id: int, title: str, content: str, is_published: bool, published_at: str):
   
     news = find_by_news_id(db, news_id)
     if not news:
@@ -31,6 +31,6 @@ def update_by_news_id(db:Session, news_id: int, title: str, content: str, is_pub
     news.title = title
     news.content = content
     news.is_published = is_published
-    news.published_at =  dt.datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%SZ")
+    news.published_at =  dt.datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%S")
     db.add(news)
     return news
