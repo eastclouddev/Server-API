@@ -17,7 +17,6 @@ DbDependency = Annotated[Session, Depends(get_db)]
 
 router = APIRouter(prefix="/mentors", tags=["Mentors"])
 
-
 @router.get("/{mentor_id}/rewards", response_model=RewardsResponseBody, status_code=status.HTTP_200_OK)
 async def find_reward_list(db: DbDependency, mentor_id: int = Path(gt=0)):
     """
@@ -267,60 +266,11 @@ async def find_question_list_from_student(db: DbDependency, request: Request, me
 
     return re_di 
 
-
-
-@router.get("/{mentor_id}/students/reviews",response_model= AllResponseBody,status_code=status.HTTP_200_OK)
-async def find_review_list_from_student(request: Request,db: DbDependency, mentor_id: int):
-    """
-    受講生のレビュー一覧取得
-    
-    Parameter
-    -----------------------
-    mentor_id: int
-        取得するメンターのユーザーID
-
-    Returns
-    -----------------------
-    reviews: array
-        id: int
-            レビューのID
-        title: str
-            レビューのタイトル
-        content: str
-            レビューの内容
-        curriculum_id: int
-            レビューに紐づくカリキュラムのID
-        created_at:str
-            レビューの作成日（ISO 8601形式）
-        is_read: bool
-            未読コメントの有無
-        is_closed: bool
-            完了しているかどうか
-    """
-    found_reviews = mentors_crud.find_reviews(db,mentor_id)
-
-    reviews_list = []
-
-    for review in found_reviews:
-        one_review = {
-            "id": review.id,
-            "title": review.title,
-            "content": review.content,
-            "curriculum_id": review.curriculum_id,
-            "created_at": review.created_at.isoformat(),
-            "is_read": mentors_crud.find_is_read(db,review.id),
-            "is_closed": review.is_closed
-        }
-
-        reviews_list.append(one_review)
-
-    return {"reviews": reviews_list}
-
 @router.get("/{mentor_id}/notifications", response_model=ListResponseBody,status_code=status.HTTP_200_OK)
 async def find_notification(db: DbDependency, mentor_id: int):
 
     """
-    通知一覧(受講生)
+    通知一覧(メンター)
     
     Parameters
     -----------------------
@@ -354,7 +304,9 @@ async def find_notification(db: DbDependency, mentor_id: int):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    questions = mentors_crud.find_questions_by_mentor_id(db,mentor_id)
+    logger.info(mentor_id)
+    questions = mentors_crud.find_questions(db,mentor_id)
+    logger.info(questions)
 
     review_requests = mentors_crud.find_reviews(db,mentor_id)
 
@@ -370,7 +322,7 @@ async def find_notification(db: DbDependency, mentor_id: int):
             "related_answer_id": None,
             "related_review_request_id": None,
             "related_review_response_id": None,
-            "is_read": True,#TODO:db追加
+            "is_read": question.is_read,
             "created_at": question.created_at.isoformat()
         }
         li.append(di)
@@ -402,7 +354,7 @@ async def find_notification(db: DbDependency, mentor_id: int):
             "related_answer_id": None,
             "related_review_request_id": review_request.id,
             "related_review_response_id": None,
-            "is_read": True,#TODO:db追加
+            "is_read": review_request.is_read,
             "created_at": review_request.created_at.isoformat()
         }
         li.append(di)

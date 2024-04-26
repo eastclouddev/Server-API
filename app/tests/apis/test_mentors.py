@@ -1,4 +1,7 @@
 from fastapi.testclient import TestClient
+from logging import getLogger
+logger = getLogger("uvicorn.app")
+
 
 def test_xxx_01(client_fixture: TestClient):
     pass
@@ -122,7 +125,7 @@ def test_find_review_list_from_student_01(client_fixture: TestClient):
 
 def test_notification_01(client_fixture: TestClient):
 
-    response = client_fixture.get("/mentors/1/notifications")
+    response = client_fixture.get("/mentors/9/notifications")
 
     assert response.status_code == 200
     assert "id" in response.json()["notifications"][0]
