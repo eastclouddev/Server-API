@@ -16,8 +16,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 # TODO:専用のファイルから取得する
 SECRET_KEY = "SECRET_KEY123"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1
-REFRESH_TOKEN_EXPIRE_MINUTES = 10
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+REFRESH_TOKEN_EXPIRE_MINUTES = 60
 
 class Token(BaseModel):
     access_token: str
@@ -106,7 +106,7 @@ def create_refresh_token(db: Session, user_id):
     return encoded_jwt
 
 # アクセストークンよりユーザー情報を取得
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -125,3 +125,22 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         "user_id": user_id
     }
     return TokenData(**token_data)
+
+# tokenタイプの判定
+def token_analysis(db: Session, token_data: TokenData):
+    # refresh_tokenの場合はそのまま返す
+    if token_data.token_type == "refresh_token":
+        access_token = create_access_token(token_data.user_id)
+        refresh_token = create_refresh_token(db, token_data.user_id)
+        return
+
+    # 以下不要かも
+    user = find_user_by_id(db, token_data.user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return user
