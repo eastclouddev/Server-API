@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from schemas.companies import CreateRequestBody
+from schemas.companies import CompanyCreateRequestBody
 
 from models.companies import Companies 
 from models.users import Users
@@ -11,7 +11,7 @@ from models.curriculums import Curriculums
 from models.roles import Roles
 from models.users import Users
 
-def create_company(db: Session, company_create: CreateRequestBody):
+def create_company(db: Session, company_create: CompanyCreateRequestBody):
     new_company = Companies(**company_create.model_dump())
     db.add(new_company)
     return new_company

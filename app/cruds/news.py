@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 import datetime as dt
 
-from schemas.news import CreateRequestBody
+from schemas.news import NewsCreateRequestBody
 from models.news import News
 
 
@@ -11,7 +11,7 @@ def find_by_news_id(db: Session, news_id: int):
 def find_news(db: Session):
     return db.query(News).all()
 
-def create_news(db: Session, param: CreateRequestBody):
+def create_news(db: Session, param: NewsCreateRequestBody):
     new_news = News(
         title = param.title,
         content = param.content,
