@@ -6,8 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query,Request
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.reviews import UpdateResponseRequestBody, UpdateResponseResponseBody, UpdateReviewRequestBody, UpdateReviewResponseBody, \
-    AllResponseBody, AllReviewResponse
+from schemas.reviews import ReviewResponseUpdateRequestBody, ReviewResponseUpdateResponseBody, \
+                            ReviewRequestUpdateRequestBody, ReviewRequestUpdateResponseBody, \
+                            ReviewThreadDetailResponseBody
 
 from cruds import reviews as reviews_crud
 
@@ -18,8 +19,8 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/reviews", tags=["Reviews"])
 
 
-@router.patch("/responses/{response_id}", response_model=UpdateResponseResponseBody, status_code=status.HTTP_200_OK)
-async def update_review_response(db: DbDependency, update: UpdateResponseRequestBody, response_id: int = Path(gt=0)):
+@router.patch("/responses/{response_id}", response_model=ReviewResponseUpdateResponseBody, status_code=status.HTTP_200_OK)
+async def update_review_response(db: DbDependency, update: ReviewResponseUpdateRequestBody, response_id: int = Path(gt=0)):
     """
     レビュー回答更新
 
@@ -52,7 +53,7 @@ async def update_review_response(db: DbDependency, update: UpdateResponseRequest
             回答が最後に更新された日時
     """
     
-    new_response = reviews_crud.update_response(db, update,response_id)
+    new_response = reviews_crud.update_response(db, update, response_id)
     if not new_response:
         raise HTTPException(status_code=404, detail="Response not found.")
 
@@ -66,8 +67,8 @@ async def update_review_response(db: DbDependency, update: UpdateResponseRequest
         raise HTTPException(status_code=400, detail="Invalid input data.")
 
 
-@router.patch("/{review_id}", response_model=UpdateReviewResponseBody, status_code=status.HTTP_200_OK)
-async def update_review(db: DbDependency, update: UpdateReviewRequestBody, review_id: int = Path(gt=0)):
+@router.patch("/{review_id}", response_model=ReviewRequestUpdateResponseBody, status_code=status.HTTP_200_OK)
+async def update_review_request(db: DbDependency, update: ReviewRequestUpdateRequestBody, review_id: int = Path(gt=0)):
     """
     レビュー更新（受講生）
 
@@ -99,7 +100,7 @@ async def update_review(db: DbDependency, update: UpdateReviewRequestBody, revie
 
     """
     
-    new_review = reviews_crud.update_review(db, update,review_id)
+    new_review = reviews_crud.update_review(db, update, review_id)
     if not new_review:
         raise HTTPException(status_code=404, detail="Curriculum not found.")
 
@@ -111,58 +112,10 @@ async def update_review(db: DbDependency, update: UpdateReviewRequestBody, revie
         logger.error(str(e)) # logger.warning,logger.info が使えます
         db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")
+ 
 
-
-@router.get("/{mentor_id}/students/reviews",response_model= AllResponseBody,status_code=status.HTTP_200_OK)
-async def get_all_reviews(request: Request,db: DbDependency, mentor_id: int):
-    """
-    受講生のレビュー一覧取得
-    
-    Parameter
-    -----------------------
-    mentor_id: int
-        取得するメンターのユーザーID
-
-    Returns
-    -----------------------
-    reviews: array
-        id: int
-            レビューのID
-        title: str
-            レビューのタイトル
-        content: str
-            レビューの内容
-        curriculum_id: int
-            レビューに紐づくカリキュラムのID
-        created_at:str
-            レビューの作成日（ISO 8601形式）
-        is_read: bool
-            未読コメントの有無
-        is_closed: bool
-            完了しているかどうか
-    """
-    found_reviews = reviews_crud.find_reviews(db,mentor_id)
-
-
-    reviews_list = []
-
-    for review in found_reviews:
-        one_review = {
-            "id": review.id,
-            "title": review.title,
-            "content": review.content,
-            "curriculum_id": review.curriculum_id,
-            "created_at": review.created_at.isoformat(),
-            "is_read": reviews_crud.find_is_read(db,review.id),
-            "is_closed": review.is_closed
-        }
-
-        reviews_list.append(one_review)
-
-    return {"reviews": reviews_list} 
-
-@router.get("/{review_request_id}", response_model=AllReviewResponse, status_code=status.HTTP_200_OK)
-async def get_reviews_thread(db: DbDependency, review_request_id: int):
+@router.get("/{review_request_id}", response_model=ReviewThreadDetailResponseBody, status_code=status.HTTP_200_OK)
+async def find_review_thread_details(db: DbDependency, review_request_id: int):
     """
     レビュースレッド詳細
     

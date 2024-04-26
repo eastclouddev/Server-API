@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-"""取得成功パターン"""
+"""進捗管理一覧"""
 def test_progresses_01(client_fixture: TestClient):
     
     response = client_fixture.get(

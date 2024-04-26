@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class CreateRequestBody(BaseModel):
+class CompanyCreateRequestBody(BaseModel):
     name: str = Field(examples=["会社名"])
     prefecture: str = Field(examples=["都道府県"])
     city: str = Field(examples=["市区町村"])
@@ -15,7 +15,7 @@ class CreateRequestBody(BaseModel):
     phone_number: str = Field(examples=["電話番号"])
     email: str = Field(examples=["メールアドレス"])
 
-class CreateResponseBody(BaseModel):
+class CompanyCreateResponseBody(BaseModel):
     company_id: int
     name: str
     prefecture: str
@@ -26,7 +26,7 @@ class CreateResponseBody(BaseModel):
     phone_number: str
     email: str
 
-class DetailResponseBody(BaseModel):
+class CompanyDetailResponseBody(BaseModel):
     company_id: int
     name: str
     prefecture: str
@@ -51,23 +51,29 @@ class Company(BaseModel):
     email: str
     created_at: str
 
-class AllResponseBody(BaseModel):
+class CompanyListResponseBody(BaseModel):
     companies: list[Company]
 
+class ProgressesResponseList(BaseModel):
+    progress_id: int
+    user_id: int
+    course_id: int
+    section_id: Optional[int]
+    curriculum_id: Optional[int]
+    progress_percentage: int
+    status: str
 
-class RequestList(BaseModel):
-    role:Optional[str] = Field(default=None, examples=["student"])
-    page:int = Field(default=None, examples=[1],gt=0)
-    limit:int = Field(default=None, examples=[10],gt=0)
+class ProgressListResponseBody(BaseModel):
+    progresses: list[ProgressesResponseList]
 
-class ResponseList(BaseModel):
-    user_id: int = Field(gt=0, examples=[1])
-    first_name: str = Field(examples=["太郎"])
-    last_name: str = Field(examples=["田中"])
-    email: str = Field(examples=["taro@example.com"])
-    role: str = Field(examples=["student"])
+
+class Student(BaseModel):
+    user_id: int
+    first_name: str
+    last_name: str
+    email: str
+    role: str
     last_login: str
 
-class ResponseBody(BaseModel):
-    users: list[ResponseList]
-  
+class StudentListResponseBody(BaseModel):
+    users: list[Student]
