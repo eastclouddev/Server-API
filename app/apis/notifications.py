@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.notifications import ListResponseBody
+from schemas.notifications import NotificationListResponseBody
 from cruds import notifications as notifications_crud
 
 logger = getLogger("uvicorn.app")
@@ -14,8 +14,7 @@ DbDependency = Annotated[Session, Depends(get_db)]
 
 router = APIRouter(prefix="/notifications", tags=["Notifications"])
 
-
-@router.get("",response_model=ListResponseBody, status_code=status.HTTP_200_OK)
+@router.get("", response_model=NotificationListResponseBody, status_code=status.HTTP_200_OK)
 async def find_notification(db: DbDependency):
 
     """
@@ -39,86 +38,49 @@ async def find_notification(db: DbDependency):
         回答のID
     related_review_request_id: int
         レビューリクエストのID
-    related_review_respomse_id: int
-        レビューリスポンスのID
+    related_review_response_id: int
+        レビューレスポンスのID
     is_read: bool
         通知が既読かどうか
     created_at: str
+        作成日時
     """
-
-    user = notifications_crud.find_user(db)
-
-    # if not user:
-    #     raise HTTPException(status_code=404, detail="")
-
-    questions = notifications_crud.find_questions(db)
-
-    review_requests = notifications_crud.find_reviews(db)
-
+    
+    # 4つの各テーブルから取得
+    all_tables = notifications_crud.find_table(db)
     li = []
-    count = 1
-    for question in questions:
+    for all_table in all_tables:
         di = {
-            "id": count,
-            "from_user_id": user.id,
-            "from_user_name": user.first_name + user.last_name,
-            "content": question.content,
-            "related_question_id": question.id,
-            "related_answer_id": None,
-            "related_review_request_id": None,
-            "related_review_response_id": None,
-            "is_read": True,#TODO:db追加
-            "created_at": question.created_at.isoformat()
+            "id": all_table[0],
+            "content": all_table[1],
+            "created_at": all_table[2]
         }
         li.append(di)
-        count = count + 1
-        answers = notifications_crud.find_answers(db)
-        for answer in answers:
-            di = {
-                "id": count,
-                "from_user_id": user.id,
-                "from_user_name": user.first_name + user.last_name,
-                "content": answer.content,
-                "related_question_id": question.id,
-                "related_answer_id": answer.id,
-                "related_review_request_id": None,
-                "related_review_response_id": None,
-                "is_read": answer.is_read,
-                "created_at": answer.created_at.isoformat()
-            }
-            li.append(di)
-            count = count +1
 
-    for review_request in review_requests:
+    # 作成日が新しい順に並び替える
+    re_sorted = sorted(li, key=lambda x:x["created_at"], reverse=True)
+    # 並び替えたものから先頭10件取得
+    re_sorted = re_sorted[:10]
+    count = 1
+    li = []
+
+    for r in re_sorted:
+        table, data = notifications_crud.find_db(db, r["id"], r["content"], r["created_at"])
+        # ユーザー取得
+        user = notifications_crud.find_user_by_id(db, data.user_id)
         di = {
             "id": count,
             "from_user_id": user.id,
-            "from_user_name": user.first_name + user.last_name,
-            "content": review_request.content,
-            "related_question_id": None,
-            "related_answer_id": None,
-            "related_review_request_id": review_request.id,
-            "related_review_response_id": None,
-            "is_read": True,#TODO:db追加
-            "created_at": review_request.created_at.isoformat()
+            "from_user_name": user.last_name + user.first_name,
+            "content": data.content,
+            "related_question_id": data.id if table == "question" else data.question_id if table == "answer" else None,
+            "related_answer_id": data.id if table == "answer" else None,
+            "related_review_request_id": data.id if table == "request" else data.review_request_id if table == "response" else None,
+            "related_review_response_id": data.id if table == "response" else None,
+            "is_read": data.is_read,
+            "created_at": data.created_at.isoformat()
         }
         li.append(di)
-        count = count + 1
-        review_responses = notifications_crud.find_is_read(db)
-        for  review_response in review_responses:
-            di = {
-                "id": count,
-                "from_user_id": user.id,
-                "from_user_name": user.first_name + user.last_name,
-                "content": review_response.content,
-                "related_question_id": None,
-                "related_answer_id": None,
-                "related_review_request_id": review_request.id,
-                "related_review_response_id": review_response.id,
-                "is_read": review_response.is_read,
-                "created_at": review_response.created_at.isoformat()
-            }
-            li.append(di)
-            count = count +1
+        count += 1
 
     return {"notifications": li}

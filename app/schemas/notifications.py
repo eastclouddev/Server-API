@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
-class NotificationsResponse(BaseModel):
+class Notification(BaseModel):
     id: int 
     from_user_id: int
     from_user_name: str
@@ -15,5 +15,5 @@ class NotificationsResponse(BaseModel):
     is_read: bool
     created_at: str
 
-class ListResponseBody(BaseModel):
-    notifications: list[NotificationsResponse]
+class NotificationListResponseBody(BaseModel):
+    notifications: list[Notification]
