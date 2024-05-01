@@ -6,9 +6,10 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.mentors import DetailResponseBody, CreateResponseBody, CreateRequestBody,\
-    RewardsResponseBody, ResponseBody,\
-     ProgressesResponseBody, AllResponseBody, ListResponseBody
+from schemas.mentors import AccountInfoDetailResponseBody, AccountInfoCreateResponseBody, AccountInfoCreateRequestBody, \
+                           \
+    RewardListResponseBody, QuestionListResponseBody,\
+                            ProgressListResponseBody, ReviewRequestListResponseBody, ListResponseBody
 from cruds import mentors as mentors_crud
 
 logger = getLogger("uvicorn.app")
@@ -17,7 +18,8 @@ DbDependency = Annotated[Session, Depends(get_db)]
 
 router = APIRouter(prefix="/mentors", tags=["Mentors"])
 
-@router.get("/{mentor_id}/rewards", response_model=RewardsResponseBody, status_code=status.HTTP_200_OK)
+
+@router.get("/{mentor_id}/rewards", response_model=RewardListResponseBody, status_code=status.HTTP_200_OK)
 async def find_reward_list(db: DbDependency, mentor_id: int = Path(gt=0)):
     """
     送金履歴一覧
@@ -60,7 +62,7 @@ async def find_reward_list(db: DbDependency, mentor_id: int = Path(gt=0)):
 
     return re_di
 
-@router.get("/{mentor_id}/accounts", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
+@router.get("/{mentor_id}/accounts", response_model=AccountInfoDetailResponseBody, status_code=status.HTTP_200_OK)
 async def find_account_info_details(db: DbDependency, mentor_id: int = Path(gt=0)):
     """
     送金先の情報詳細を取得
@@ -93,8 +95,8 @@ async def find_account_info_details(db: DbDependency, mentor_id: int = Path(gt=0
     return info
 
 
-@router.post("/{mentor_id}/accounts", response_model=CreateResponseBody, status_code=status.HTTP_201_CREATED)
-async def create_account_info(db: DbDependency, create_model: CreateRequestBody, mentor_id: int = Path(gt=0)):
+@router.post("/{mentor_id}/accounts", response_model=AccountInfoCreateResponseBody, status_code=status.HTTP_201_CREATED)
+async def create_account_info(db: DbDependency, create_model: AccountInfoCreateRequestBody, mentor_id: int = Path(gt=0)):
     """
     送金先の作成
 
@@ -166,8 +168,8 @@ async def create_account_info(db: DbDependency, create_model: CreateRequestBody,
         db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")
 
-@router.get("/{mentor_id}/progresses",response_model= ProgressesResponseBody,status_code=status.HTTP_200_OK)
-async def find_progress_list_mentor(db: DbDependency):
+@router.get("/{mentor_id}/progresses", response_model=ProgressListResponseBody, status_code=status.HTTP_200_OK)
+async def find_progress_list_mentor(db: DbDependency, mentor_id: int):
     """
     進捗管理一覧
     
@@ -193,7 +195,9 @@ async def find_progress_list_mentor(db: DbDependency):
         status: str
             ステータス
     """
-    found_course_progresses = mentors_crud.find_course_progresses(db)
+    found_course_progresses = mentors_crud.find_course_progresses(db, mentor_id)
+    if not found_course_progresses:
+        raise HTTPException(status_code=404, detail="progresses not found")
 
     progresses_list = []
     for progress in found_course_progresses:
@@ -201,16 +205,16 @@ async def find_progress_list_mentor(db: DbDependency):
             "progress_id": progress.id,
             "user_id": progress.user_id,
             "course_id": progress.course_id,
-            "section_id": mentors_crud.find_section_id(db,progress.course_id),
-            "curriculum_id": mentors_crud.find_curriculum_id(db,progress.course_id),
+            "section_id": mentors_crud.find_section_id(db, progress.course_id),
+            "curriculum_id": mentors_crud.find_curriculum_id(db, progress.course_id),
             "progress_percentage": progress.progress_percentage,
-            "status": mentors_crud.find_status_name(db,progress.status_id)
+            "status": mentors_crud.find_status_name(db, progress.status_id)
         }
         progresses_list.append(one_progress)
 
     return {"progresses": progresses_list} 
 
-@router.get("/{mentor_id}/students/questions", response_model=ResponseBody, status_code=status.HTTP_200_OK)
+@router.get("/{mentor_id}/students/questions", response_model=QuestionListResponseBody, status_code=status.HTTP_200_OK)
 async def find_question_list_from_student(db: DbDependency, request: Request, mentor_id: int = Path(gt=0)):
     """
     受講生からの質問一覧取得
@@ -308,7 +312,7 @@ async def find_notification(db: DbDependency, mentor_id: int):
     questions = mentors_crud.find_questions(db,mentor_id)
     logger.info(questions)
 
-    review_requests = mentors_crud.find_reviews(db,mentor_id)
+    review_requests = mentors_crud.find_reviews(db, mentor_id)
 
     li = []
     count = 1
@@ -359,7 +363,7 @@ async def find_notification(db: DbDependency, mentor_id: int):
         }
         li.append(di)
         count = count + 1
-        review_responses = mentors_crud.find_is_read(db,review_request.id)
+        review_responses = mentors_crud.find_is_read(db, review_request.id)
         for  review_response in review_responses:
             di = {
                 "id": count,

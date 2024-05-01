@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from schemas.users import UpdateRequestBody
+from schemas.users import UserUpdateRequestBody
 from models.users import Users
 from models.companies import Companies
 from models.roles import Roles
@@ -22,7 +22,7 @@ def find_by_email(db: Session, email: str, user_id: int):
     else:
         return user
 
-def update_user(db: Session, param:UpdateRequestBody, user_id: str):
+def update_user(db: Session, param:UserUpdateRequestBody, user_id: str):
     # 更新対象のユーザーを取得
     user = find_by_user_id(db, user_id)
     if not user:

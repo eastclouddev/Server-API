@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from schemas.mentors import CreateResponseBody
+from schemas.mentors import AccountInfoCreateRequestBody
 from models.user_account_info import UserAccountInfo
 from models.users import Users
 from models.user_account_types import UserAccountTypes
@@ -45,7 +45,7 @@ def find_bank_info(db: Session, mentor_id: int):
 
     return info
 
-def create(db: Session, create_model: CreateResponseBody, mentor_id: int):
+def create(db: Session, create_model: AccountInfoCreateRequestBody, mentor_id: int):
 
     mentor = db.query(Users).filter(Users.id == mentor_id).first()
     if not mentor:
@@ -69,12 +69,25 @@ def create(db: Session, create_model: CreateResponseBody, mentor_id: int):
     db.add(new_transfer)
 
     return new_transfer
-  
-def find_course_progresses(db:Session):
-    progresses =  db.query(CourseProgresses).all()
-    if not progresses:
+
+def find_course_progresses(db:Session, mentor_id: int):
+    mentor_ships = db.query(Mentorships).filter(Mentorships.mentor_id == mentor_id).all()
+    if not mentor_ships:
         return None
-    return progresses
+    student_list = []
+    for mentor in mentor_ships:
+        found_student = db.query(Users).filter(Users.id == mentor.student_id).first()
+        if not found_student:
+            return None
+        student_list.append(found_student)
+    progresses_list = []
+    for student in student_list:
+        found_progresses = db.query(CourseProgresses).filter(CourseProgresses.user_id == student.id).all()
+        if not found_progresses:
+            return None
+        for info in found_progresses:
+            progresses_list.append(info)
+    return progresses_list
 
 def find_section_id(db:Session,course_id:int):
     info =  db.query(Sections).filter(Sections.course_id == course_id).first()

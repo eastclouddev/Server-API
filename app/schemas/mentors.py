@@ -4,7 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-class DetailResponseBody(BaseModel):
+class AccountInfoDetailResponseBody(BaseModel):
     mentor_id: int
     account_name: str
     bank_name: str
@@ -12,7 +12,7 @@ class DetailResponseBody(BaseModel):
     account_number: str
     account_type: str
 
-class CreateRequestBody(BaseModel):
+class AccountInfoCreateRequestBody(BaseModel):
     bank_name: str = Field(examples=["銀行名"])
     branch_name: str = Field(examples=["支店名"])
     bank_code: str = Field(examples=["銀行コード"])
@@ -27,10 +27,10 @@ class Rewards(BaseModel):
     amount: float
     to_mentor_id: int
 
-class RewardsResponseBody(BaseModel):
+class RewardListResponseBody(BaseModel):
     rewards: list[Rewards]
 
-class CreateResponseBody(BaseModel):
+class AccountInfoCreateResponseBody(BaseModel):
     account_id: int
     mentor_id: int 
     bank_name: str
@@ -45,12 +45,12 @@ class ProgressesResponseList(BaseModel):
     progress_id: int
     user_id: int
     course_id: int
-    section_id:Optional[int]
-    curriculum_id:Optional[int]
+    section_id: Optional[int]
+    curriculum_id: Optional[int]
     progress_percentage: int
     status: str
 
-class ProgressesResponseBody(BaseModel):
+class ProgressListResponseBody(BaseModel):
     progresses: list[ProgressesResponseList]
 
 class Question(BaseModel):
@@ -62,7 +62,7 @@ class Question(BaseModel):
     is_read: bool
     is_closed: bool
 
-class ResponseBody(BaseModel):
+class QuestionListResponseBody(BaseModel):
     questions: list[Question]
 
 class NotificationsResponse(BaseModel):
@@ -89,5 +89,5 @@ class AllResponseList(BaseModel):
     is_read: bool
     is_closed: bool
 
-class AllResponseBody(BaseModel):
+class ReviewRequestListResponseBody(BaseModel):
     reviews: list[AllResponseList]

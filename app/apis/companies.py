@@ -2,11 +2,12 @@ from logging import getLogger
 from typing import Annotated
 
 from database.database import get_db
-from fastapi import APIRouter, Depends, HTTPException, Path, Query,Request
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.companies import CreateRequestBody, CreateResponseBody, DetailResponseBody,AllResponseBody,ResponseBody,ProgressesResponseBody
+from schemas.companies import CompanyCreateRequestBody, CompanyCreateResponseBody, CompanyDetailResponseBody, \
+                                CompanyListResponseBody, StudentListResponseBody, ProgressListResponseBody
 from cruds import companies as companies_cruds
 from services import companies as compamies_services
 
@@ -17,8 +18,8 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/companies", tags=["Companies"])
 
 
-@router.post("", response_model=CreateResponseBody, status_code=status.HTTP_200_OK)
-async def create_company(db: DbDependency, param: CreateRequestBody):
+@router.post("", response_model=CompanyCreateResponseBody, status_code=status.HTTP_200_OK)
+async def create_company(db: DbDependency, param: CompanyCreateRequestBody):
     """
     会社情報作成
 
@@ -93,7 +94,7 @@ async def create_company(db: DbDependency, param: CreateRequestBody):
     
 
 
-@router.get("/{company_id}", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
+@router.get("/{company_id}", response_model=CompanyDetailResponseBody, status_code=status.HTTP_200_OK)
 async def find_company_details(db: DbDependency, company_id: int = Path(gt=0)):
     """
     会社詳細取得
@@ -152,9 +153,8 @@ async def find_company_details(db: DbDependency, company_id: int = Path(gt=0)):
 
 
 
-@router.get("", response_model=AllResponseBody, status_code=status.HTTP_200_OK)
+@router.get("", response_model=CompanyListResponseBody, status_code=status.HTTP_200_OK)
 async def find_company_list(db: DbDependency):
-
     """
     会社情報一覧取得
     
@@ -191,7 +191,7 @@ async def find_company_list(db: DbDependency):
     found_companies = companies_cruds.find_companies(db)
 
     if not found_companies:
-        raise HTTPException(status_code=500,detail="Internal server error.")
+        raise HTTPException(status_code=500, detail="Internal server error.")
     
     companies_list = []
 
@@ -213,8 +213,8 @@ async def find_company_list(db: DbDependency):
     
     return {"companies": companies_list}
 
-@router.get("/{company_id}/progresses",response_model= ProgressesResponseBody,status_code=status.HTTP_200_OK)
-async def find_progress_list_company(db: DbDependency):
+@router.get("/{company_id}/progresses", response_model=ProgressListResponseBody, status_code=status.HTTP_200_OK)
+async def find_progress_list_company(db: DbDependency, company_id: int):
     """
     進捗管理一覧
     
@@ -240,8 +240,9 @@ async def find_progress_list_company(db: DbDependency):
         status: str
             ステータス
     """
-    found_course_progresses = companies_cruds.find_course_progresses(db)
-
+    found_course_progresses = companies_cruds.find_course_progresses(db, company_id)
+    if not found_course_progresses:
+        raise HTTPException(status_code=404, detail="progresses not found")
 
     progresses_list = []
 
@@ -250,19 +251,18 @@ async def find_progress_list_company(db: DbDependency):
             "progress_id": progress.id,
             "user_id": progress.user_id,
             "course_id": progress.course_id,
-            "section_id": companies_cruds.find_section_id(db,progress.course_id),
-            "curriculum_id": companies_cruds.find_curriculum_id(db,progress.course_id),
+            "section_id": companies_cruds.find_section_id(db, progress.course_id),
+            "curriculum_id": companies_cruds.find_curriculum_id(db, progress.course_id),
             "progress_percentage": progress.progress_percentage,
-            "status": companies_cruds.find_status_name(db,progress.status_id)
+            "status": companies_cruds.find_status_name(db, progress.status_id)
         }
 
         progresses_list.append(one_progress)
 
     return {"progresses": progresses_list} 
 
-@router.get("/{company_id}/users", response_model=ResponseBody, status_code=status.HTTP_200_OK)
-async def find_student_list_company(db: DbDependency, company_id:int, role: str,  page: int, limit: int):
-
+@router.get("/{company_id}/users", response_model=StudentListResponseBody, status_code=status.HTTP_200_OK)
+async def find_student_list_company(db: DbDependency, company_id: int, role: str, page: int, limit: int):
     """
     受講生一覧（法人、法人代行)
     
@@ -275,11 +275,8 @@ async def find_student_list_company(db: DbDependency, company_id:int, role: str,
     limit: int
         1ページ当たりの記事数
 
-
     Returns
     -----------------------
-    {"users": users_list} : dic{}
-                    受け取ったroleと一致するユーザー全員の情報
     users: array
         user_id: int
             ユーザーのID

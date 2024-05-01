@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.courses import AllResponseBody, DetailResponseBody
+from schemas.courses import CourseListResponseBody, CourseDetailResponseBody
 from cruds import courses as courses_crud
 
 logger = getLogger("uvicorn.app")
@@ -16,7 +16,7 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/courses", tags=["Courses"])
 
 
-@router.get("", response_model=AllResponseBody, status_code=status.HTTP_200_OK)
+@router.get("", response_model=CourseListResponseBody, status_code=status.HTTP_200_OK)
 async def find_course_list(db: DbDependency):
     """
     コース一覧取得
@@ -62,7 +62,7 @@ async def find_course_list(db: DbDependency):
 
     return re_di
 
-@router.get("/{course_id}", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
+@router.get("/{course_id}", response_model=CourseDetailResponseBody, status_code=status.HTTP_200_OK)
 async def find_course_details(db: DbDependency, course_id: int = Path(gt=0)):
     """
     コース詳細取得
