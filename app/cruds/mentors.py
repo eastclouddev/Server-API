@@ -1,4 +1,6 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import union_all
+from sqlalchemy import desc
 
 from schemas.mentors import AccountInfoCreateRequestBody
 from models.user_account_info import UserAccountInfo
@@ -119,17 +121,47 @@ def find_answers_by_question_id(db: Session, question_id: int):
 def find_user_by_mentor_id(db: Session, mentor_id: int):
     return db.query(Users).filter(Users.id == mentor_id).first()
 
-def find_questions(db: Session, user_id: int):
-    mentorships = db.query(Mentorships).filter(Mentorships.mentor_id == user_id).first()
-    if not mentorships:
-        return []
-    return db.query(Questions).filter(Questions.user_id == mentorships.student_id).all()
+# def find_questions(db: Session, user_id: int):
+#     mentorships = db.query(Mentorships).filter(Mentorships.mentor_id == user_id).first()
+#     if not mentorships:
+#         return []
+#     return db.query(Questions).filter(Questions.user_id == mentorships.student_id).all()
 
-def find_reviews(db:Session,user_id: int):
-    mentorships = db.query(Mentorships).filter(Mentorships.mentor_id == user_id).first()
-    if not mentorships:
-        return []
-    return db.query(ReviewRequests).filter(ReviewRequests.user_id == mentorships.student_id).all()
+# def find_reviews(db:Session,user_id: int):
+#     mentorships = db.query(Mentorships).filter(Mentorships.mentor_id == user_id).first()
+#     if not mentorships:
+#         return []
+#     return db.query(ReviewRequests).filter(ReviewRequests.user_id == mentorships.student_id).all()
 
-def find_is_read(db:Session, id: int):
-    return db.query(ReviewResponses).filter(ReviewResponses.review_request_id == id).all()
+# def find_is_read(db:Session, id: int):
+#     return db.query(ReviewResponses).filter(ReviewResponses.review_request_id == id).all()
+
+def find_table(db: Session):
+    # 10個制限
+    question = db.query(Questions.id, Questions.content, Questions.created_at)\
+            .order_by(desc(Questions.created_at)).limit(10)\
+        .union_all(db.query(Answers.id, Answers.content, Answers.created_at)\
+            .order_by(desc(Answers.created_at)).limit(10))\
+        .union_all(db.query(ReviewRequests.id, ReviewRequests.content, ReviewRequests.created_at)\
+            .order_by(desc(ReviewRequests.created_at)).limit(10))\
+        .union_all(db.query(ReviewResponses.id, ReviewResponses.content, ReviewResponses.created_at)\
+            .order_by(desc(ReviewResponses.created_at)).limit(10))\
+        .all()
+    return question
+
+def find_db(db: Session, id, content, created_at):
+    question = db.query(Questions).filter(Questions.id == id, Questions.content == content, Questions.created_at == created_at).first()
+    if question:
+        return "question", question
+
+    answer = db.query(Answers).filter(Answers.id == id, Answers.content == content, Answers.created_at == created_at).first()
+    if answer:
+        return "answer", answer
+
+    request = db.query(ReviewRequests).filter(ReviewRequests.id == id, ReviewRequests.content == content, ReviewRequests.created_at == created_at).first()
+    if request:
+        return "request", request
+
+    response = db.query(ReviewResponses).filter(ReviewResponses.id == id, ReviewResponses.content == content, ReviewResponses.created_at == created_at).first()
+    if response:
+        return "response", response
