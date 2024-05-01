@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from schemas.mentors import CreateResponseBody
+from schemas.mentors import AccountInfoCreateRequestBody
 from models.user_account_info import UserAccountInfo
 from models.users import Users
 from models.user_account_types import UserAccountTypes
@@ -45,7 +45,7 @@ def find_bank_info(db: Session, mentor_id: int):
 
     return info
 
-def create(db: Session, create_model: CreateResponseBody, mentor_id: int):
+def create(db: Session, create_model: AccountInfoCreateRequestBody, mentor_id: int):
 
     mentor = db.query(Users).filter(Users.id == mentor_id).first()
     if not mentor:
