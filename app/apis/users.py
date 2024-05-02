@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.users import UserUpdateRequestBody, UserDetailResponseBody, UserListResponseBody
+from schemas.users import UserUpdateRequestBody, UserDetailResponseBody, UserListResponseBody, AccountListResponseBody
 from cruds import users as users_crud
 from services import users as users_service
 
@@ -197,3 +197,38 @@ async def find_student_list(db:DbDependency, role: str, page: int, limit: int):
         li.append(di)
 
     return {"users":li}
+
+@router.get("/counts/", response_model=AccountListResponseBody, status_code=status.HTTP_200_OK)
+async def find_number_of_accounts(db: DbDependency):
+    """
+    有効アカウント数取得
+
+    Parameters
+    -----------------------
+    なし
+
+    Return
+    -----------------------
+    role_counts: array
+        role_id: int
+            ロールのID
+        role_name: str
+            ロールの名称
+        count: int
+            そのロールを持つ有効なユーザーの総数
+    """
+
+    roles = users_crud.find_roles(db)
+    li = []
+    for role in roles:
+        users = users_crud.find_users_by_role_id(db, role.id)
+        di = {
+            "role_id": role.id,
+            "role_name": role.name,
+            "count": len(users)
+        }
+        li.append(di)
+
+    return {"role_counts": li}
+
+

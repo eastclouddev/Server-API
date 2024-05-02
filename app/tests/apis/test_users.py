@@ -134,8 +134,12 @@ def test_find_student_list_02(client_fixture: TestClient):
     assert response.status_code == 200
     assert response.json()["users"] == []
     
+"""有効アカウント数取得"""
+def test_find_number_of_accounts_01(client_fixture: TestClient):
+    response = client_fixture.get("/users/counts/")
 
-
+    assert response.status_code == 200
+    assert "role_counts" in response.json()
 
 
 
