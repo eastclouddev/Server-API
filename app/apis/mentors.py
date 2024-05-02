@@ -276,7 +276,7 @@ async def find_notification(db: DbDependency, mentor_id: int):
     
     Parameters
     -----------------------
-    mentor_id:int
+    mentor_id: int
         ユーザーのID
     Returns
     -----------------------
@@ -302,32 +302,33 @@ async def find_notification(db: DbDependency, mentor_id: int):
         作成日時
     """
 
-    user = mentors_crud.find_user_by_mentor_id(db,mentor_id)
-
-    if not user:
+    # メンターが担当している受講生を取得
+    users = mentors_crud.find_users_by_mentor_id(db, mentor_id)
+    if not users: # メンターが存在しない、メンターに紐づく受講生がいない
         raise HTTPException(status_code=404, detail="User not found")
-    
-    # 4つのテーブルから取得
-    all_tables = mentors_crud.find_table(db)
-    li = []
 
-    for all_table in all_tables:
+    # 担当している受講生からの通知(質問・回答・レビュー依頼・レビュー回答)を取得
+    li = []
+    user_id_list = [user.student_id for user in users]
+    four_tables = mentors_crud.find_table(db, user_id_list)
+    for data in four_tables:
         di = {
-            "id": all_table[0],
-            "content": all_table[1],
-            "created_at": all_table[2]
+            "id": data[0],
+            "content": data[1],
+            "created_at": data[2]
         }
         li.append(di)
 
-    # 作成日が新しい順に並び替える
+    # 作成日が新しい順に並び替え、先頭の件を取得
     re_sorted = sorted(li, key=lambda x:x["created_at"], reverse=True)
-    # 並び替えたものから先頭10件取得
     re_sorted = re_sorted[:10]
+
+    # 返却データを作成
     count = 1
     li = []
-
     for r in re_sorted:
         table, data = mentors_crud.find_db(db, r["id"], r["content"], r["created_at"])
+        user = mentors_crud.find_user_by_user_id(db, data.user_id)
         
         di = {
             "id": count,

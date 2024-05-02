@@ -65,7 +65,7 @@ class Question(BaseModel):
 class QuestionListResponseBody(BaseModel):
     questions: list[Question]
 
-class NotificationsResponse(BaseModel):
+class Notification(BaseModel):
     id: int 
     from_user_id: int
     from_user_name: str
@@ -78,7 +78,7 @@ class NotificationsResponse(BaseModel):
     created_at: str
 
 class NotificationListResponseBody(BaseModel):
-    notifications: list[NotificationsResponse]
+    notifications: list[Notification]
 
 class AllResponseList(BaseModel):
     id: int 
