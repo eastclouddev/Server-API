@@ -20,3 +20,8 @@ class ResponseBody(BaseModel):
     access_token: str
     expires_in: int
     role: str
+
+class LoginRequestBody(BaseModel):
+    email: Optional[str] = Field(examples=["aaa@mail.com"])
+    password: Optional[str] = Field(examples=["test1234"])
+    device_info: DeviceInfo
