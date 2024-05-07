@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.students import ResponseBody, AllResponseBody, ProgressesResponse, ListResponseBody
+from schemas.students import ResponseBody, AllResponseBody, ProgressesResponse, NotificationListResponseBody
 from cruds import students as students_crud
 
 logger = getLogger("uvicorn.app")
@@ -178,7 +178,7 @@ async def find_my_review_list(db: DbDependency, student_id: int):
 
     return {"reviews": li}
 
-@router.get("/{student_id}/notifications", response_model=ListResponseBody, status_code=status.HTTP_200_OK)
+@router.get("/{student_id}/notifications", response_model=NotificationListResponseBody, status_code=status.HTTP_200_OK)
 async def find_notification(db: DbDependency, student_id: int):
 
     """
@@ -205,87 +205,56 @@ async def find_notification(db: DbDependency, student_id: int):
         回答のID
     related_review_request_id: int
         レビューリクエストのID
-    related_review_respomse_id: int
-        レビューリスポンスのID
+    related_review_response_id: int
+        レビューレスポンスのID
     is_read: bool
         通知が既読かどうか
     created_at: str
+        作成日時
 
     """
+    mentors = students_crud.find_mentor_by_student_id(db, student_id)
 
-    user = students_crud.find_user_by_student_id(db,student_id)
-
-    if not user:
+    if not mentors:
         raise HTTPException(status_code=404, detail="User not found")
-
-    questions = students_crud.find_by_user_id(db,student_id)
-
-    review_requests = students_crud.find_reviews(db,student_id)
-
-    li = []
-    count = 1
-    for question in questions:
-        di = {
-            "id": count,
-            "from_user_id": user.id,
-            "from_user_name": user.first_name + user.last_name,
-            "content": question.content,
-            "related_question_id": question.id,
-            "related_answer_id": None,
-            "related_review_request_id": None,
-            "related_review_response_id": None,
-            "is_read": question.is_read,
-            "created_at": question.created_at.isoformat()
-        }
-        li.append(di)
-        count = count + 1
-        answers = students_crud.find_answers_by_question_id(db,question.id)
-        for answer in answers:
-            di = {
-                "id": count,
-                "from_user_id": user.id,
-                "from_user_name": user.first_name + user.last_name,
-                "content": answer.content,
-                "related_question_id": question.id,
-                "related_answer_id": answer.id,
-                "related_review_request_id": None,
-                "related_review_response_id": None,
-                "is_read": answer.is_read,
-                "created_at": answer.created_at.isoformat()
-            }
-            li.append(di)
-            count = count +1
     
-    for review_request in review_requests:
+    # 2つのテーブルから取得
+    li = []
+    user_id_list = [mentor.mentor_id for mentor in mentors]
+    two_tables = students_crud.find_table(db, user_id_list)
+    for data in two_tables:
         di = {
-            "id": count,
-            "from_user_id": user.id,
-            "from_user_name": user.first_name + user.last_name,
-            "content": review_request.content,
-            "related_question_id": None,
-            "related_answer_id": None,
-            "related_review_request_id": review_request.id,
-            "related_review_response_id": None,
-            "is_read": review_request.is_read,
-            "created_at": review_request.created_at.isoformat()
+            "id": data[0],
+            "content": data[1],
+            "created_at": data[2]
         }
         li.append(di)
-        count = count + 1
-        review_responses = students_crud.find_is_read(db,review_request.id)
-        for  review_response in review_responses:
-            di = {
-                "id": count,
-                "from_user_id": user.id,
-                "from_user_name": user.first_name + user.last_name,
-                "content": review_response.content,
-                "related_question_id": None,
-                "related_answer_id": None,
-                "related_review_request_id": review_request.id,
-                "related_review_response_id": review_response.id,
-                "is_read": review_response.is_read,
-                "created_at": review_response.created_at.isoformat()
-            }
-            li.append(di)
-            count = count +1
+
+    # 作成日が新しい順に並び替える
+    re_sorted = sorted(li, key=lambda x:x["created_at"], reverse=True)
+    # 並び替えたものから先頭10件取得
+    re_sorted = re_sorted[:10]
+    count = 1
+    li = []
+
+    for r in re_sorted:
+        table, data = students_crud.find_db(db, r["id"], r["content"], r["created_at"])
+        mentor = students_crud.find_user_by_user_id(db, data.user_id)
+
+        di = {
+            "id": count,
+            "from_user_id": mentor.id,
+            "from_user_name": mentor.last_name + mentor.first_name,
+            "content": data.content,
+            "related_question_id": data.question_id if table == "answer" else None,
+            "related_answer_id": data.id if table == "answer" else None,
+            "related_review_request_id": data.review_request_id if table == "response" else None,
+            "related_review_response_id": data.id if table == "response" else None,
+            "is_read": data.is_read,
+            "created_at": data.created_at.isoformat()
+        }
+        li.append(di)
+
+        count += 1
 
     return {"notifications": li}

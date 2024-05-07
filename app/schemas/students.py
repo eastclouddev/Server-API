@@ -54,5 +54,5 @@ class NotificationsResponse(BaseModel):
     is_read: bool
     created_at: str
 
-class ListResponseBody(BaseModel):
+class NotificationListResponseBody(BaseModel):
     notifications: list[NotificationsResponse]
