@@ -162,4 +162,3 @@ def find_response_by_review_request_id(db: Session, review_request_id: int):
     if not response:
         return False
     return response.is_read
-
