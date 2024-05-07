@@ -6,14 +6,13 @@ from models.companies import Companies
 from models.roles import Roles
 
 
-
-def find_by_user_id(db: Session, user_id: int):
+def find_user_by_user_id(db: Session, user_id: int):
     return db.query(Users).filter(Users.id == user_id).first()
 
-def find_by_role_id(db: Session, role_id: int):
+def find_role_by_role_id(db: Session, role_id: int):
     return db.query(Roles).filter(Roles.id == role_id).first()
 
-def find_by_email(db: Session, email: str, user_id: int):
+def find_user_by_email(db: Session, email: str, user_id: int):
     user = db.query(Users).filter(Users.email == email).first()
 
     # 重複しているユーザーがいない or 更新対象と同じメールアドレス
@@ -24,7 +23,7 @@ def find_by_email(db: Session, email: str, user_id: int):
 
 def update_user(db: Session, param:UserUpdateRequestBody, user_id: str):
     # 更新対象のユーザーを取得
-    user = find_by_user_id(db, user_id)
+    user = find_user_by_user_id(db, user_id)
     if not user:
         return None
     
@@ -37,16 +36,13 @@ def update_user(db: Session, param:UserUpdateRequestBody, user_id: str):
     db.add(user)
     return user
 
-def find_user(db:Session,user_id:int):
-    return db.query(Users).filter(Users.id == user_id).first()
-
-def update_address(db,found_user,token_info):
+def update_email(db: Session, found_user, token_info):
     found_user.email = token_info["email"]
 
     db.add(found_user)
     return found_user
 
-def find_by_user(db: Session, role: str):
+def find_users_by_role(db: Session, role: str):
     find_role = db.query(Roles).filter(Roles.name == role).first()
     if not find_role:
         return []

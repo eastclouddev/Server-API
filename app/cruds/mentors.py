@@ -12,7 +12,6 @@ from models.learning_statuses import LearningStatuses
 from models.course_progresses import CourseProgresses
 from models.sections import Sections
 from models.curriculums import Curriculums
-from models.learning_statuses import LearningStatuses
 from models.questions import Questions
 from models.answers import Answers
 from models.review_requests import ReviewRequests
@@ -21,13 +20,13 @@ from models.review_responses import ReviewResponses
 def find_rewards_by_mentor_id(db: Session, mentor_id: int):
     return db.query(UserRewards).filter(UserRewards.user_id == mentor_id).all()
 
-def find_bank_info(db: Session, mentor_id: int):
+def find_account_info_by_mentor_id(db: Session, mentor_id: int):
 
-    mentor_info = db.query(Mentorships).filter(Mentorships.mentor_id == mentor_id).first()
-    if not mentor_info:
+    mentor = db.query(Mentorships).filter(Mentorships.mentor_id == mentor_id).first()
+    if not mentor:
         return None
 
-    bank_info = db.query(UserAccountInfo).filter(UserAccountInfo.user_id == mentor_info.mentor_id).first()
+    bank_info = db.query(UserAccountInfo).filter(UserAccountInfo.user_id == mentor.mentor_id).first()
     if not bank_info:
         return None
 
@@ -47,7 +46,7 @@ def find_bank_info(db: Session, mentor_id: int):
 
     return info
 
-def create(db: Session, create_model: AccountInfoCreateRequestBody, mentor_id: int):
+def create_account_info(db: Session, create_model: AccountInfoCreateRequestBody, mentor_id: int):
 
     mentor = db.query(Users).filter(Users.id == mentor_id).first()
     if not mentor:
@@ -72,7 +71,7 @@ def create(db: Session, create_model: AccountInfoCreateRequestBody, mentor_id: i
 
     return new_transfer
 
-def find_course_progresses(db:Session, mentor_id: int):
+def find_course_progresses(db: Session, mentor_id: int):
     mentor_ships = db.query(Mentorships).filter(Mentorships.mentor_id == mentor_id).all()
     if not mentor_ships:
         return None
@@ -91,23 +90,23 @@ def find_course_progresses(db:Session, mentor_id: int):
             progresses_list.append(info)
     return progresses_list
 
-def find_section_id(db:Session,course_id:int):
-    info =  db.query(Sections).filter(Sections.course_id == course_id).first()
-    if not info:
+def find_section_by_course_id(db: Session, course_id: int):
+    section = db.query(Sections).filter(Sections.course_id == course_id).first()
+    if not section:
         return None
-    return info.id  
+    return section.id  
 
-def find_curriculum_id(db:Session,course_id: int):
-    section_id = find_section_id(db,course_id)
+def find_curriculum_by_course_id(db: Session, course_id: int):
+    section_id = find_section_by_course_id(db, course_id)
     if not section_id:
         return None
-    info =  db.query(Curriculums).filter(Curriculums.section_id == section_id).first()
-    if not info:
+    curriculum = db.query(Curriculums).filter(Curriculums.section_id == section_id).first()
+    if not curriculum:
         return None
-    return info.id
+    return curriculum.id
 
-def find_status_name(db: Sections,status_id: int):
-    status =  db.query(LearningStatuses).filter(LearningStatuses.id == status_id).first()
+def find_status_by_status_id(db: Session, status_id: int):
+    status = db.query(LearningStatuses).filter(LearningStatuses.id == status_id).first()
     if not status:
         return None
     return status.name
@@ -153,3 +152,13 @@ def find_db(db: Session, id, content, created_at):
     response = db.query(ReviewResponses).filter(ReviewResponses.id == id, ReviewResponses.content == content, ReviewResponses.created_at == created_at).first()
     if response:
         return "response", response
+
+def find_review_requests_by_user_id(db: Session, user_id: int):
+    mentorships = db.query(Mentorships).filter(Mentorships.mentor_id == user_id).first()
+    return db.query(ReviewRequests).filter(ReviewRequests.user_id == mentorships.student_id).all()
+
+def find_response_by_review_request_id(db: Session, review_request_id: int):
+    response = db.query(ReviewResponses).filter(ReviewResponses.review_request_id == review_request_id).first()
+    if not response:
+        return False
+    return response.is_read

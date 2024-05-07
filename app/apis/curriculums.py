@@ -50,7 +50,7 @@ async def find_review_list(db: DbDependency, curriculum_id: int = Path(gt=0)):
             レビューリクエストが最後に更新された日時（ISO 8601形式）
     """
 
-    reviews = curriculums_crud.find_reviews(db, curriculum_id)
+    reviews = curriculums_crud.find_reviews_by_curriculum_id(db, curriculum_id)
 
     li = []
     for review in reviews:
@@ -100,7 +100,7 @@ async def find_curriculum_details(db: DbDependency, curriculum_id: int = Path(gt
         display_no: int
             カリキュラムの表示順
     """
-    info = curriculums_crud.find_by_curriculum_id(db, curriculum_id)
+    info = curriculums_crud.find_info_by_curriculum_id(db, curriculum_id)
     if not info:
         raise HTTPException(status_code=404, detail="Curriculum not found.")
     return info
@@ -133,7 +133,7 @@ async def find_test_details(db: DbDependency, curriculum_id: int = Path(gt=0)):
             media_content_url: str
                 メディアコンテンツのURL
     """
-    quizzes = curriculums_crud.find_quiz_contents(db, curriculum_id)
+    quizzes = curriculums_crud.find_quiz_contents_by_curriculum_id(db, curriculum_id)
     if not quizzes:
         raise HTTPException(status_code=404, detail="Test content not found for the specified curriculum.")
     li = []
@@ -197,7 +197,7 @@ async def create_question(db: DbDependency, param: QuestionCreateRequestBody, cu
         media_content: str 
             関連するメディアコンテンツの情報
     """
-    found_curriculum = curriculums_crud.find_curriculum(db, curriculum_id)
+    found_curriculum = curriculums_crud.find_curriculum_by_curriculum_id(db, curriculum_id)
 
     if not found_curriculum:
         raise HTTPException(status_code=404, detail="Curriculum not found.")
@@ -262,7 +262,7 @@ async def find_question_list_in_curriculum(db: DbDependency, curriculum_id: int)
                 メディアコンテンツのURL
     """
 
-    questions = curriculums_crud.find_by_questions(db, curriculum_id)
+    questions = curriculums_crud.find_questions_by_curriculum_id(db, curriculum_id)
 
     if not questions:
         raise HTTPException(status_code=404, detail="Questions not found for the specified curriculum.")
@@ -297,7 +297,7 @@ async def find_question_list_in_curriculum(db: DbDependency, curriculum_id: int)
 
 
 @router.post("/{curriculum_id}/reviews", response_model=ReviewRequestCreateResponseBody, status_code=status.HTTP_201_CREATED)
-async def create_review(db: DbDependency, param: ReviewRequestCreateRequestBody, curriculum_id: int):
+async def create_review_request(db: DbDependency, param: ReviewRequestCreateRequestBody, curriculum_id: int):
 
     """
     レビュー作成
@@ -335,13 +335,13 @@ async def create_review(db: DbDependency, param: ReviewRequestCreateRequestBody,
     """
 
 
-    found_curriculum = curriculums_crud.find_by_reviews(db, curriculum_id)
+    found_curriculum = curriculums_crud.find_review_request_by_curriculum_id(db, curriculum_id)
 
     if not found_curriculum:
         raise HTTPException(status_code=404, detail="Curriculum not found.")
 
     try:
-        reviews = curriculums_crud.create_reviews(db, curriculum_id, param.user_id, param.title, param.content, param.is_closed)
+        reviews = curriculums_crud.create_review_request(db, curriculum_id, param.user_id, param.title, param.content, param.is_closed)
         db.commit()
         di = {
             "id": reviews.id,

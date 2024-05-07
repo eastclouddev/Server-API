@@ -5,7 +5,7 @@ from schemas.news import NewsCreateRequestBody
 from models.news import News
 
 
-def find_by_news_id(db: Session, news_id: int):
+def find_news_by_news_id(db: Session, news_id: int):
     return db.query(News).filter(News.id == news_id).first()
 
 def find_news(db: Session):
@@ -22,9 +22,9 @@ def create_news(db: Session, param: NewsCreateRequestBody):
 
     return new_news
 
-def update_by_news_id(db: Session, news_id: int, title: str, content: str, is_published: bool, published_at: str):
+def update_news_by_news_id(db: Session, news_id: int, title: str, content: str, is_published: bool, published_at: str):
   
-    news = find_by_news_id(db, news_id)
+    news = find_news_by_news_id(db, news_id)
     if not news:
         return None
     

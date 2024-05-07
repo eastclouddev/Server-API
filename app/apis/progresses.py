@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 from schemas.progresses import ProgressListResponseBody
-
 from cruds import progresses as progresses_crud
 
 logger = getLogger("uvicorn.app")
@@ -53,10 +52,10 @@ async def find_progress_list_admin(db: DbDependency):
             "progress_id": progress.id,
             "user_id": progress.user_id,
             "course_id": progress.course_id,
-            "section_id": progresses_crud.find_section_id(db, progress.course_id),
-            "curriculum_id": progresses_crud.find_curriculum_id(db, progress.course_id),
+            "section_id": progresses_crud.find_section_by_course_id(db, progress.course_id),
+            "curriculum_id": progresses_crud.find_curriculum_by_course_id(db, progress.course_id),
             "progress_percentage": progress.progress_percentage,
-            "status": progresses_crud.find_status_name(db, progress.status_id)
+            "status": progresses_crud.find_status_by_status_id(db, progress.status_id)
         }
 
         progresses_list.append(one_progress)

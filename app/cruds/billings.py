@@ -7,7 +7,7 @@ from models.company_transaction_histories import CompanyTransactionHistories
 from models.company_billing_statuses import CompanyBillingStatuses
 
 
-def find_detail(db: Session, billing_id: int):
+def find_detail_by_billing_id(db: Session, billing_id: int):
     billing_info = db.query(CompanyBillingInfo).filter(CompanyBillingInfo.id == billing_id).first()
     if not billing_info:
         return None
