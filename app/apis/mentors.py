@@ -87,7 +87,7 @@ async def find_account_info_details(db: DbDependency, mentor_id: int = Path(gt=0
             口座の種類（例: "普通", "当座", "貯蓄"）
     """
 
-    info = mentors_crud.find_bank_info(db, mentor_id)
+    info = mentors_crud.find_account_info_by_mentor_id(db, mentor_id)
     if not info:
         raise HTTPException(status_code=404, detail="Mentor not found.")
     return info
@@ -140,7 +140,7 @@ async def create_account_info(db: DbDependency, create_model: AccountInfoCreateR
             口座名義
     """
 
-    new_transfer = mentors_crud.create(db, create_model, mentor_id)
+    new_transfer = mentors_crud.create_account_info(db, create_model, mentor_id)
     if not new_transfer:
         raise HTTPException(status_code=404, detail="Mentor not found.")
 
@@ -203,10 +203,10 @@ async def find_progress_list_mentor(db: DbDependency, mentor_id: int):
             "progress_id": progress.id,
             "user_id": progress.user_id,
             "course_id": progress.course_id,
-            "section_id": mentors_crud.find_section_id(db, progress.course_id),
-            "curriculum_id": mentors_crud.find_curriculum_id(db, progress.course_id),
+            "section_id": mentors_crud.find_section_by_course_id(db, progress.course_id),
+            "curriculum_id": mentors_crud.find_curriculum_by_course_id(db, progress.course_id),
             "progress_percentage": progress.progress_percentage,
-            "status": mentors_crud.find_status_name(db, progress.status_id)
+            "status": mentors_crud.find_status_by_status_id(db, progress.status_id)
         }
         progresses_list.append(one_progress)
 
@@ -344,5 +344,6 @@ async def find_notification(db: DbDependency, mentor_id: int):
         }
         li.append(di)
         count += 1
+
 
     return {"notifications": li}

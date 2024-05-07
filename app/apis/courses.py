@@ -102,8 +102,8 @@ async def find_course_details(db: DbDependency, course_id: int = Path(gt=0)):
                 description: str
                     カリキュラムの説明
     """
-    course = courses_crud.find_by_course_id(db, course_id)
-    sections = courses_crud.find_sections(db, course_id)
+    course = courses_crud.find_course_by_course_id(db, course_id)
+    sections = courses_crud.find_sections_by_course_id(db, course_id)
 
     if not course:
         raise HTTPException(status_code=404, detail="Course not found.")
@@ -111,7 +111,7 @@ async def find_course_details(db: DbDependency, course_id: int = Path(gt=0)):
     section_li = []
     if sections:
         for section in sections:
-            curriculums = courses_crud.find_curriculums(db, section.id)
+            curriculums = courses_crud.find_curriculums_by_section_id(db, section.id)
             curriculum_li = []
             # 最内のリストを作成
             for curriculum in curriculums:

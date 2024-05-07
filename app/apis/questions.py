@@ -49,7 +49,7 @@ async def create_answer(db: DbDependency, param: AnswerCreateRequestBody, questi
         raise HTTPException(status_code=404, detail="Question not found.")
     
     try:
-        answer = questions_crud.find_by_answer(db, question_id)
+        answer = questions_crud.find_answer_by_question_id(db, question_id)
 
         # 同じ質問に対して、再度回答する場合はparent_answer_idを追加する
         if answer:
@@ -119,7 +119,7 @@ async def find_question_thread_details(db: DbDependency, question_id: int):
                 作成日（ISO 8601形式）
     """
 
-    found_question = questions_crud.find_question(db, question_id)
+    found_question = questions_crud.find_question_by_question_id(db, question_id)
 
     if not found_question:
         raise HTTPException(status_code=404,detail="Question not found.")
@@ -135,7 +135,7 @@ async def find_question_thread_details(db: DbDependency, question_id: int):
         "created_at": found_question.created_at.isoformat()
     }
 
-    found_answers = questions_crud.find_answers(db, question_id)
+    found_answers = questions_crud.find_answers_by_question_id(db, question_id)
     answer_list = []
     for answer in found_answers:
         one_answer = {

@@ -43,7 +43,7 @@ async def update_user(db: DbDependency, param: UserUpdateRequestBody, user_id: i
     なし
     """
     # メールアドレスの重複チェック
-    duplication_user = users_crud.find_by_email(db, param.email, user_id)
+    duplication_user = users_crud.find_user_by_email(db, param.email, user_id)
     if duplication_user:
         raise HTTPException(status_code=400, detail="Email is already in use.")
 
@@ -91,11 +91,11 @@ async def find_user_details(db: DbDependency, user_id: int = Path(gt=0)):
         last_login: str
             最終ログイン日時（ISO 8601形式）
     """
-    user = users_crud.find_by_user_id(db, user_id)
+    user = users_crud.find_user_by_user_id(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
 
-    role = users_crud.find_by_role_id(db, user.role_id)
+    role = users_crud.find_role_by_role_id(db, user.role_id)
 
     re_di = {
         "user_id": user.id,
@@ -128,7 +128,7 @@ async def email_confirm_change(token, db: DbDependency, user_id: int = Path(gt=0
         "Your email address has been successfully updated."}
     """
     #一致するユーザーを取得
-    found_user = users_crud.find_user(db,user_id)
+    found_user = users_crud.find_user_by_user_id(db, user_id)
     if not found_user:
         raise HTTPException(status_code = 400,detail="Invalid or expired token.")
 
@@ -137,7 +137,7 @@ async def email_confirm_change(token, db: DbDependency, user_id: int = Path(gt=0
 
     try:
         # 該当のユーザーを更新
-        update_info = users_crud.update_address(db, found_user, token_info)
+        update_info = users_crud.update_email(db, found_user, token_info)
         if not update_info:
             raise HTTPException(status_code = 400,detail="Invalid or expired token.")
 
@@ -181,7 +181,7 @@ async def find_student_list(db:DbDependency, role: str, page: int, limit: int):
             最終ログイン日時（ISO 8601形式）
     """
 
-    users = users_crud.find_by_user(db, role)
+    users = users_crud.find_users_by_role(db, role)
 
     li = []
 

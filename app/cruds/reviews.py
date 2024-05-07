@@ -7,11 +7,11 @@ from models.review_requests import ReviewRequests
 from models.mentorships import Mentorships
 
 
-def find_response(db: Session, response_id: int):
+def find_response_by_response_id(db: Session, response_id: int):
     return db.query(ReviewResponses).filter(ReviewResponses.id == response_id).first()
 
 def update_response(db: Session, update:ReviewResponseUpdateRequestBody ,response_id: int):
-    found_response = find_response(db, response_id)
+    found_response = find_response_by_response_id(db, response_id)
     if not found_response:
         return None
     
@@ -31,19 +31,14 @@ def update_response(db: Session, update:ReviewResponseUpdateRequestBody ,respons
 
     return update_response
 
-
-def find_review(db: Session, review_id: int):
-    return db.query(ReviewRequests).filter(ReviewRequests.id == review_id).first()
-
-
-def update_review(db: Session, update:ReviewRequestUpdateRequestBody ,review_id: int):
-    found_review = find_review(db, review_id)
+def update_review(db: Session, param: ReviewRequestUpdateRequestBody, review_id: int):
+    found_review = find_review_request_by_review_request_id(db, review_id)
     if not found_review:
         return None
     
-    found_review.title =update.title
-    found_review.content =update.content
-    found_review.is_closed =update.is_closed
+    found_review.title = param.title
+    found_review.content = param.content
+    found_review.is_closed = param.is_closed
     db.add(found_review)
     
     update_review = {
@@ -56,8 +51,8 @@ def update_review(db: Session, update:ReviewRequestUpdateRequestBody ,review_id:
 
     return update_review
 
-def find_review_request_by_review_request_id(db: Session, review_request_1d: int):
-    return db.query(ReviewRequests).filter(ReviewRequests.id == review_request_1d).first()
+def find_review_request_by_review_request_id(db: Session, review_request_id: int):
+    return db.query(ReviewRequests).filter(ReviewRequests.id == review_request_id).first()
 
-def find_review_response_by_review_request_id(db:Session, review_request_id:int):
+def find_review_response_by_review_request_id(db: Session, review_request_id: int):
     return db.query(ReviewResponses).filter(ReviewResponses.review_request_id == review_request_id).all()
