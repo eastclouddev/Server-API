@@ -6,8 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query,Request
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.progresses import ProgressesResponseBody
-
+from schemas.progresses import ProgressListResponseBody
 from cruds import progresses as progresses_crud
 
 logger = getLogger("uvicorn.app")
@@ -17,7 +16,7 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/progresses", tags=["Progresses"])
 
 
-@router.get("",response_model= ProgressesResponseBody,status_code=status.HTTP_200_OK)
+@router.get("", response_model=ProgressListResponseBody, status_code=status.HTTP_200_OK)
 async def find_progress_list_admin(db: DbDependency):
     """
     進捗管理一覧
@@ -53,10 +52,10 @@ async def find_progress_list_admin(db: DbDependency):
             "progress_id": progress.id,
             "user_id": progress.user_id,
             "course_id": progress.course_id,
-            "section_id": progresses_crud.find_section_id(db,progress.course_id),
-            "curriculum_id": progresses_crud.find_curriculum_id(db,progress.course_id),
+            "section_id": progresses_crud.find_section_by_course_id(db, progress.course_id),
+            "curriculum_id": progresses_crud.find_curriculum_by_course_id(db, progress.course_id),
             "progress_percentage": progress.progress_percentage,
-            "status": progresses_crud.find_status_name(db,progress.status_id)
+            "status": progresses_crud.find_status_by_status_id(db, progress.status_id)
         }
 
         progresses_list.append(one_progress)

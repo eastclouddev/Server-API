@@ -7,8 +7,8 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.news import ResponseBody,AllResponseBody,RequestBody,UpdateResponseBody
-from schemas.news import DetailResponseBody, CreateRequestBody, CreateResponseBody
+from schemas.news import NewsListResponseBody, NewsUpdateRequestBody, NewsUpdateResponseBody, \
+                            NewsDetailResponseBody, NewsCreateRequestBody, NewsCreateResponseBody
 from cruds import news as news_crud
 
 logger = getLogger("uvicorn.app")
@@ -18,7 +18,7 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/news", tags=["News"])
 
 
-@router.get("/{news_id}", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
+@router.get("/{news_id}", response_model=NewsDetailResponseBody, status_code=status.HTTP_200_OK)
 async def find_news_details(db: DbDependency, news_id: int = Path(gt=0)):
     """
     ニュース詳細取得
@@ -41,7 +41,7 @@ async def find_news_details(db: DbDependency, news_id: int = Path(gt=0)):
             ニュースの公開日（ISO 8601形式）
     """
 
-    news = news_crud.find_by_news_id(db, news_id)
+    news = news_crud.find_news_by_news_id(db, news_id)
 
     if not news:
         raise HTTPException(status_code=404, detail="The requested news article was not found.")
@@ -55,7 +55,7 @@ async def find_news_details(db: DbDependency, news_id: int = Path(gt=0)):
 
     return re_di
 
-@router.get("", response_model=AllResponseBody, status_code=status.HTTP_200_OK)
+@router.get("", response_model=NewsListResponseBody, status_code=status.HTTP_200_OK)
 async def find_news_list(db: DbDependency, page: int, limit: int):
     """
     ニュース一覧取得
@@ -107,8 +107,8 @@ async def find_news_list(db: DbDependency, page: int, limit: int):
 
     return re_di
 
-@router.patch("/{news_id}", response_model= UpdateResponseBody, status_code=status.HTTP_200_OK)
-async def update_news(db: DbDependency, news_id: int, param:RequestBody):
+@router.patch("/{news_id}", response_model=NewsUpdateResponseBody, status_code=status.HTTP_200_OK)
+async def update_news(db: DbDependency, news_id: int, param: NewsUpdateRequestBody):
     """
     ニュース更新
 
@@ -145,13 +145,13 @@ async def update_news(db: DbDependency, news_id: int, param:RequestBody):
     """
     logger.info(param)
 
-    found_news = news_crud.find_by_news_id(db, news_id)
+    found_news = news_crud.find_news_by_news_id(db, news_id)
 
     if not found_news:
         raise HTTPException(status_code=404, detail="News not found.")
 
     try:
-        news = news_crud.update_by_news_id(db, news_id, param.title, param.content, param.is_published, param.published_at)
+        news = news_crud.update_news_by_news_id(db, news_id, param.title, param.content, param.is_published, param.published_at)
         db.commit()
 
         re_di = {
@@ -170,8 +170,8 @@ async def update_news(db: DbDependency, news_id: int, param:RequestBody):
         db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")  
 
-@router.post("", response_model=CreateResponseBody, status_code=status.HTTP_201_CREATED)
-async def create_news(db: DbDependency, param: CreateRequestBody):
+@router.post("", response_model=NewsCreateResponseBody, status_code=status.HTTP_201_CREATED)
+async def create_news(db: DbDependency, param: NewsCreateRequestBody):
     """
     ニュース作成
     Parameters

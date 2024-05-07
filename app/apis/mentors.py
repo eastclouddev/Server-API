@@ -6,8 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.mentors import DetailResponseBody, CreateResponseBody, CreateRequestBody, RewardsResponseBody, ResponseBody,\
-     ProgressesResponseBody, AllResponseBody
+from schemas.mentors import AccountInfoDetailResponseBody, AccountInfoCreateResponseBody, AccountInfoCreateRequestBody, \
+                            RewardListResponseBody, QuestionListResponseBody,\
+                            ProgressListResponseBody, ReviewRequestListResponseBody
 from cruds import mentors as mentors_crud
 
 logger = getLogger("uvicorn.app")
@@ -17,7 +18,7 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/mentors", tags=["Mentors"])
 
 
-@router.get("/{mentor_id}/rewards", response_model=RewardsResponseBody, status_code=status.HTTP_200_OK)
+@router.get("/{mentor_id}/rewards", response_model=RewardListResponseBody, status_code=status.HTTP_200_OK)
 async def find_reward_list(db: DbDependency, mentor_id: int = Path(gt=0)):
     """
     送金履歴一覧
@@ -60,7 +61,7 @@ async def find_reward_list(db: DbDependency, mentor_id: int = Path(gt=0)):
 
     return re_di
 
-@router.get("/{mentor_id}/accounts", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
+@router.get("/{mentor_id}/accounts", response_model=AccountInfoDetailResponseBody, status_code=status.HTTP_200_OK)
 async def find_account_info_details(db: DbDependency, mentor_id: int = Path(gt=0)):
     """
     送金先の情報詳細を取得
@@ -87,14 +88,14 @@ async def find_account_info_details(db: DbDependency, mentor_id: int = Path(gt=0
             口座の種類（例: "普通", "当座", "貯蓄"）
     """
 
-    info = mentors_crud.find_bank_info(db, mentor_id)
+    info = mentors_crud.find_account_info_by_mentor_id(db, mentor_id)
     if not info:
         raise HTTPException(status_code=404, detail="Mentor not found.")
     return info
 
 
-@router.post("/{mentor_id}/accounts", response_model=CreateResponseBody, status_code=status.HTTP_201_CREATED)
-async def create_account_info(db: DbDependency, create_model: CreateRequestBody, mentor_id: int = Path(gt=0)):
+@router.post("/{mentor_id}/accounts", response_model=AccountInfoCreateResponseBody, status_code=status.HTTP_201_CREATED)
+async def create_account_info(db: DbDependency, create_model: AccountInfoCreateRequestBody, mentor_id: int = Path(gt=0)):
     """
     送金先の作成
 
@@ -140,7 +141,7 @@ async def create_account_info(db: DbDependency, create_model: CreateRequestBody,
             口座名義
     """
 
-    new_transfer = mentors_crud.create(db, create_model, mentor_id)
+    new_transfer = mentors_crud.create_account_info(db, create_model, mentor_id)
     if not new_transfer:
         raise HTTPException(status_code=404, detail="Mentor not found.")
 
@@ -166,8 +167,8 @@ async def create_account_info(db: DbDependency, create_model: CreateRequestBody,
         db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")
 
-@router.get("/{mentor_id}/progresses",response_model= ProgressesResponseBody,status_code=status.HTTP_200_OK)
-async def find_progress_list_mentor(db: DbDependency):
+@router.get("/{mentor_id}/progresses", response_model=ProgressListResponseBody, status_code=status.HTTP_200_OK)
+async def find_progress_list_mentor(db: DbDependency, mentor_id: int):
     """
     進捗管理一覧
     
@@ -193,7 +194,9 @@ async def find_progress_list_mentor(db: DbDependency):
         status: str
             ステータス
     """
-    found_course_progresses = mentors_crud.find_course_progresses(db)
+    found_course_progresses = mentors_crud.find_course_progresses(db, mentor_id)
+    if not found_course_progresses:
+        raise HTTPException(status_code=404, detail="progresses not found")
 
     progresses_list = []
     for progress in found_course_progresses:
@@ -201,16 +204,16 @@ async def find_progress_list_mentor(db: DbDependency):
             "progress_id": progress.id,
             "user_id": progress.user_id,
             "course_id": progress.course_id,
-            "section_id": mentors_crud.find_section_id(db,progress.course_id),
-            "curriculum_id": mentors_crud.find_curriculum_id(db,progress.course_id),
+            "section_id": mentors_crud.find_section_by_course_id(db, progress.course_id),
+            "curriculum_id": mentors_crud.find_curriculum_by_course_id(db, progress.course_id),
             "progress_percentage": progress.progress_percentage,
-            "status": mentors_crud.find_status_name(db,progress.status_id)
+            "status": mentors_crud.find_status_by_status_id(db, progress.status_id)
         }
         progresses_list.append(one_progress)
 
     return {"progresses": progresses_list} 
 
-@router.get("/{mentor_id}/students/questions", response_model=ResponseBody, status_code=status.HTTP_200_OK)
+@router.get("/{mentor_id}/students/questions", response_model=QuestionListResponseBody, status_code=status.HTTP_200_OK)
 async def find_question_list_from_student(db: DbDependency, request: Request, mentor_id: int = Path(gt=0)):
     """
     受講生からの質問一覧取得
@@ -268,8 +271,8 @@ async def find_question_list_from_student(db: DbDependency, request: Request, me
 
 
 
-@router.get("/{mentor_id}/students/reviews",response_model= AllResponseBody,status_code=status.HTTP_200_OK)
-async def find_review_list_from_student(request: Request,db: DbDependency, mentor_id: int):
+@router.get("/{mentor_id}/students/reviews", response_model=ReviewRequestListResponseBody, status_code=status.HTTP_200_OK)
+async def find_review_list_from_student(request: Request, db: DbDependency, mentor_id: int):
     """
     受講生のレビュー一覧取得
     
@@ -296,7 +299,7 @@ async def find_review_list_from_student(request: Request,db: DbDependency, mento
         is_closed: bool
             完了しているかどうか
     """
-    found_reviews = mentors_crud.find_reviews(db,mentor_id)
+    found_reviews = mentors_crud.find_review_requests_by_user_id(db, mentor_id)
 
     reviews_list = []
 
@@ -307,7 +310,7 @@ async def find_review_list_from_student(request: Request,db: DbDependency, mento
             "content": review.content,
             "curriculum_id": review.curriculum_id,
             "created_at": review.created_at.isoformat(),
-            "is_read": mentors_crud.find_is_read(db,review.id),
+            "is_read": mentors_crud.find_response_by_review_request_id(db, review.id),
             "is_closed": review.is_closed
         }
 

@@ -6,9 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.questions import CreateRequestBody, CreateResponseBody, DetailResponseBody, \
-                                UpdateAnswerRequestBody, UpdateAnswerResponseBody, \
-                                UpdateQuestioinRequestBody, UpdateQuestionResponseBody
+from schemas.questions import AnswerCreateRequestBody, AnswerCreateResponseBody, QuestionThreadDetailResponseBody, \
+                                AnswerUpdateRequestBody, AnswerUpdateResponseBody, \
+                                QuestionUpdateRequestBody, QuestionUpdateResponseBody
 from cruds import questions as questions_crud
 from services import questions as questions_service
 
@@ -19,8 +19,8 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/questions", tags=["Questions"])
 
 
-@router.post("/{question_id}/answers", response_model=CreateResponseBody, status_code=status.HTTP_201_CREATED)
-async def create_answer(db: DbDependency, param: CreateRequestBody, question_id: int = Path(gt=0)):
+@router.post("/{question_id}/answers", response_model=AnswerCreateResponseBody, status_code=status.HTTP_201_CREATED)
+async def create_answer(db: DbDependency, param: AnswerCreateRequestBody, question_id: int = Path(gt=0)):
     """
     質問回答投稿作成
     Parameters
@@ -49,7 +49,7 @@ async def create_answer(db: DbDependency, param: CreateRequestBody, question_id:
         raise HTTPException(status_code=404, detail="Question not found.")
     
     try:
-        answer = questions_crud.find_by_answer(db, question_id)
+        answer = questions_crud.find_answer_by_question_id(db, question_id)
 
         # 同じ質問に対して、再度回答する場合はparent_answer_idを追加する
         if answer:
@@ -71,7 +71,7 @@ async def create_answer(db: DbDependency, param: CreateRequestBody, question_id:
         logger.error(str(e))
         raise HTTPException(status_code=400, detail="Invalid input data.")
 
-@router.get("/{question_id}", response_model=DetailResponseBody, status_code=status.HTTP_200_OK)
+@router.get("/{question_id}", response_model=QuestionThreadDetailResponseBody, status_code=status.HTTP_200_OK)
 async def find_question_thread_details(db: DbDependency, question_id: int):
     """
     質問スレッド詳細取得
@@ -119,23 +119,23 @@ async def find_question_thread_details(db: DbDependency, question_id: int):
                 作成日（ISO 8601形式）
     """
 
-    found_question = questions_crud.find_question(db, question_id)
+    found_question = questions_crud.find_question_by_question_id(db, question_id)
 
     if not found_question:
         raise HTTPException(status_code=404,detail="Question not found.")
     
     question = {
-        "id":found_question.id,
-        "curriculum_id":found_question.curriculum_id,
-        "user_id":found_question.user_id,
-        "title":found_question.title,
-        "content":found_question.content,
-        "media_content":found_question.media_content,
-        "is_closed":found_question.is_closed,
-        "created_at":found_question.created_at.isoformat()
+        "id": found_question.id,
+        "curriculum_id": found_question.curriculum_id,
+        "user_id": found_question.user_id,
+        "title": found_question.title,
+        "content": found_question.content,
+        "media_content": found_question.media_content,
+        "is_closed": found_question.is_closed,
+        "created_at": found_question.created_at.isoformat()
     }
 
-    found_answers = questions_crud.find_answers(db, question_id)
+    found_answers = questions_crud.find_answers_by_question_id(db, question_id)
     answer_list = []
     for answer in found_answers:
         one_answer = {
@@ -158,8 +158,8 @@ async def find_question_thread_details(db: DbDependency, question_id: int):
     
     return re_di
 
-@router.patch("/{question_id}", response_model=UpdateQuestionResponseBody, status_code=status.HTTP_200_OK)
-async def update_question(db: DbDependency, param: UpdateQuestioinRequestBody, question_id: int):
+@router.patch("/{question_id}", response_model=QuestionUpdateResponseBody, status_code=status.HTTP_200_OK)
+async def update_question(db: DbDependency, param: QuestionUpdateRequestBody, question_id: int):
     """
     質問編集
 
@@ -221,8 +221,8 @@ async def update_question(db: DbDependency, param: UpdateQuestioinRequestBody, q
         db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")
 
-@router.patch("/answers/{answer_id}", response_model=UpdateAnswerResponseBody, status_code=status.HTTP_200_OK)
-async def update_answer(db: DbDependency, param: UpdateAnswerRequestBody, answer_id: int):
+@router.patch("/answers/{answer_id}", response_model=AnswerUpdateResponseBody, status_code=status.HTTP_200_OK)
+async def update_answer(db: DbDependency, param: AnswerUpdateRequestBody, answer_id: int):
     """
     質問回答更新（受講生、メンター）
 

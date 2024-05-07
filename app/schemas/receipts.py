@@ -9,7 +9,7 @@ class RequestBody(BaseModel):
     pass
 
 
-class ResponseBody(BaseModel):
+class ReceiptDetailResponseBody(BaseModel):
     receipt_id: int
     company_id: int
     billing_id: int

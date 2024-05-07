@@ -2,12 +2,13 @@ from logging import getLogger
 from typing import Annotated
 
 from database.database import get_db
-from fastapi import APIRouter, Depends, HTTPException, Path, Query,Request
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.reviews import UpdateResponseRequestBody, UpdateResponseResponseBody, UpdateReviewRequestBody, UpdateReviewResponseBody, \
-     AllReviewResponse
+from schemas.reviews import ReviewResponseUpdateRequestBody, ReviewResponseUpdateResponseBody, \
+                            ReviewRequestUpdateRequestBody, ReviewRequestUpdateResponseBody, \
+                            ReviewThreadDetailResponseBody
 
 from cruds import reviews as reviews_crud
 
@@ -18,8 +19,8 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/reviews", tags=["Reviews"])
 
 
-@router.patch("/responses/{response_id}", response_model=UpdateResponseResponseBody, status_code=status.HTTP_200_OK)
-async def update_review_response(db: DbDependency, update: UpdateResponseRequestBody, response_id: int = Path(gt=0)):
+@router.patch("/responses/{response_id}", response_model=ReviewResponseUpdateResponseBody, status_code=status.HTTP_200_OK)
+async def update_review_response(db: DbDependency, update: ReviewResponseUpdateRequestBody, response_id: int = Path(gt=0)):
     """
     レビュー回答更新
 
@@ -52,7 +53,7 @@ async def update_review_response(db: DbDependency, update: UpdateResponseRequest
             回答が最後に更新された日時
     """
     
-    new_response = reviews_crud.update_response(db, update,response_id)
+    new_response = reviews_crud.update_response(db, update, response_id)
     if not new_response:
         raise HTTPException(status_code=404, detail="Response not found.")
 
@@ -66,8 +67,8 @@ async def update_review_response(db: DbDependency, update: UpdateResponseRequest
         raise HTTPException(status_code=400, detail="Invalid input data.")
 
 
-@router.patch("/{review_id}", response_model=UpdateReviewResponseBody, status_code=status.HTTP_200_OK)
-async def update_review_request(db: DbDependency, update: UpdateReviewRequestBody, review_id: int = Path(gt=0)):
+@router.patch("/{review_id}", response_model=ReviewRequestUpdateResponseBody, status_code=status.HTTP_200_OK)
+async def update_review_request(db: DbDependency, update: ReviewRequestUpdateRequestBody, review_id: int = Path(gt=0)):
     """
     レビュー更新（受講生）
 
@@ -99,7 +100,7 @@ async def update_review_request(db: DbDependency, update: UpdateReviewRequestBod
 
     """
     
-    new_review = reviews_crud.update_review(db, update,review_id)
+    new_review = reviews_crud.update_review(db, update, review_id)
     if not new_review:
         raise HTTPException(status_code=404, detail="Curriculum not found.")
 
@@ -113,7 +114,7 @@ async def update_review_request(db: DbDependency, update: UpdateReviewRequestBod
         raise HTTPException(status_code=400, detail="Invalid input data.")
  
 
-@router.get("/{review_request_id}", response_model=AllReviewResponse, status_code=status.HTTP_200_OK)
+@router.get("/{review_request_id}", response_model=ReviewThreadDetailResponseBody, status_code=status.HTTP_200_OK)
 async def find_review_thread_details(db: DbDependency, review_request_id: int):
     """
     レビュースレッド詳細
