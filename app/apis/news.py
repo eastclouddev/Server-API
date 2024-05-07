@@ -41,7 +41,7 @@ async def find_news_details(db: DbDependency, news_id: int = Path(gt=0)):
             ニュースの公開日（ISO 8601形式）
     """
 
-    news = news_crud.find_by_news_id(db, news_id)
+    news = news_crud.find_news_by_news_id(db, news_id)
 
     if not news:
         raise HTTPException(status_code=404, detail="The requested news article was not found.")
@@ -145,13 +145,13 @@ async def update_news(db: DbDependency, news_id: int, param: NewsUpdateRequestBo
     """
     logger.info(param)
 
-    found_news = news_crud.find_by_news_id(db, news_id)
+    found_news = news_crud.find_news_by_news_id(db, news_id)
 
     if not found_news:
         raise HTTPException(status_code=404, detail="News not found.")
 
     try:
-        news = news_crud.update_by_news_id(db, news_id, param.title, param.content, param.is_published, param.published_at)
+        news = news_crud.update_news_by_news_id(db, news_id, param.title, param.content, param.is_published, param.published_at)
         db.commit()
 
         re_di = {
