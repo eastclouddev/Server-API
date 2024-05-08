@@ -48,3 +48,9 @@ def find_users_by_role(db: Session, role: str):
         return []
     users = db.query(Users).filter(Users.role_id == find_role.id).all()
     return users
+
+def find_roles(db: Session):
+    return db.query(Roles).all()
+
+def find_users_by_role_id(db: Session, role_id: int):
+    return db.query(Users).filter(Users.role_id == role_id, Users.is_enable == True).all()
