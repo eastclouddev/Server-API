@@ -116,11 +116,12 @@ def find_answers_by_question_id(db: Session, question_id: int):
     return db.query(Answers).filter(Answers.question_id == question_id).all()
 
 def find_review_requests_by_user_id(db: Session, user_id: int):
-    mentorships = db.query(Mentorships).filter(Mentorships.mentor_id == user_id).first()
-    return db.query(ReviewRequests).filter(ReviewRequests.user_id == mentorships.student_id).all()
-
-def find_response_by_review_request_id(db: Session, review_request_id: int):
-    response = db.query(ReviewResponses).filter(ReviewResponses.review_request_id == review_request_id).first()
-    if not response:
-        return False
-    return response.is_read
+    mentorships = db.query(Mentorships).filter(Mentorships.mentor_id == user_id).all()
+    if not mentorships:
+        return []
+    li = []
+    for mentorship in mentorships:
+        users = db.query(ReviewRequests).filter(ReviewRequests.user_id == mentorship.student_id).all()
+        for user in users:
+            li.append(user)
+    return li

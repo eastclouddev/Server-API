@@ -300,7 +300,6 @@ async def find_review_list_from_student(request: Request, db: DbDependency, ment
             完了しているかどうか
     """
     found_reviews = mentors_crud.find_review_requests_by_user_id(db, mentor_id)
-
     reviews_list = []
 
     for review in found_reviews:
@@ -310,7 +309,7 @@ async def find_review_list_from_student(request: Request, db: DbDependency, ment
             "content": review.content,
             "curriculum_id": review.curriculum_id,
             "created_at": review.created_at.isoformat(),
-            "is_read": mentors_crud.find_response_by_review_request_id(db, review.id),
+            "is_read": True, #TODO テーブル変更のため
             "is_closed": review.is_closed
         }
 
