@@ -38,3 +38,13 @@ class CourseDetailResponseBody(BaseModel):
     created_user_id: int
     created_at: str
     sections: list[Section]
+
+class CoursesStartRequestBody(BaseModel):
+    user_id: int = Field(examples=[1])
+    course_ids: list[int] = Field(examples=[[1, 2, 3]])
+
+class CourseStart(BaseModel):
+    course_id: int
+    started_at: str
+class CoursesStartResponsetBody(BaseModel):
+    courses: list[CourseStart]
