@@ -177,3 +177,32 @@ async def find_my_review_list(db: DbDependency, student_id: int):
         li.append(di)
 
     return {"reviews": li}
+
+@router.post("/{student_id}/assign_mentor", status_code=status.HTTP_201_CREATED)
+async def create_assign_mentor(db: DbDependency, student_id: int):
+        
+    """
+    受講生と担当メンターの関連付け
+    
+    Parameters
+    -----------------------
+    student_id: int
+        メンターを割り当てる受講生のID
+
+    Returns
+    -----------------------
+    なし
+    """
+
+    user = students_crud.find_student_id(db, student_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Student ID is not found.")
+    
+    try:
+        students_crud.find_mentor_by_least_students(db, student_id)
+        db.commit()
+        return
+    except Exception as e:
+        logger.error(str(e))
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Student ID is invalid.")
