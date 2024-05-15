@@ -16,9 +16,15 @@ Dockerのインストール、gitの初期設定を行っていること
 ## マイグレーション　　※docker起動時に実行されます
 
 1. dockerに入る: `docker-compose exec api bash`
-2. ディレクトリ移動: `cd database`
+<!-- 2. ディレクトリ移動: `cd database` ファイル階層が変わり不要になりました -->
+2. app/database/migrations にversionsフォルダを作成する
 3. マイグレーションファイル生成: `alembic revision --autogenerate -m "※ファイル名、下記の補足参照"`
-4. ローカルを確認すると、app/database/versions に新規ファイルが作成されているので、中身を編集する
+4. ローカルを確認すると、app/database/migrations/versions に新規ファイルが作成されているので、中身を編集する
+   sa.ForeignKeyConstraint(['mentor_id', 'student_id'], ['users.id', 'users.id'], ),
+   を
+   sa.ForeignKeyConstraint(['mentor_id'], ['users.id'], ),
+   sa.ForeignKeyConstraint(['student_id'], ['users.id'], ),
+   に修正します
 5. マイグレーション実行: `alembic upgrade head`
 
 ※補足: マイグレーションファイル名は、[Create/Alter/Drop +テーブル名]としてください
