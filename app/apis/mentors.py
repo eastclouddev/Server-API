@@ -8,7 +8,7 @@ from starlette import status
 
 from schemas.mentors import AccountInfoDetailResponseBody, AccountInfoCreateResponseBody, AccountInfoCreateRequestBody, \
                             RewardListResponseBody, QuestionListResponseBody,\
-                            ProgressListResponseBody, ReviewRequestListResponseBody, MentorScountList
+                            ProgressListResponseBody, ReviewRequestListResponseBody, MentorsCountListResponseBody
 from cruds import mentors as mentors_crud
 
 logger = getLogger("uvicorn.app")
@@ -317,7 +317,7 @@ async def find_review_list_from_student(request: Request, db: DbDependency, ment
 
     return {"reviews": reviews_list}
 
-@router.get("/counts", response_model=MentorScountList, status_code=status.HTTP_200_OK)
+@router.get("/counts", response_model=MentorsCountListResponseBody, status_code=status.HTTP_200_OK)
 async def find_student_count(db: DbDependency):
     """
     メンター担当受講生数取得
@@ -335,7 +335,7 @@ async def find_student_count(db: DbDependency):
             メンターの名前
         student_content: str
             そのメンターが担当する受講生の数
-    # """
+    """
 
     mentors = mentors_crud.find_mentor_by_students(db)
     return mentors
