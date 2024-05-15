@@ -2,13 +2,22 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette import status
 
+from fastapi import Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
+from database.database import get_db
+from typing import Annotated
+from sqlalchemy.orm import Session
+
 from apis import \
     login, logout, password_reset, news, \
     students, mentors, reviews, companies, users, \
     courses, curriculums, questions, billings, receipts, \
     rewards, progresses
+from authenticate import \
+    authenticate_user, create_access_token, create_refresh_token, \
+    find_user_by_id, get_current_user, Token, TokenData, token_analysis
 
-
+DbDependency = Annotated[Session, Depends(get_db)]
 app = FastAPI()
 
 app.add_middleware(
@@ -39,3 +48,26 @@ app.include_router(billings.router)
 app.include_router(receipts.router)
 app.include_router(rewards.router)
 app.include_router(progresses.router)
+
+@app.post("/token")
+async def login_for_access_token(
+    db: DbDependency,
+    form_data: OAuth2PasswordRequestForm = Depends()
+): # TODO:ログイン画面に応じてform_dataのスキーマが変更になる
+    user = authenticate_user(db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token = create_access_token(user.user_id)
+    refresh_token = create_refresh_token(db, user.user_id)
+    return Token(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
+
+
+# 認証の使い方サンプル
+@app.get("/users/me/")
+async def read_users_me(db: DbDependency, token_data: TokenData = Depends(get_current_user)):
+    user = token_analysis(db, token_data)
+    return user
