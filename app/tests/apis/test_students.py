@@ -55,3 +55,18 @@ def test_find_my_review_list_02(client_fixture: TestClient):
 
     assert response.status_code == 200
     assert response.json()["reviews"] == []
+
+"""受講生と担当メンターの関連付け"""
+def test_create_assign_mentor_01(client_fixture: TestClient):
+
+    response = client_fixture.post("/students/11/assign_mentor")
+
+    assert response.status_code == 201
+
+def test_create_assign_ABNORMAL_01(client_fixture: TestClient):
+
+    response = client_fixture.post("/students/111/assign_mentor")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Student ID is not found."
+
