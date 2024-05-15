@@ -76,3 +76,11 @@ class AllResponseList(BaseModel):
 
 class ReviewRequestListResponseBody(BaseModel):
     reviews: list[AllResponseList]
+
+class MentorScountResponseBody(BaseModel):
+    mentor_id: int
+    mentor_name: str
+    student_count: int
+
+class MentorScountList(BaseModel):
+    mentors: list[MentorScountResponseBody]

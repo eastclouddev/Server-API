@@ -119,3 +119,14 @@ def test_find_review_list_from_student_01(client_fixture: TestClient):
     assert "created_at" in response.json()["reviews"][0]
     assert "is_read" in response.json()["reviews"][0]
     assert "is_closed" in response.json()["reviews"][0]
+
+"""メンター担当受講者数取得"""
+def test_find_mentors_student_count_01(client_fixture: TestClient):
+    response = client_fixture.get(
+        "/mentors/counts"
+    )
+    
+    assert response.status_code == 200
+    assert "mentor_id" in response.json()["mentors"][0]
+    assert "mentor_name" in response.json()["mentors"][0]
+    assert "student_count" in response.json()["mentors"][0]
