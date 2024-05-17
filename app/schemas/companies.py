@@ -77,3 +77,12 @@ class Student(BaseModel):
 
 class StudentListResponseBody(BaseModel):
     users: list[Student]
+
+class Account(BaseModel):
+    role_id: int
+    role_name: str
+    count: int
+
+class AccountListResponseBody(BaseModel):
+    company_id: int
+    role_counts: list[Account]
