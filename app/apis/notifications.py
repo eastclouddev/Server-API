@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.notifications import NotificationListResponseBody
+from schemas.notifications import NotificationListResponseBody, NotificationUpdateResponseBody
 from cruds import notifications as notifications_crud
 
 logger = getLogger("uvicorn.app")
@@ -22,6 +22,7 @@ async def find_notification(db: DbDependency):
     
     Parameters
     -----------------------
+    なし
     
     -----------------------
     id: int
@@ -84,3 +85,34 @@ async def find_notification(db: DbDependency):
         count += 1
 
     return {"notifications": li}
+
+@router.patch("/{notification_id}/mark_read", response_model=NotificationUpdateResponseBody, status_code=status.HTTP_200_OK)
+async def update_notification(db: DbDependency, notification_id: int):
+
+    """
+    通知内容を既読に更新
+    
+    Parameters
+    -----------------------
+    notification_id: int
+        既読にする通知のID
+    
+    -----------------------
+    mesasge: str
+        操作成功のメッセージ(固定値:Notification marked as read successfully.)
+    notification_id: int
+        既読にした通知のID
+    """
+
+    try:
+        notification = notifications_crud.update_notificaton_by_id(db, notification_id)
+        if not notification:
+            raise Exception("Notification not found")
+        db.commit()
+    except Exception as e:
+        logger.error(str(e))
+        db.rollback()
+        raise HTTPException(status_code=404, detail="Notification ID not found.")
+
+
+    return {"message": "Notification marked as read successfully.", "notification_id": notification_id}

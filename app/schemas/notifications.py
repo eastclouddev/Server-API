@@ -17,3 +17,7 @@ class Notification(BaseModel):
 
 class NotificationListResponseBody(BaseModel):
     notifications: list[Notification]
+
+class NotificationUpdateResponseBody(BaseModel):
+    message: str
+    notification_id: int

@@ -8,6 +8,8 @@ from models.answers import Answers
 from models.review_requests import ReviewRequests
 from models.review_responses import ReviewResponses
 
+from models.notifications import Notifications
+
 def find_table(db: Session):
     # 10個制限
     question = db.query(Questions.id, Questions.content, Questions.created_at)\
@@ -41,14 +43,11 @@ def find_db(db: Session, id, content, created_at):
 def find_user_by_id(db: Session, id):
     return db.query(Users).filter(Users.id == id).first()
 
+def update_notificaton_by_id(db: Session, notification_id: int):
+    notification = db.query(Notifications).filter(Notifications.id == notification_id).first()
+    if not notification:
+        return None
+    notification.is_read = True
+    db.add(notification)
 
-
-
-
-
-
-
-
-
-
-
+    return notification
