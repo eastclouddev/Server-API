@@ -32,3 +32,11 @@ class User(BaseModel):
 
 class UserListResponseBody(BaseModel):
     users: list[User]
+
+class Role(BaseModel):
+    role_id: int
+    role_name: str
+    count: int
+
+class AccountListResponseBody(BaseModel):
+    role_counts: list[Role]

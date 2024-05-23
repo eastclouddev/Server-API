@@ -2,7 +2,7 @@ from logging import getLogger
 from typing import Annotated
 
 from database.database import get_db
-from fastapi import APIRouter, Depends, HTTPException, Path, Query,Request
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy.orm import Session
 from starlette import status
 

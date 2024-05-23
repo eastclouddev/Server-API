@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.courses import CourseListResponseBody, CourseDetailResponseBody
+from schemas.courses import CourseListResponseBody, CourseDetailResponseBody, CoursesStartRequestBody, CoursesStartResponsetBody
 from cruds import courses as courses_crud
 
 logger = getLogger("uvicorn.app")
@@ -102,8 +102,8 @@ async def find_course_details(db: DbDependency, course_id: int = Path(gt=0)):
                 description: str
                     カリキュラムの説明
     """
-    course = courses_crud.find_by_course_id(db, course_id)
-    sections = courses_crud.find_sections(db, course_id)
+    course = courses_crud.find_course_by_course_id(db, course_id)
+    sections = courses_crud.find_sections_by_course_id(db, course_id)
 
     if not course:
         raise HTTPException(status_code=404, detail="Course not found.")
@@ -111,7 +111,7 @@ async def find_course_details(db: DbDependency, course_id: int = Path(gt=0)):
     section_li = []
     if sections:
         for section in sections:
-            curriculums = courses_crud.find_curriculums(db, section.id)
+            curriculums = courses_crud.find_curriculums_by_section_id(db, section.id)
             curriculum_li = []
             # 最内のリストを作成
             for curriculum in curriculums:
@@ -139,4 +139,55 @@ async def find_course_details(db: DbDependency, course_id: int = Path(gt=0)):
         "sections": section_li
     }
 	
+    return re_di
+
+@router.post("/start/", response_model=CoursesStartResponsetBody, status_code=status.HTTP_201_CREATED)
+async def courses_start(db: DbDependency, param: CoursesStartRequestBody):
+    """
+    コース開始
+
+    Parameter
+    -----------------------
+    user_id: int
+        コースを開始するユーザーのID
+    course_ids: array[int]
+        開始するコースのIDリスト
+
+    Returns
+    -----------------------
+    courses: array
+        course_id: int
+            開始したコースのID
+        started_at: str
+            コースの開始日（ISO 8601形式）
+    """
+
+    # コースIDの存在チェック
+    for course_id in param.course_ids:
+        if not courses_crud.find_course_by_course_id(db, course_id):
+            raise HTTPException(status_code=404, detail="Course ID(s) not found.")
+
+    # コースの開始（進捗テーブルの作成）
+    try:
+        courses_crud.create_course_progress(db, param.user_id, param.course_ids)
+        db.commit()
+    except Exception as e:
+        logger.error(str(e))
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid user ID or course IDs.")
+
+    # 画面返却値の作成
+    li = []
+    created_course_progresses = courses_crud.find_course_progress(db, param.user_id, param.course_ids)
+    for course_progress in created_course_progresses:
+        di = {
+            "course_id": course_progress.course_id,
+            "started_at": course_progress.started_at.isoformat()
+        }
+        li.append(di)
+
+    re_di = {
+        "courses": li
+    }
+
     return re_di

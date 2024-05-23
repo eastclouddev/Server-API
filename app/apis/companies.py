@@ -131,7 +131,7 @@ async def find_company_details(db: DbDependency, company_id: int = Path(gt=0)):
             レコードの最終更新日時（ISO 8601形式）
 
     """
-    company_info = companies_cruds.find_by_company_id(db, company_id)
+    company_info = companies_cruds.find_company_by_company_id(db, company_id)
     if not company_info:
         raise HTTPException(status_code=404, detail="Company not found.")
     
@@ -240,7 +240,7 @@ async def find_progress_list_company(db: DbDependency, company_id: int):
         status: str
             ステータス
     """
-    found_course_progresses = companies_cruds.find_course_progresses(db, company_id)
+    found_course_progresses = companies_cruds.find_course_progresses_by_company_id(db, company_id)
     if not found_course_progresses:
         raise HTTPException(status_code=404, detail="progresses not found")
 
@@ -251,10 +251,10 @@ async def find_progress_list_company(db: DbDependency, company_id: int):
             "progress_id": progress.id,
             "user_id": progress.user_id,
             "course_id": progress.course_id,
-            "section_id": companies_cruds.find_section_id(db, progress.course_id),
-            "curriculum_id": companies_cruds.find_curriculum_id(db, progress.course_id),
+            "section_id": companies_cruds.find_section_by_course_id(db, progress.course_id),
+            "curriculum_id": companies_cruds.find_curriculum_by_course_id(db, progress.course_id),
             "progress_percentage": progress.progress_percentage,
-            "status": companies_cruds.find_status_name(db, progress.status_id)
+            "status": companies_cruds.find_status_by_status_id(db, progress.status_id)
         }
 
         progresses_list.append(one_progress)
@@ -291,7 +291,7 @@ async def find_student_list_company(db: DbDependency, company_id: int, role: str
         last_login: str
             最終ログイン日（ISO 8601形式）
     """
-    users = companies_cruds.get_user(db, company_id, role)
+    users = companies_cruds.find_users_by_company_id_and_role(db, company_id, role)
     if not users:
         raise HTTPException(status_code=404, detail="User not found")
     

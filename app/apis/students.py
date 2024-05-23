@@ -46,7 +46,7 @@ async def find_my_question_list(db: DbDependency, student_id: int = Path(gt=0)):
             完了しているかどうか
     """
 
-    found_question = students_crud.find_by_user_id(db, student_id)
+    found_question = students_crud.find_questions_by_user_id(db, student_id)
 
     if not found_question:
         raise HTTPException(status_code=404, detail="question not found")
@@ -62,7 +62,7 @@ async def find_my_question_list(db: DbDependency, student_id: int = Path(gt=0)):
             "created_at": question.created_at,
             "is_closed": question.is_closed
         }
-        answer = students_crud.find_by_question_id(db, question.id)
+        answer = students_crud.find_answer_by_question_id(db, question.id)
         if answer:
             find_is_read = {"is_read": answer.is_read}
             one_question.update(find_is_read)
@@ -100,13 +100,13 @@ async def find_progress_list_student(db: DbDependency, reqeust: Request):
     # TODO:ヘッダー情報から必要なパラメータを取得する
     user_id = 1
 
-    progresses = students_crud.find_course_progresses(db, user_id)
+    progresses = students_crud.find_course_progresses_by_user_id(db, user_id)
                 
     li = []
 
     for progress in progresses:
-        course = students_crud.find_by_course_id(db, progress.course_id)
-        status = students_crud.find_by_status_id(db, progress.status_id)
+        course = students_crud.find_course_by_course_id(db, progress.course_id)
+        status = students_crud.find_status_by_status_id(db, progress.status_id)
 
         if course and status:
             di = {
@@ -154,11 +154,11 @@ async def find_my_review_list(db: DbDependency, student_id: int):
 
     """
 
-    reviews = students_crud.find_reviews(db, student_id)
+    review_requests = students_crud.find_review_requests_by_user_id(db, student_id)
 
     li = []
-    for review in reviews:
-        review_responses = students_crud.find_is_read(db, review.id)
+    for review in review_requests:
+        review_responses = students_crud.find_review_responses_by_review_id(db, review.id)
         is_read = True
         for review_response in review_responses:
             data = review_response.is_read
@@ -177,3 +177,32 @@ async def find_my_review_list(db: DbDependency, student_id: int):
         li.append(di)
 
     return {"reviews": li}
+
+@router.post("/{student_id}/assign_mentor", status_code=status.HTTP_201_CREATED)
+async def create_assign_mentor(db: DbDependency, student_id: int):
+        
+    """
+    受講生と担当メンターの関連付け
+    
+    Parameters
+    -----------------------
+    student_id: int
+        メンターを割り当てる受講生のID
+
+    Returns
+    -----------------------
+    なし
+    """
+
+    user = students_crud.find_student_id(db, student_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Student ID is not found.")
+    
+    try:
+        students_crud.find_mentor_by_least_students(db, student_id)
+        db.commit()
+        return
+    except Exception as e:
+        logger.error(str(e))
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Student ID is invalid.")

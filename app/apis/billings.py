@@ -46,7 +46,7 @@ async def find_billing_details(db: DbDependency, billing_id: int = Path(gt=0)):
                 支払い日（YYYY-MM-DD形式）
 
     """
-    info = billings_crud.find_detail(db, billing_id)
+    info = billings_crud.find_detail_by_billing_id(db, billing_id)
     if not info:
         raise HTTPException(status_code=404, detail="Billing record not found")
     return info
