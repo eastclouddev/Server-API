@@ -42,3 +42,6 @@ def create_news_category(db: Session, param: NewsCategoryRequestBody):
     db.add(news_category)
 
     return news_category
+
+def find_news_categories(db: Session):
+    return db.query(NewsCategories).all()
