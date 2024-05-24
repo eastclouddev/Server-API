@@ -125,3 +125,18 @@ def find_review_requests_by_user_id(db: Session, user_id: int):
         for user in users:
             li.append(user)
     return li
+
+def find_mentor_by_students(db: Session):
+    mentors = db.query(Mentorships.mentor_id).distinct().all()
+    li =[]
+    for mentor in mentors:
+        student_count = db.query(Mentorships).filter(Mentorships.mentor_id == mentor.mentor_id).count()
+        users = db.query(Users).filter(Users.id == mentor.mentor_id).first()
+        di = {
+            "mentor_id": mentor.mentor_id,
+            "mentor_name": users.last_name+users.first_name,
+            "student_count": student_count
+        }
+        li.append(di)
+
+    return {"mentors": li}
