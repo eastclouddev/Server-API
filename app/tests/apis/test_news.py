@@ -101,3 +101,16 @@ def test_update_news_ABNORMAL_01(client_fixture: TestClient):
     
     assert response.status_code == 404
     assert response.json()["detail"] == "News not found."
+
+"""ニュースカテゴリ更新"""
+def test_update_news_category_01(client_fixture: TestClient):
+    response = client_fixture.patch(
+        "/news/categories/1",
+        json={
+            "name": "string"
+        }
+    )
+
+    assert response.status_code == 200
+    assert "category" in response.json()
+    assert "id" in response.json()["category"]
