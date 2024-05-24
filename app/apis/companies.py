@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 from schemas.companies import CompanyCreateRequestBody, CompanyCreateResponseBody, CompanyDetailResponseBody, \
-                                CompanyListResponseBody, StudentListResponseBody, ProgressListResponseBody
+CompanyListResponseBody, StudentListResponseBody, ProgressListResponseBody, AccountListResponseBody
 from cruds import companies as companies_cruds
 from services import companies as compamies_services
 
@@ -300,3 +300,44 @@ async def find_student_list_company(db: DbDependency, company_id: int, role: str
         found_user.append(user)
 
     return compamies_services.cereate_users_list(role, found_user)
+@router.get("/{company_id}/users/counts", response_model=AccountListResponseBody, status_code=status.HTTP_200_OK)
+async def find_number_of_accounts(db: DbDependency, company_id: int):
+    """
+    有効アカウント数取得(法人、法人代行)
+    Parameters
+    -----------------------
+    company_id: int
+        会社のID
+    Return
+    -----------------------
+    company_id: 会社のID
+    role_counts: array
+        role_id: int
+            ロールのID
+        role_name: str
+            ロールの名称
+        count: int
+            そのロールを持つ有効なユーザーの数
+    """
+
+    company = companies_cruds.find_users_by_company_id(db, company_id)
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found.")
+    
+    roles = companies_cruds.find_roles(db)
+    li = []
+    for role in roles:
+        users = companies_cruds.find_users_by_role_id(db, role.id)
+        di = {
+            "role_id": role.id,
+            "role_name": role.name,
+            "count": len(users)
+        }
+        li.append(di)
+
+    re_di = {
+        "company_id": company.company_id,
+        "role_counts": li
+    }
+
+    return re_di

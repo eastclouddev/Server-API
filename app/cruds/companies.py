@@ -57,3 +57,12 @@ def find_users_by_company_id_and_role(db: Session, company_id: int, role: str):
         return None
     users = db.query(Users).filter(Users.company_id == company_id, Users.role_id == found_role.id).all()
     return users
+
+def find_users_by_company_id(db: Session, company_id: int):
+    return db.query(Users).filter(Users.company_id == company_id).first()
+
+def find_roles(db: Session):
+    return db.query(Roles).all()
+
+def find_users_by_role_id(db: Session, role_id: int):
+    return db.query(Users).filter(Users.role_id == role_id, Users.is_enable == True).all()
