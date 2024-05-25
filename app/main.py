@@ -6,7 +6,7 @@ from apis import \
     login, logout, password_reset, news, \
     students, mentors, reviews, companies, users, \
     courses, curriculums, questions, billings, receipts, \
-    rewards, progresses
+    rewards, progresses,notifications
 
 
 app = FastAPI()
@@ -39,6 +39,7 @@ app.include_router(billings.router)
 app.include_router(receipts.router)
 app.include_router(rewards.router)
 app.include_router(progresses.router)
+app.include_router(notifications.router)
 
 
 from typing import List
