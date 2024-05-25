@@ -50,3 +50,16 @@ class NewsDetailResponseBody(BaseModel):
     title: str
     content: str
     published_at: str
+
+class NewsCategoryRequestBody(BaseModel):
+    name: str = Field(examples=["ニュースカテゴリの名前"])
+
+class NewsCategory(BaseModel):
+    id: int
+    name: str
+    created_at: str
+    updated_at: str
+
+class NewsCategoryResponseBody(BaseModel):
+    message: str
+    category: NewsCategory
