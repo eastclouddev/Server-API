@@ -56,10 +56,6 @@ from models.section_tags import SectionTags
 from models.sections import Sections
 from models.tags import Tags
 from models.quiz_contents import QuizContents
-from models.user_account_info import UserAccountInfo
-from models.user_account_types import UserAccountTypes
-from models.user_reward_histories import UserRewardHistories
-from models.user_rewards import UserRewards
 from models.users import Users
 target_metadata = Base.metadata
 

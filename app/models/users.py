@@ -11,9 +11,6 @@ from models.curriculum_progresses import CurriculumProgresses
 from models.learning_records import LearningRecords
 from models.questions import Questions
 from models.section_progresses import SectionProgresses
-from models.user_account_info import UserAccountInfo
-from models.user_reward_histories import UserRewardHistories
-from models.user_rewards import UserRewards
 from models.mentorships import Mentorships
 from models.review_requests import ReviewRequests
 from models.review_responses import ReviewResponses
@@ -46,9 +43,6 @@ class Users(Base):
     learning_records = relationship("LearningRecords", backref="users")
     questions = relationship("Questions", backref="users")
     section_progresses = relationship("SectionProgresses", backref="users")
-    user_account_info = relationship("UserAccountInfo", backref="users")
-    user_reward_histories = relationship("UserRewardHistories", backref="users")
-    user_rewards = relationship("UserRewards", backref="users")
     # mentorships = relationship("Mentorships", backref="users") # TODO:未解決です。少々お待ちください。（井上）
     review_requests = relationship("ReviewRequests", backref="users")
     review_responses = relationship("ReviewResponses", backref="users")

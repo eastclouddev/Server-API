@@ -18,7 +18,6 @@ class Questions(Base):
     research = Column(Text, nullable=False)
     content = Column(Text, nullable=False)
     media_content = Column(JSON)
-    is_read = Column(Boolean, default=False)
     is_closed = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())

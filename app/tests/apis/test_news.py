@@ -114,3 +114,28 @@ def test_update_news_category_01(client_fixture: TestClient):
     assert response.status_code == 200
     assert "category" in response.json()
     assert "id" in response.json()["category"]
+
+"""ニュースカテゴリ作成"""
+def test_news_category_01(client_fixture: TestClient):
+    response = client_fixture.post(
+        "/news/categories",
+        json={
+            "name": "string"
+        }
+    )
+
+    assert response.status_code == 201
+    assert "category" in response.json()
+    assert "id" in response.json()["category"]
+
+
+"""ニュースカテゴリ一覧取得"""
+def test_find_news_category_list_01(client_fixture: TestClient):
+    response = client_fixture.get("/news/categories/")
+
+    assert response.status_code == 200
+    assert "categories" in response.json()
+    assert "id" in response.json()["categories"][0]
+    assert "name" in response.json()["categories"][0]
+    assert "created_at" in response.json()["categories"][0]
+    assert "updated_at" in response.json()["categories"][0]

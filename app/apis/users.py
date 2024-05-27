@@ -110,44 +110,44 @@ async def find_user_details(db: DbDependency, user_id: int = Path(gt=0)):
 
     return re_di
 
-@router.get("/{user_id}/email/confirm_change", status_code=status.HTTP_200_OK)
-async def email_confirm_change(token, db: DbDependency, user_id: int = Path(gt=0),):
-    """
-    メールアドレス認証と更新
+# @router.get("/{user_id}/email/confirm_change", status_code=status.HTTP_200_OK)
+# async def email_confirm_change(token, db: DbDependency, user_id: int = Path(gt=0),):
+#     """
+#     メールアドレス認証と更新
 
-    Parameters
-    -----------------------
-    user_id: int
-        メールアドレスを変更しようとしているユーザーのID
-    token: str
-        メールアドレス変更を認証するための一意のトークン
+#     Parameters
+#     -----------------------
+#     user_id: int
+#         メールアドレスを変更しようとしているユーザーのID
+#     token: str
+#         メールアドレス変更を認証するための一意のトークン
 
-    Return
-    -----------------------
-    message: str
-        "Your email address has been successfully updated."}
-    """
-    #一致するユーザーを取得
-    found_user = users_crud.find_user_by_user_id(db, user_id)
-    if not found_user:
-        raise HTTPException(status_code = 400,detail="Invalid or expired token.")
+#     Return
+#     -----------------------
+#     message: str
+#         "Your email address has been successfully updated."}
+#     """
+#     #一致するユーザーを取得
+#     found_user = users_crud.find_user_by_user_id(db, user_id)
+#     if not found_user:
+#         raise HTTPException(status_code = 400,detail="Invalid or expired token.")
 
-    #アクセストークンからemailを取得
-    token_info = users_service.get_email(token)
+#     #アクセストークンからemailを取得
+#     token_info = users_service.get_email(token)
 
-    try:
-        # 該当のユーザーを更新
-        update_info = users_crud.update_email(db, found_user, token_info)
-        if not update_info:
-            raise HTTPException(status_code = 400,detail="Invalid or expired token.")
+#     try:
+#         # 該当のユーザーを更新
+#         update_info = users_crud.update_email(db, found_user, token_info)
+#         if not update_info:
+#             raise HTTPException(status_code = 400,detail="Invalid or expired token.")
 
-        db.commit()
-        return {"message": "Your email address has been successfully updated."}
+#         db.commit()
+#         return {"message": "Your email address has been successfully updated."}
 
-    except Exception as e:
-        db.rollback()
-        logger.error(e)
-        raise HTTPException(status_code = 400,detail="Invalid or expired token.")
+#     except Exception as e:
+#         db.rollback()
+#         logger.error(e)
+#         raise HTTPException(status_code = 400,detail="Invalid or expired token.")
     
 @router.get("", response_model=UserListResponseBody, status_code=status.HTTP_200_OK)
 async def find_student_list(db:DbDependency, role: str, page: int, limit: int):

@@ -54,6 +54,9 @@ class NewsDetailResponseBody(BaseModel):
 class NewsCategoryUpdateRequestBody(BaseModel):
     name: str = Field(examples=["ニュースカテゴリの名前"])
 
+class NewsCategoryRequestBody(BaseModel):
+    name: str = Field(examples=["ニュースカテゴリの名前"])
+
 class NewsCategory(BaseModel):
     id: int
     name: str
@@ -63,3 +66,10 @@ class NewsCategory(BaseModel):
 class NewsCategoryUpdateResponseBody(BaseModel):
     message: str
     category: NewsCategory
+
+class NewsCategoryResponseBody(BaseModel):
+    message: str
+    category: NewsCategory
+
+class NewsCategoryListResponseBody(BaseModel):
+    categories: list[NewsCategory]
