@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 import datetime as dt
 
-from schemas.news import NewsCreateRequestBody, NewsCategoryRequestBody
+from schemas.news import NewsCreateRequestBody, NewsCategoryUpdateRequestBody, NewsCategoryRequestBody
 from models.news import News
 from models.news_categories import NewsCategories
 
@@ -34,6 +34,15 @@ def update_news_by_news_id(db: Session, news_id: int, title: str, content: str, 
     news.published_at =  dt.datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%S")
     db.add(news)
     return news
+
+def update_news_category_by_category_id(db: Session, category_id: int, param: NewsCategoryUpdateRequestBody):
+    news_category = db.query(NewsCategories).filter(NewsCategories.id == category_id).first()
+    if not news_category:
+        return None
+
+    news_category.name = param.name
+    db.add(news_category)
+    return news_category
 
 def create_news_category(db: Session, param: NewsCategoryRequestBody):
     news_category = NewsCategories(
