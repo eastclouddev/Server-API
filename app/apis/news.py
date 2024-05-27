@@ -9,7 +9,7 @@ from starlette import status
 
 from schemas.news import NewsListResponseBody, NewsUpdateRequestBody, NewsUpdateResponseBody, \
                             NewsDetailResponseBody, NewsCreateRequestBody, NewsCreateResponseBody,\
-                            NewsCategoryRequestBody, NewsCategoryResponseBody
+                            NewsCategoryRequestBody, NewsCategoryResponseBody, NewsCategoryListResponseBody
 from cruds import news as news_crud
 
 logger = getLogger("uvicorn.app")
@@ -219,7 +219,7 @@ async def create_news(db: DbDependency, param: NewsCreateRequestBody):
         raise HTTPException(status_code=400, detail="Invalid input data.")
 
 @router.post("/categories", response_model=NewsCategoryResponseBody, status_code=status.HTTP_201_CREATED)
-async def create_news(db: DbDependency, param: NewsCategoryRequestBody):
+async def create_news_categorie(db: DbDependency, param: NewsCategoryRequestBody):
     """
     ニュースカテゴリー作成
     Parameters
@@ -264,3 +264,40 @@ async def create_news(db: DbDependency, param: NewsCategoryRequestBody):
     }
 
     return re_di
+
+
+@router.get("/categories/", response_model=NewsCategoryListResponseBody, status_code=status.HTTP_200_OK)
+async def find_news_category_list(db: DbDependency):
+    """
+    ニュースカテゴリ一覧取得
+    
+    Parameters
+    -----------------------
+    なし
+
+    Returns
+    -----------------------
+    categories: array
+        id: int
+            カテゴリの一意識別子
+        name: str
+            カテゴリの名前
+        created_at: str
+            カテゴリが作成された日時（ISO 8601形式）
+        updated_at: str
+            カテゴリが最後に更新された日時（ISO 8601形式）
+    """
+
+    news_categories = news_crud.find_news_categories(db)
+
+    li = []
+    for category in news_categories:
+        di = {
+            "id": category.id,
+            "name": category.name,
+            "created_at": category.created_at.isoformat(),
+            "updated_at": category.updated_at.isoformat(),
+        }
+        li.append(di)
+
+    return {"categories": li}

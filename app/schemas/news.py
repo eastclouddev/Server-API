@@ -63,3 +63,7 @@ class NewsCategory(BaseModel):
 class NewsCategoryResponseBody(BaseModel):
     message: str
     category: NewsCategory
+
+
+class NewsCategoryListResponseBody(BaseModel):
+    categories: list[NewsCategory]
