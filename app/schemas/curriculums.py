@@ -26,18 +26,6 @@ class Review(BaseModel):
 class ReviewRequestListResponseBody(BaseModel):
     reviews: list[Review]
 
-class Quizzes(BaseModel):
-    test_id: int
-    question: str
-    options: list[str]
-    correct_answer: str
-    explanation: str
-    media_content_url: list[str]
-
-class QuizDetailResponseBody(BaseModel):
-    curriculum_id: int
-    tests: list[Quizzes]
-
 class ReviewRequestCreateResponseBody(BaseModel):
     id: int
     curriculum_id: int

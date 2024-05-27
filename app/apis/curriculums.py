@@ -10,7 +10,7 @@ from starlette import status
 from schemas.curriculums import ReviewRequestListResponseBody, CurriculumDetailResponseBody, \
                                 QuestionCreateRequestBody, QuestionCreateResponseBody,\
                                 ReviewRequestCreateResponseBody, ReviewRequestCreateRequestBody, \
-                                QuizDetailResponseBody, QuestionListResponseBody
+                                QuestionListResponseBody
 from cruds import curriculums as curriculums_crud
 
 logger = getLogger("uvicorn.app")
@@ -106,59 +106,59 @@ async def find_curriculum_details(db: DbDependency, curriculum_id: int = Path(gt
     return info
 
 
-@router.get("/{curriculum_id}/test", response_model=QuizDetailResponseBody, status_code=status.HTTP_200_OK)
-async def find_test_details(db: DbDependency, curriculum_id: int = Path(gt=0)):
-    """
-    テスト詳細取得
-    Parameter
-    -----------------------
-    curriculum_id: int
-        テストを取得したいカリキュラムのID
-    Returns
-    -----------------------
-    dict
-        curriculum_id: int
-            カリキュラムのID
-        tests: array
-            test_id: int
-                テストのID
-            question: str
-                質問文
-            options: array of str
-                選択肢
-            correct_answer: str
-                正解の選択肢
-            explanation: str
-                正解の解説
-            media_content_url: str
-                メディアコンテンツのURL
-    """
-    quizzes = curriculums_crud.find_quiz_contents_by_curriculum_id(db, curriculum_id)
-    if not quizzes:
-        raise HTTPException(status_code=404, detail="Test content not found for the specified curriculum.")
-    li = []
-    for quiz in quizzes:
-        option_list = []
-        for option in quiz.options.values():
-            option_list.append(option)
-        url_list = []
-        for media_content in quiz.media_content:
-            if "url" in media_content:
-                url_list.append(media_content.get("url", ""))
-        di = {
-            "test_id": quiz.id,
-            "question": quiz.question,
-            "options": option_list,
-            "correct_answer": quiz.correct_answer,
-            "explanation": quiz.explanation,
-            "media_content_url": url_list
-        }
-        li.append(di)
-    re_di = {
-        "curriculum_id": curriculum_id,
-        "tests": li
-    }
-    return re_di
+# @router.get("/{curriculum_id}/test", response_model=QuizDetailResponseBody, status_code=status.HTTP_200_OK)
+# async def find_test_details(db: DbDependency, curriculum_id: int = Path(gt=0)):
+#     """
+#     テスト詳細取得
+#     Parameter
+#     -----------------------
+#     curriculum_id: int
+#         テストを取得したいカリキュラムのID
+#     Returns
+#     -----------------------
+#     dict
+#         curriculum_id: int
+#             カリキュラムのID
+#         tests: array
+#             test_id: int
+#                 テストのID
+#             question: str
+#                 質問文
+#             options: array of str
+#                 選択肢
+#             correct_answer: str
+#                 正解の選択肢
+#             explanation: str
+#                 正解の解説
+#             media_content_url: str
+#                 メディアコンテンツのURL
+#     """
+#     quizzes = curriculums_crud.find_quiz_contents_by_curriculum_id(db, curriculum_id)
+#     if not quizzes:
+#         raise HTTPException(status_code=404, detail="Test content not found for the specified curriculum.")
+#     li = []
+#     for quiz in quizzes:
+#         option_list = []
+#         for option in quiz.options.values():
+#             option_list.append(option)
+#         url_list = []
+#         for media_content in quiz.media_content:
+#             if "url" in media_content:
+#                 url_list.append(media_content.get("url", ""))
+#         di = {
+#             "test_id": quiz.id,
+#             "question": quiz.question,
+#             "options": option_list,
+#             "correct_answer": quiz.correct_answer,
+#             "explanation": quiz.explanation,
+#             "media_content_url": url_list
+#         }
+#         li.append(di)
+#     re_di = {
+#         "curriculum_id": curriculum_id,
+#         "tests": li
+#     }
+#     return re_di
 
 @router.post("/{curriculum_id}/questions", response_model=QuestionCreateResponseBody, status_code=status.HTTP_201_CREATED)
 async def create_question(db: DbDependency, param: QuestionCreateRequestBody, curriculum_id: int = Path(gt=0)):
