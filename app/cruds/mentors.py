@@ -1,11 +1,7 @@
 from sqlalchemy.orm import Session
 
-from schemas.mentors import AccountInfoCreateRequestBody
-from models.user_account_info import UserAccountInfo
 from models.users import Users
-from models.user_account_types import UserAccountTypes
 from models.mentorships import Mentorships
-from models.user_rewards import UserRewards 
 from models.learning_statuses import LearningStatuses
 from models.course_progresses import CourseProgresses
 from models.sections import Sections
@@ -15,59 +11,6 @@ from models.answers import Answers
 from models.review_requests import ReviewRequests
 from models.review_responses import ReviewResponses
 
-def find_rewards_by_mentor_id(db: Session, mentor_id: int):
-    return db.query(UserRewards).filter(UserRewards.user_id == mentor_id).all()
-
-def find_account_info_by_mentor_id(db: Session, mentor_id: int):
-
-    mentor = db.query(Mentorships).filter(Mentorships.mentor_id == mentor_id).first()
-    if not mentor:
-        return None
-
-    bank_info = db.query(UserAccountInfo).filter(UserAccountInfo.user_id == mentor.mentor_id).first()
-    if not bank_info:
-        return None
-
-    account_type = db.query(UserAccountTypes).filter(UserAccountTypes.id == bank_info.account_type_id).first()
-    if not account_type:
-        return None
-
-    #送金先情報詳細
-    info = {
-        "mentor_id":  mentor_id,
-        "account_name": bank_info.account_name,
-        "bank_name": bank_info.bank_name,
-        "branch_name": bank_info.branch_name,
-        "account_number": bank_info.account_number,
-        "account_type": account_type.name 
-    }
-
-    return info
-
-def create_account_info(db: Session, create_model: AccountInfoCreateRequestBody, mentor_id: int):
-
-    mentor = db.query(Users).filter(Users.id == mentor_id).first()
-    if not mentor:
-        return None
-
-    account_type = db.query(UserAccountTypes).filter(UserAccountTypes.name == create_model.account_type).first()
-    if not account_type:
-        return None
-
-    new_transfer = UserAccountInfo(
-        user_id = mentor_id,
-        bank_name = create_model.bank_name,
-        branch_name = create_model.branch_name,
-        bank_code = create_model.bank_code,
-        branch_code = create_model.branch_code,
-        account_type_id = account_type.id,
-        account_number = create_model.account_number,
-        account_name = create_model.account_name
-    )
-    
-    db.add(new_transfer)
-
-    return new_transfer
 
 def find_course_progresses(db: Session, mentor_id: int):
     mentor_ships = db.query(Mentorships).filter(Mentorships.mentor_id == mentor_id).all()

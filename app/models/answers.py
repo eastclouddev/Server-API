@@ -14,6 +14,5 @@ class Answers(Base):
     parent_answer_id = Column(Integer, ForeignKey("answers.id"), default=None)
     content = Column(Text, nullable=False)
     media_content = Column(JSON)
-    is_read = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
