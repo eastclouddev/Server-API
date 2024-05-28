@@ -143,6 +143,25 @@ def test_find_student_list_company_ABNORMAL_01(client_fixture: TestClient):
 
     assert response.status_code == 404
 
+"""請求履歴一覧取得"""
+def test_find_billing_list_01(client_fixture: TestClient):
+    
+    response = client_fixture.get("/companies/3/billings")
+
+    assert response.status_code == 200
+    assert "billing_id" in response.json()["billings"][0]
+    assert "date" in response.json()["billings"][0]
+    assert "amount" in response.json()["billings"][0]
+    assert "status" in response.json()["billings"][0]
+    assert "description" in response.json()["billings"][0]
+
+def test_find_billing_list_ABNORMAL_01(client_fixture: TestClient):
+
+    response = client_fixture.get("/companies/999/billings")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Company not found."
+
 """有効アカウント数取得"""
 def test_find_number_of_accounts_01(client_fixture: TestClient):
     response = client_fixture.get("/companies/1/users/counts/")
