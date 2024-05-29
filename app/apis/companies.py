@@ -341,3 +341,61 @@ async def find_number_of_accounts(db: DbDependency, company_id: int):
     }
 
     return re_di
+
+@router.patch("",  status_code=status.HTTP_200_OK)
+async def find_company_list(db: DbDependency):
+    # """
+    # 会社情報作成取得
+    
+    # Parameters
+    # -----------------------
+    # なし
+
+    # Returns
+    # -----------------------
+    #     company_id: int
+    #         会社のID（int）
+    #     name: str
+    #         会社名
+    #     name_kana: str
+    #         会社名のカナ
+    #     prefecture: str
+    #         都道府県
+    #     city: str
+    #         市区町村
+    #     town: str
+    #         町名、番地等
+    #     address: str
+    #         建物名、部屋番号等
+    #     postal_code: str
+    #         郵便番号
+    #     phone_number: str
+    #         電話番号
+    #     email: str
+    #         メールアドレス
+    # """
+
+    found_companies = companies_cruds.find_companies(db)
+
+    if not found_companies:
+        raise HTTPException(status_code=500, detail="Internal server error.")
+    
+    companies_list = []
+
+    for company in found_companies:
+        one_company = {
+            "company_id": company.id,
+            "name": company.name,
+            "prefecture": company.prefecture,
+            "city": company.city,
+            "town": company.town,
+            "address": company.address,
+            "postal_code": company.postal_code,
+            "phone_number": company.phone_number,
+            "email": company.email,
+            "created_at": company.created_at.isoformat()
+        }
+
+        companies_list.append(one_company)
+    
+    return {"companies": companies_list}
