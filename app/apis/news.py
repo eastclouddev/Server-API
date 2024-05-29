@@ -9,7 +9,8 @@ from starlette import status
 
 from schemas.news import NewsListResponseBody, NewsUpdateRequestBody, NewsUpdateResponseBody, \
                             NewsDetailResponseBody, NewsCreateRequestBody, NewsCreateResponseBody,\
-                            NewsCategoryRequestBody, NewsCategoryResponseBody
+                            NewsCategoryUpdateRequestBody, NewsCategoryUpdateResponseBody,\
+                            NewsCategoryRequestBody, NewsCategoryResponseBody, NewsCategoryListResponseBody
 from cruds import news as news_crud
 
 logger = getLogger("uvicorn.app")
@@ -217,6 +218,57 @@ async def create_news(db: DbDependency, param: NewsCreateRequestBody):
         logger.error(e)
         db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")
+    
+@router.patch("/categories/{category_id}", response_model=NewsCategoryUpdateResponseBody, status_code=status.HTTP_200_OK)
+async def update_news_category(db: DbDependency, category_id: int, param: NewsCategoryUpdateRequestBody):
+    """
+    ニュースカテゴリー更新
+    Parameters
+    -----------------------
+    category_id: int
+        更新するカテゴリのID
+    dict
+        name: str
+            更新後のカテゴリ名
+    Returns
+    -----------------------
+    message: str
+        メッセージ
+    category: array
+        id: int
+            カテゴリの一意識別子
+        name: str
+            カテゴリの名前
+        created_at: str
+            カテゴリの作成日
+        updated_at: str
+            カテゴリの更新日
+    """
+
+    try:
+        news_category = news_crud.update_news_category_by_category_id(db, category_id, param)
+        if not news_category:
+            raise Exception("category not found.")
+        db.commit()
+
+        di = {
+            "id": news_category.id,
+            "name": news_category.name,
+            "created_at": news_category.created_at.isoformat(),
+            "updated_at": news_category.updated_at.isoformat(),
+        }
+
+        re_di = {
+            "message": "Category updated successfully.",
+            "category": di
+        }
+
+        return re_di
+
+    except Exception as e:
+        logger.error(e)
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid input data or category not found.")
 
 @router.post("/categories", response_model=NewsCategoryResponseBody, status_code=status.HTTP_201_CREATED)
 async def create_news(db: DbDependency, param: NewsCategoryRequestBody):
@@ -227,7 +279,6 @@ async def create_news(db: DbDependency, param: NewsCategoryRequestBody):
     dict
         name: str
             ニュースカテゴリの名前
-
     Returns
     -----------------------
     message: str
@@ -264,3 +315,40 @@ async def create_news(db: DbDependency, param: NewsCategoryRequestBody):
     }
 
     return re_di
+
+
+@router.get("/categories/", response_model=NewsCategoryListResponseBody, status_code=status.HTTP_200_OK)
+async def find_news_category_list(db: DbDependency):
+    """
+    ニュースカテゴリ一覧取得
+    
+    Parameters
+    -----------------------
+    なし
+
+    Returns
+    -----------------------
+    categories: array
+        id: int
+            カテゴリの一意識別子
+        name: str
+            カテゴリの名前
+        created_at: str
+            カテゴリが作成された日時（ISO 8601形式）
+        updated_at: str
+            カテゴリが最後に更新された日時（ISO 8601形式）
+    """
+
+    news_categories = news_crud.find_news_categories(db)
+
+    li = []
+    for category in news_categories:
+        di = {
+            "id": category.id,
+            "name": category.name,
+            "created_at": category.created_at.isoformat(),
+            "updated_at": category.updated_at.isoformat(),
+        }
+        li.append(di)
+
+    return {"categories": li}
