@@ -54,7 +54,9 @@ from models.roles import Roles
 from models.section_progresses import SectionProgresses
 from models.section_tags import SectionTags
 from models.sections import Sections
+from models.skill_levels import SkillLevels
 from models.tags import Tags
+from models.tech_categories import TechCategories
 from models.quiz_contents import QuizContents
 from models.users import Users
 target_metadata = Base.metadata

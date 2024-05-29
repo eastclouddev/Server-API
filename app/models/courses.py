@@ -18,6 +18,9 @@ class Courses(Base):
     description = Column(Text, nullable=False)
     created_user = Column(Integer, ForeignKey("users.id"), nullable=False)
     thumbnail_url = Column(String(255), nullable=False)
+    skill_level_id = Column(Integer, ForeignKey("skill_levels.id"), nullable=False)
+    expected_end_hours = Column(Integer, nullable=False)
+    tech_category_id = Column(Integer, ForeignKey("tech_categories.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
     

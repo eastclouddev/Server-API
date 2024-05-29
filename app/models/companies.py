@@ -13,6 +13,7 @@ class Companies(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(100), nullable=False)
+    name_kana = Column(String(100), nullable=False)
     prefecture = Column(String(50), nullable=False)
     city = Column(String(100), nullable=False)
     town = Column(String(255), nullable=False)
