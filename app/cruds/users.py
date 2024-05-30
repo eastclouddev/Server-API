@@ -1,3 +1,7 @@
+import random
+import string
+import hashlib
+
 from sqlalchemy.orm import Session
 
 from schemas.users import UserCreateRequestBody, UserUpdateRequestBody
@@ -7,15 +11,22 @@ from models.roles import Roles
 
 
 def create_user(db: Session, param: UserCreateRequestBody):
+    role = find_role_by_role_name(db, param.role)
+    compnay = find_company_by_company_id(db, param.company_id)
+    if not role or not compnay:
+        return None
+    
+    plain_pass = "".join(random.choices(string.ascii_letters + string.digits, k=8))
+
     new_user = Users(
-        company_id = 1,
+        company_id = param.company_id,
         first_name = param.first_name,
         last_name = param.last_name,
         first_name_kana = param.first_name_kana,
         last_name_kana = param.last_name_kana,
-        password = "adbeljldk",
+        password = hashlib.sha256(plain_pass.encode("utf-8")).hexdigest(),
         email = param.email,
-        role_id = 1,
+        role_id = role.id,
     )
     db.add(new_user)
     return new_user
@@ -25,6 +36,9 @@ def find_user_by_user_id(db: Session, user_id: int):
 
 def find_role_by_role_id(db: Session, role_id: int):
     return db.query(Roles).filter(Roles.id == role_id).first()
+
+def find_role_by_role_name(db: Session, role_name: str):
+    return db.query(Roles).filter(Roles.name == role_name).first()
 
 def find_company_by_company_id(db: Session, company_id: int):
     return db.query(Companies).filter(Companies.id == company_id).first()

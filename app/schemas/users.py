@@ -11,6 +11,8 @@ class UserCreateRequestBody(BaseModel):
     first_name_kana: Optional[str] = Field(None, examples=["ハナコ"])
     last_name_kana: Optional[str] = Field(None, examples=["ヤマダ"])
     email: Optional[str] = Field(None, examples=["hanako@example.com"])
+    role: Optional[str] = Field(None, examples=["student"])
+    company_id: Optional[int] = Field(None, examples=[1])
 
 class UserCreateResponseBody(BaseModel):
     user_id: int

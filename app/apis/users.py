@@ -36,6 +36,10 @@ async def create_user(db: DbDependency, param: UserCreateRequestBody):
             姓（カナ）
         email: str
             メールアドレス
+        role: str
+            ユーザーのロール
+        company_id: int
+            所属会社のID
 
     Returns
     -----------------------
@@ -46,10 +50,12 @@ async def create_user(db: DbDependency, param: UserCreateRequestBody):
     duplication_user = users_crud.find_user_by_email(db, param.email)
     if duplication_user:
         raise HTTPException(status_code=400, detail="Email is already in use.")
-    # TODO:会社・ロールを判定し、登録する必要がある
 
     try:
         create_user = users_crud.create_user(db, param)
+        if not create_user:
+            raise Exception("role or company_id not found.")
+
         db.commit()
         return {"user_id": create_user.id}
 
