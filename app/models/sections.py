@@ -15,6 +15,7 @@ class Sections(Base):
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
     title = Column(String(100), nullable=False)
     description = Column(Text)
+    duration = Column(Integer, nullable=False)
     display_no = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
