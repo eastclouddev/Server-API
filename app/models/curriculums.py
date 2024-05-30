@@ -17,6 +17,7 @@ class Curriculums(Base):
     title = Column(String(100), nullable=False)
     description = Column(Text)
     content = Column(Text)
+    duration = Column(Integer, nullable=False)
     display_no = Column(Integer, nullable=False)
     video_url = Column(String(255))
     is_test = Column(Boolean, default=False)

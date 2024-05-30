@@ -16,7 +16,7 @@ class CompanyBillingInfo(Base):
     city = Column(String(100), nullable=False)
     town = Column(String(255), nullable=False)
     address = Column(String(255), nullable=False)
-    billing_email = Column(String(255), nullable=False)
+    email = Column(String(255), nullable=False)
     invoice_number = Column(String(255), nullable=False)
     tax_number = Column(String(255), nullable=False)
     payment_method_id = Column(Integer, ForeignKey("payment_methods.id"), nullable=False)
