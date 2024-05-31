@@ -79,10 +79,18 @@ async def find_question_list_from_student(db: DbDependency, request: Request, me
             新しく作成された送金先情報のID
         title: str
             質問のタイトル
+        objective: str
+            学習内容で実践したいこと
+        current_situation: str
+            現状
+        research: str
+            自分が調べたこと
         content: str
             質問の内容
         curriculum_id: str
             質問が紐づくカリキュラムのID
+        tech_category: str
+            カリキュラムのコースに紐づいた技術カテゴリ
         created_at: str
             質問作成日
         is_read: str
@@ -91,23 +99,26 @@ async def find_question_list_from_student(db: DbDependency, request: Request, me
             完了しているかどうか
     """
 	
-    # TODO:ヘッダー情報をどう使うか
-    header = request.headers
-	
     questions = mentors_crud.find_questions_by_mentor_id(db, mentor_id)
 
     li = []
     for question in questions:
-        answers = mentors_crud.find_answers_by_question_id(db, question.id)
-        read_flag = all([answer.is_read for answer in answers]) # 全てtrueだった場合にはtrue、1つでもfalseがあればfalse
-        
+        # questionからcourseを取得し、courseに紐づくtech_categoryを取得
+        tech_category = mentors_crud.find_category_by_course_id(db, question.course_id)
+        notifications = mentors_crud.find_notification_by_question_id(db, question.id)
+        is_read = all([notification.is_read for notification in notifications])
+
         di = {
             "id": question.id,
             "title": question.title,
+            "objective": question.objective,
+            "current_situation": question.current_situation,
+            "research": question.research,
             "content": question.content,
             "curriculum_id": question.curriculum_id,
+            "tech_category": tech_category.name,
             "created_at": question.created_at.isoformat(),
-            "is_read": read_flag,
+            "is_read": is_read,
             "is_closed": question.is_closed
         }
         li.append(di)
@@ -141,6 +152,8 @@ async def find_review_list_from_student(request: Request, db: DbDependency, ment
             レビューの内容
         curriculum_id: int
             レビューに紐づくカリキュラムのID
+        tech_category: str
+            カリキュラムのコースに紐づいた技術カテゴリ
         created_at:str
             レビューの作成日（ISO 8601形式）
         is_read: bool
@@ -148,23 +161,29 @@ async def find_review_list_from_student(request: Request, db: DbDependency, ment
         is_closed: bool
             完了しているかどうか
     """
-    found_reviews = mentors_crud.find_review_requests_by_user_id(db, mentor_id)
-    reviews_list = []
+    review_requests = mentors_crud.find_review_requests_by_mentor_id(db, mentor_id)
 
-    for review in found_reviews:
-        one_review = {
-            "id": review.id,
-            "title": review.title,
-            "content": review.content,
-            "curriculum_id": review.curriculum_id,
-            "created_at": review.created_at.isoformat(),
-            "is_read": True, #TODO テーブル変更のため
-            "is_closed": review.is_closed
+    li = []
+    for review_request in review_requests:
+        # review_requestからcurriculumを取得し、curriculumに紐づくsectionを取得、sectionに紐づくcourseを取得、courseに紐づくtech_categoryを取得
+        tech_category = mentors_crud.find_category_by_curriculum_id(db, review_request.curriculum_id)
+        notifications = mentors_crud.find_notification_by_question_id(db, review_request.id)
+        is_read = all([notification.is_read for notification in notifications])
+
+        di = {
+            "id": review_request.id,
+            "title": review_request.title,
+            "content": review_request.content,
+            "curriculum_id": review_request.curriculum_id,
+            "tech_category": tech_category.name,
+            "created_at": review_request.created_at.isoformat(),
+            "is_read": is_read,
+            "is_closed": review_request.is_closed
         }
 
-        reviews_list.append(one_review)
+        li.append(di)
 
-    return {"reviews": reviews_list}
+    return {"reviews": li}
 
 @router.get("/counts", response_model=MentorsCountListResponseBody, status_code=status.HTTP_200_OK)
 async def find_student_count(db: DbDependency):
