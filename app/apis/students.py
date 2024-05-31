@@ -34,10 +34,18 @@ async def find_my_question_list(db: DbDependency, student_id: int = Path(gt=0)):
             質問のID
         title: str
             質問のタイトル
+        objective: str
+            学習内容で実践したいこと
+        current_situation: str
+            現状
+        research: str
+            自分が調べたこと
         content: str
             質問の内容
         curriculum_id: int
             紐づいたカリキュラムのID
+        tech_category: str
+            カリキュラムのコースに紐づいた技術カテゴリ
         created_at: str
             質問作成日
         is_read: bool
@@ -52,23 +60,23 @@ async def find_my_question_list(db: DbDependency, student_id: int = Path(gt=0)):
         raise HTTPException(status_code=404, detail="question not found")
 
     question_list = []
-
     for question in found_question:
+        tech_category = students_crud.find_category_by_course_id(db, question.course_id)
+        notifications = students_crud.find_notification_by_question_id(db, question.id)
+        is_read = all([notification.is_read for notification in notifications])
         one_question = {
             "id": question.id,
             "title": question.title,
+            "objective": question.objective,
+            "current_situation": question.current_situation,
+            "research": question.research,
             "content": question.content,
             "curriculum_id": question.curriculum_id,
+            "tech_category": tech_category.name,
             "created_at": question.created_at,
+            "is_read": is_read,
             "is_closed": question.is_closed
         }
-        answer = students_crud.find_answer_by_question_id(db, question.id)
-        if answer:
-            find_is_read = {"is_read": answer.is_read}
-            one_question.update(find_is_read)
-        else:
-            find_is_read = {"is_read": False}
-            one_question.update(find_is_read)
         
         question_list.append(one_question)
     
@@ -137,39 +145,39 @@ async def find_my_review_list(db: DbDependency, student_id: int):
 
     Returns
     -----------------------
-    id: int
-        レビューのID
-    title: str
-        レビューのタイトル
-    content: str
-        レビューの内容
-    curriculum_id: int
-        紐づいたカリキュラムのID
-    created_at: str
-        レビュー作成日
-    is_read: bool
-        未読コメントの有無
-    is_closed: bool
-        完了しているかどうか
-
+    reviews: dict
+        id: int
+            レビューのID
+        title: str
+            レビューのタイトル
+        content: str
+            レビューの内容
+        curriculum_id: int
+            紐づいたカリキュラムのID
+        tech_category: str
+            カリキュラムのコースに紐づいた技術カテゴリ
+        created_at: str
+            レビュー作成日
+        is_read: bool
+            未読コメントの有無
+        is_closed: bool
+            完了しているかどうか
     """
 
     review_requests = students_crud.find_review_requests_by_user_id(db, student_id)
 
     li = []
     for review in review_requests:
-        review_responses = students_crud.find_review_responses_by_review_id(db, review.id)
-        is_read = True
-        for review_response in review_responses:
-            data = review_response.is_read
-            if data == False:
-                is_read = False
+        tech_category = students_crud.find_category_by_curriculum_id(db, review.curriculum_id)
+        notifications = students_crud.find_notification_by_review_request_id(db, review.id)
+        is_read = all([notification.is_read for notification in notifications])
 
         di = {
             "id": review.id,
             "title": review.title,
             "content": review.content,
             "curriculum_id": review.curriculum_id,
+            "tech_category": tech_category.name,
             "created_at": review.created_at.isoformat(),
             "is_read": is_read,
             "is_closed": review.is_closed
