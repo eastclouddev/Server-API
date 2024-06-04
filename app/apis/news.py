@@ -10,7 +10,8 @@ from starlette import status
 from schemas.news import NewsListResponseBody, NewsUpdateRequestBody, NewsUpdateResponseBody, \
                             NewsDetailResponseBody, NewsCreateRequestBody, NewsCreateResponseBody,\
                             NewsCategoryUpdateRequestBody, NewsCategoryUpdateResponseBody,\
-                            NewsCategoryRequestBody, NewsCategoryResponseBody, NewsCategoryListResponseBody
+                            NewsCategoryRequestBody, NewsCategoryResponseBody, NewsCategoryListResponseBody,\
+                            PublishedNewsListResponseBody
 from cruds import news as news_crud
 
 logger = getLogger("uvicorn.app")
@@ -20,7 +21,7 @@ DbDependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/news", tags=["News"])
 
 
-@router.get("/{news_id}", response_model=NewsDetailResponseBody, status_code=status.HTTP_200_OK)
+@router.get("/{news_id}/", response_model=NewsDetailResponseBody, status_code=status.HTTP_200_OK)
 async def find_news_details(db: DbDependency, news_id: int = Path(gt=0)):
     """
     ニュース詳細取得
@@ -38,7 +39,12 @@ async def find_news_details(db: DbDependency, news_id: int = Path(gt=0)):
         title: str
             ニュースのタイトル
         content: str
-            ニュースの内容
+            ニュースの本文
+        category: array
+            categoey_id: int
+                カテゴリのID
+            category_name: str
+                カテゴリのID
         published_at: str
             ニュースの公開日（ISO 8601形式）
     """
@@ -48,10 +54,17 @@ async def find_news_details(db: DbDependency, news_id: int = Path(gt=0)):
     if not news:
         raise HTTPException(status_code=404, detail="The requested news article was not found.")
 
+    news_category = news_crud.find_news_categories_by_category_id(db, news.news_category_id)
+    di = {
+        "category_id": news_category.id,
+        "category_name": news_category.name
+    }
+
     re_di = {
         "id": news.id,
         "title": news.title,
         "content": news.content,
+        "category": di,
         "published_at": news.published_at.isoformat()
     }
 
@@ -60,7 +73,7 @@ async def find_news_details(db: DbDependency, news_id: int = Path(gt=0)):
 @router.get("", response_model=NewsListResponseBody, status_code=status.HTTP_200_OK)
 async def find_news_list(db: DbDependency, page: int, limit: int):
     """
-    ニュース一覧取得
+    ニュース一覧(管理者)取得
 
     Parameters
     -----------------------
@@ -73,41 +86,39 @@ async def find_news_list(db: DbDependency, page: int, limit: int):
     -----------------------
     news: array
         id: int
-            ニュースのID
+            取得したニュースのID
         title: str
             ニュースのタイトル
+        category: array
+            categoey_id: int
+                カテゴリのID
+            category_name: str
+                カテゴリのID
         published_at: str
             ニュースの公開日（ISO 8601形式）
-    page: int
-        表示するページ
-    limit: int
-        1ページに表示するニュース数
-    total_page: int
-        全ページ数
-    total_news: int
-        全ニュース数
+        is_published: bool
+            ニュース公開状態
     """
     news = news_crud.find_news(db)
 
     li = []
     
     for data in news[(page-1)*limit : page*limit]:
+        news_category = news_crud.find_news_categories_by_category_id(db, data.news_category_id)
         di = {
+            "category_id": news_category.id,
+            "category_name": news_category.name
+        }
+
+        re_di = {
             "id": data.id,
             "title": data.title,
+            "category": di,
             "published_at": data.published_at.isoformat()
         }
-        li.append(di)
+        li.append(re_di)
 
-    re_di = {
-        "news": li,
-        "page": page,
-        "limit": limit,
-        "total_pages": math.ceil(len(news) / limit),
-        "total_news": len(news)
-    }
-
-    return re_di
+    return {"news": li}
 
 @router.patch("/{news_id}", response_model=NewsUpdateResponseBody, status_code=status.HTTP_200_OK)
 async def update_news(db: DbDependency, news_id: int, param: NewsUpdateRequestBody):
@@ -123,6 +134,8 @@ async def update_news(db: DbDependency, news_id: int, param: NewsUpdateRequestBo
             更新するニュースのタイトル
         content: str
             更新するニュースの本文
+        categoey_id: int
+            カテゴリのID
         is_published: bool
             公開フラグ
         published_at: str
@@ -137,6 +150,11 @@ async def update_news(db: DbDependency, news_id: int, param: NewsUpdateRequestBo
             更新されたニュースのタイトル
         content: str
             更新されたニュースの内容
+        category: array
+            category_id: int
+                カテゴリのID
+            category_name: str
+                カテゴリの名前
         is_published: bool
             ニュースの公開フラグ
         published_at: str
@@ -156,10 +174,17 @@ async def update_news(db: DbDependency, news_id: int, param: NewsUpdateRequestBo
         news = news_crud.update_news_by_news_id(db, news_id, param.title, param.content, param.is_published, param.published_at)
         db.commit()
 
+        news_category = news_crud.find_news_categories_by_category_id(db, news.news_category_id)
+        di = {
+            "category_id": news_category.id,
+            "category_name": news_category.name
+        }
+
         re_di = {
             "news_id": news.id,
             "title": news.title,
             "content": news.content,
+            "category": di,
             "is_published": news.is_published,
             "published_at": news.published_at.isoformat(),
             "updated_at": news.updated_at.isoformat()
@@ -183,15 +208,27 @@ async def create_news(db: DbDependency, param: NewsCreateRequestBody):
             作成するニュースのタイトル
         content: str
             作成するニュースの本文
-        is_published: bool
-            公開フラグ
+        category_id: int
+            カテゴリのID
         published_at: str
             公開日（ISO 8601形式）
 
     Returns
     -----------------------
     dict
-        
+        news_id: int
+            ニュースのID
+        title: str
+            ニュースのタイトル
+        content: str
+            ニュースの本文
+        category: array
+            category_id: int
+                カテゴリのID
+            category_name: str
+                カテゴリの名前
+        is_published: bool
+            ニュース公開状態
         published_at: str
             ニュースの公開日（ISO 8601形式）
         created_at: str
@@ -203,10 +240,17 @@ async def create_news(db: DbDependency, param: NewsCreateRequestBody):
         new_news = news_crud.create_news(db, param)
         db.commit()
 
+        news_category = news_crud.find_news_categories_by_category_id(db, new_news.news_category_id)
+        di = {
+            "category_id": news_category.id,
+            "category_name": news_category.name
+        }
+
         re_di = {
             "id": new_news.id,
             "title": new_news.title,
             "content": new_news.content,
+            "category": di,            
             "is_published": new_news.is_published,
             "published_at": new_news.published_at.isoformat(),
             "created_at": new_news.created_at.isoformat()
@@ -316,7 +360,6 @@ async def create_news(db: DbDependency, param: NewsCategoryRequestBody):
 
     return re_di
 
-
 @router.get("/categories/", response_model=NewsCategoryListResponseBody, status_code=status.HTTP_200_OK)
 async def find_news_category_list(db: DbDependency):
     """
@@ -352,3 +395,51 @@ async def find_news_category_list(db: DbDependency):
         li.append(di)
 
     return {"categories": li}
+
+@router.get("/published", response_model=PublishedNewsListResponseBody, status_code=status.HTTP_200_OK)
+async def find_news_list(db: DbDependency, page: int, limit: int):
+    """
+    ニュース一覧取得
+
+    Parameters
+    -----------------------
+    page: int
+        表示するページ
+    limit: int
+        1ページに表示するニュース数
+
+    Returns
+    -----------------------
+    news: array
+        id: int
+            ニュースのID
+        title: str
+            ニュースのタイトル
+        category: array
+            category_id: int
+                カテゴリのID
+            category_name: str
+                カテゴリの名前
+        published_at: str
+            ニュースの公開日（ISO 8601形式）
+    """
+    news = news_crud.find_news_by_published(db)
+
+    li = []
+    
+    for data in news[(page-1)*limit : page*limit]:
+        news_category = news_crud.find_news_categories_by_category_id(db, data.news_category_id)
+        di = {
+            "category_id": news_category.id,
+            "category_name": news_category.name
+        }
+
+        re_di = {
+            "id": data.id,
+            "title": data.title,
+            "category": di,
+            "published_at": data.published_at.isoformat()
+        }
+        li.append(re_di)
+
+    return {"news": li}
