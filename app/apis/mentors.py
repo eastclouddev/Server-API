@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.mentors import QuestionListResponseBody, ProgressListResponseBody, ReviewRequestListResponseBody, MentorsCountListResponseBody
+from schemas.mentors import QuestionListResponseBody, ProgressListResponseBody, ReviewRequestListResponseBody, MentorsCountListResponseBody, NotificationListResponseBody
 from cruds import mentors as mentors_crud
 
 logger = getLogger("uvicorn.app")
@@ -207,3 +207,107 @@ async def find_student_count(db: DbDependency):
 
     mentors = mentors_crud.find_mentor_by_students(db)
     return mentors
+
+@router.get("/{mentor_id}/notifications", response_model=NotificationListResponseBody, status_code=status.HTTP_200_OK)
+async def find_notification(db: DbDependency, mentor_id: int):
+
+    """
+    通知一覧（メンター）
+    
+    Parameters
+    -----------------------
+    mentor_id:int
+        ユーザーのID
+    Returns
+    -----------------------
+    notifications: array
+        id: int
+            通知のID
+        from_user: dict
+            id: int
+                通知を送ったユーザーのID
+            name: str
+                通知を送ったユーザーの名前
+        question_id: int
+            質問のID
+        answer_id: int
+            回答のID
+        review_request_id: int
+            レビューリクエストのID
+        review_respomse_id: int
+            レビューリスポンスのID
+        title: str
+            通知のタイトル
+        content: str
+            通知の内容
+        is_read: bool
+            通知が既読かどうか
+        created_at: str
+            通知が生成された日時（ISO 8601形式）
+    """
+    
+    # メンターに紐づく受講生を取得
+    students = mentors_crud.find_students_by_mentor_id(db, mentor_id)
+    if not students:
+        raise HTTPException(status_code=404, detail="User not found.")
+    student_list = [s.student_id for s in students]
+
+    # 受講生からの通知を取得
+    notifications = mentors_crud.find_notifications_by_user_id_list(db, student_list)
+
+    li = []
+    for i, notification in enumerate(notifications):
+        q_id = None
+        a_id = None
+        req_id = None
+        res_id = None        
+        title = ""
+        content = ""
+
+        # 質問・回答
+        if notification.question_id:
+            question = mentors_crud.find_question_by_question_id(db, notification.question_id)
+            q_id = question.id
+            title = question.title
+            content = question.content
+        elif notification.answer_id:
+            answer = mentors_crud.find_answer_by_answer_id(db, notification.answer_id)
+            q_id = answer.question_id
+            a_id = answer.id
+            question = mentors_crud.find_question_by_question_id(db, answer.question_id)
+            title = question.title
+            content = answer.content
+        # レビューリクエスト・レビューレスポンス
+        elif notification.review_request_id:
+            request = mentors_crud.find_request_by_request_id(db, notification.review_request_id)
+            req_id = request.id
+            title = request.title
+            content = request.content
+        elif notification.review_response_id:
+            response = mentors_crud.find_response_by_response_id(db, notification.review_response_id)
+            req_id = response.review_request_id
+            res_id = response.id
+            request = mentors_crud.find_request_by_request_id(db, response.review_request_id)
+            title = request.title
+            content = response.content
+
+        user = mentors_crud.find_user_by_id(db, notification.user_id)
+
+        di = {
+            "id": i + 1,
+            "from_user": {
+                "id": notification.user_id,
+                "name": user.last_name + user.first_name
+            },
+            "question_id": q_id,
+            "answer_id": a_id,
+            "review_request_id": req_id,
+            "review_response_id": res_id,
+            "title": title,
+            "content": content,
+            "is_read": notification.is_read,
+            "created_at": notification.created_at.isoformat()
+        }
+        li.append(di)
+
+    return {"notifications": li}
