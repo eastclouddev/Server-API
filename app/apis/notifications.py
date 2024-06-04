@@ -25,64 +25,86 @@ async def find_notification(db: DbDependency):
     なし
     
     -----------------------
-    id: int
-        通知のID
-    from_user_id: int
-        ユーザーのID
-    from_user_name: str
-        ユーザーの名前
-    content: str
-        通知の内容
-    related_question_id: int
-        質問のID
-    related_answer_id: int
-        回答のID
-    related_review_request_id: int
-        レビューリクエストのID
-    related_review_response_id: int
-        レビューレスポンスのID
-    is_read: bool
-        通知が既読かどうか
-    created_at: str
-        作成日時
+    dict: array
+        id: int
+            通知のID
+        from_user: dict
+            id: int
+                ユーザーのID
+            name: str
+                ユーザーの名前
+        question_id: int
+            質問のID
+        answer_id: int
+            回答のID
+        related_review_request_id: int
+            レビューリクエストのID
+        related_review_response_id: int
+            レビューレスポンスのID
+        title: str
+            通知のタイトル
+        content: str
+            通知の内容
+        is_read: bool
+            通知が既読かどうか
+        created_at: str
+            通知が生成された日時（ISO 8601形式）
     """
-    
-    # 4つの各テーブルから取得
-    all_tables = notifications_crud.find_table(db)
-    li = []
-    for all_table in all_tables:
-        di = {
-            "id": all_table[0],
-            "content": all_table[1],
-            "created_at": all_table[2]
-        }
-        li.append(di)
 
-    # 作成日が新しい順に並び替える
-    re_sorted = sorted(li, key=lambda x:x["created_at"], reverse=True)
-    # 並び替えたものから先頭10件取得
-    re_sorted = re_sorted[:10]
-    count = 1
+    notifications = notifications_crud.find_notifications_order_by_created_at(db)
     li = []
 
-    for r in re_sorted:
-        table, data = notifications_crud.find_db(db, r["id"], r["content"], r["created_at"])
-        # ユーザー取得
-        user = notifications_crud.find_user_by_id(db, data.user_id)
+    for i, notification in enumerate(notifications):
+        q_id = None
+        a_id = None
+        req_id = None
+        res_id = None        
+        title = ""
+        content = ""
+        if notification.question_id:
+            question = notifications_crud.find_question_by_question_id(db, notification.question_id)
+            q_id = question.id
+            title = question.title
+            content = question.content
+        elif notification.answer_id:
+            answer = notifications_crud.find_answer_by_answer_id(db, notification.answer_id)
+            q_id = answer.question_id
+            a_id = answer.id
+            question = notifications_crud.find_question_by_question_id(db, answer.question_id)
+            title = question.title
+            content = answer.content
+        # レビューリクエスト・レビューレスポンス
+        elif notification.review_request_id:
+            request = notifications_crud.find_request_by_request_id(db, notification.review_request_id)
+            req_id = request.id
+            title = request.title
+            content = request.content
+        elif notification.review_response_id:
+            response = notifications_crud.find_response_by_response_id(db, notification.review_response_id)
+            req_id = response.review_request_id
+            res_id = response.id
+            request = notifications_crud.find_request_by_request_id(db, response.review_request_id)
+            title = request.title
+            content = response.content
+
+        user = notifications_crud.find_user_by_id(db, notification.user_id)
+
         di = {
-            "id": count,
-            "from_user_id": user.id,
-            "from_user_name": user.last_name + user.first_name,
-            "content": data.content,
-            "related_question_id": data.id if table == "question" else data.question_id if table == "answer" else None,
-            "related_answer_id": data.id if table == "answer" else None,
-            "related_review_request_id": data.id if table == "request" else data.review_request_id if table == "response" else None,
-            "related_review_response_id": data.id if table == "response" else None,
-            "is_read": data.is_read,
-            "created_at": data.created_at.isoformat()
+            "id": i + 1,
+            "from_user": {
+                "id": notification.user_id,
+                "name": user.last_name + user.first_name
+            },
+            "question_id": q_id,
+            "answer_id": a_id,
+            "review_request_id": req_id,
+            "review_response_id": res_id,
+            "title": title,
+            "content": content,
+            "is_read": notification.is_read,
+            "created_at": notification.created_at.isoformat()
         }
         li.append(di)
-        count += 1
 
     return {"notifications": li}
 
