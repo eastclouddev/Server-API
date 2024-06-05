@@ -35,6 +35,7 @@ def test_create_company_ABNORMAL_01(client_fixture: TestClient):
         "/companies",
         json={
             "name": 123,
+            "name_kana":"会社フリガナ",
             "prefecture": "A都",
             "city": "A区",
             "town": "A町",
