@@ -8,11 +8,12 @@ def test_create_company_01(client_fixture: TestClient):
     response = client_fixture.post(
         "/companies",
         json={
-            "name": "A社",
-            "prefecture": "A都",
-            "city": "A区",
-            "town": "A町",
-            "address": "建物A",
+            "name": "F社",
+            "name_kana": "会社名フリガナ",            
+            "prefecture": "F都",
+            "city": "F区",
+            "town": "F町",
+            "address": "建物F",
             "postal_code": "000-0000",
             "phone_number": "000-0000-0000",
             "email": "aaa@mail.com"
@@ -55,6 +56,7 @@ def test_find_company_details_01(client_fixture: TestClient):
     assert response.status_code == 200
     assert "company_id" in response.json()
     assert "name" in response.json()
+    assert "name_kana" in response.json()
     assert "prefecture" in response.json()
     assert "city" in response.json()
     assert "town" in response.json()
@@ -83,6 +85,7 @@ def test_find_company_list_01(client_fixture: TestClient):
     assert response.status_code == 200
     assert "company_id" in response.json()["companies"][0]
     assert "name" in response.json()["companies"][0]
+    assert "name_kana" in response.json()["companies"][0]
     assert "prefecture" in response.json()["companies"][0]
     assert "city" in response.json()["companies"][0]
     assert "town" in response.json()["companies"][0]
@@ -114,9 +117,8 @@ def test_find_progress_list_company_02(client_fixture: TestClient):
         "/companies/999/progresses"
     )
 
-    assert response.status_code == 200
-    assert "progresses" in response.json()
-    assert response.json()["progresses"] == []
+    assert response.status_code == 404
+    assert response.json()["detail"] == "progresses not found."
 
 """受講生一覧（法人、法人代行)"""
 def test_find_student_list_company_01(client_fixture: TestClient):

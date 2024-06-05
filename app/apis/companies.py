@@ -28,6 +28,8 @@ async def create_company(db: DbDependency, param: CompanyCreateRequestBody):
     dict
         name: str
             会社名
+        name_kana: str
+            会社名フリガナ
         prefecture: str
             都道府県
         city: str
@@ -50,6 +52,8 @@ async def create_company(db: DbDependency, param: CompanyCreateRequestBody):
             新しく作成された会社のID
         name: str
             会社名
+        name_kana: str
+            会社名フリガナ
         prefecture: str
             都道府県
         city: str
@@ -70,12 +74,13 @@ async def create_company(db: DbDependency, param: CompanyCreateRequestBody):
 
     try:
         new_company = companies_cruds.create_company(db, param)
-        
+            
         db.commit()
         
         re_di = {
             "company_id": new_company.id,
             "name": new_company.name,
+            "name_kana": new_company.name_kana,
             "prefecture": new_company.prefecture,
             "city": new_company.city,
             "town": new_company.town,
@@ -111,6 +116,8 @@ async def find_company_details(db: DbDependency, company_id: int = Path(gt=0)):
             会社のID
         name: str
             会社の名前
+        name: str
+            会社名のフリガナ
         prefecture: str
             所在地の都道府県
         city: str
@@ -138,6 +145,7 @@ async def find_company_details(db: DbDependency, company_id: int = Path(gt=0)):
     info = {
         "company_id": company_id,
         "name": company_info.name,
+        "name_kana": company_info.name_kana,
         "prefecture": company_info.prefecture,
         "city": company_info.city,
         "town": company_info.town,
@@ -169,6 +177,8 @@ async def find_company_list(db: DbDependency):
             会社のID（int）
         name: str
             会社名
+        name_kana: str
+            会社名のフリガナ
         prefecture: str
             都道府県
         city: str
@@ -199,6 +209,7 @@ async def find_company_list(db: DbDependency):
         one_company = {
             "company_id": company.id,
             "name": company.name,
+            "name_kana": company.name_kana,
             "prefecture": company.prefecture,
             "city": company.city,
             "town": company.town,
@@ -212,6 +223,8 @@ async def find_company_list(db: DbDependency):
         companies_list.append(one_company)
     
     return {"companies": companies_list}
+
+
 
 @router.get("/{company_id}/progresses", response_model=ProgressListResponseBody, status_code=status.HTTP_200_OK)
 async def find_progress_list_company(db: DbDependency, company_id: int):
@@ -242,7 +255,7 @@ async def find_progress_list_company(db: DbDependency, company_id: int):
     """
     found_course_progresses = companies_cruds.find_course_progresses_by_company_id(db, company_id)
     if not found_course_progresses:
-        raise HTTPException(status_code=404, detail="progresses not found")
+        raise HTTPException(status_code=404, detail="progresses not found.")
 
     progresses_list = []
 
@@ -260,6 +273,8 @@ async def find_progress_list_company(db: DbDependency, company_id: int):
         progresses_list.append(one_progress)
 
     return {"progresses": progresses_list} 
+
+
 
 @router.get("/{company_id}/users", response_model=StudentListResponseBody, status_code=status.HTTP_200_OK)
 async def find_student_list_company(db: DbDependency, company_id: int, role: str, page: int, limit: int):
@@ -300,6 +315,9 @@ async def find_student_list_company(db: DbDependency, company_id: int, role: str
         found_user.append(user)
 
     return compamies_services.cereate_users_list(role, found_user)
+
+
+
 @router.get("/{company_id}/users/counts", response_model=AccountListResponseBody, status_code=status.HTTP_200_OK)
 async def find_number_of_accounts(db: DbDependency, company_id: int):
     """

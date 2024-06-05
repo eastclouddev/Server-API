@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class CompanyCreateRequestBody(BaseModel):
     name: str = Field(examples=["会社名"])
+    name_kana: str = Field(examples=["会社名フリガナ"])
     prefecture: str = Field(examples=["都道府県"])
     city: str = Field(examples=["市区町村"])
     town: str = Field(examples=["町名、番地等"])
@@ -18,6 +19,7 @@ class CompanyCreateRequestBody(BaseModel):
 class CompanyCreateResponseBody(BaseModel):
     company_id: int
     name: str
+    name_kana: str
     prefecture: str
     city: str
     town: str
@@ -29,6 +31,7 @@ class CompanyCreateResponseBody(BaseModel):
 class CompanyDetailResponseBody(BaseModel):
     company_id: int
     name: str
+    name_kana: str
     prefecture: str
     city: str
     town: str
@@ -42,6 +45,7 @@ class CompanyDetailResponseBody(BaseModel):
 class Company(BaseModel):
     company_id: int
     name: str 
+    name_kana: str 
     prefecture: str
     city: str
     town: str
