@@ -1,5 +1,6 @@
 import random
 
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from models.questions import Questions 
@@ -11,6 +12,11 @@ from models.review_requests import ReviewRequests
 from models.review_responses import ReviewResponses
 from models.mentorships import Mentorships
 from models.users import Users
+from models.notifications import Notifications
+from models.tech_categories import TechCategories
+from models.curriculums import Curriculums
+from models.sections import Sections
+
 
 def find_questions_by_user_id(db: Session, user_id: int):
     return db.query(Questions).filter(Questions.user_id == user_id).all()
@@ -58,5 +64,39 @@ def find_mentor_by_least_students(db: Session, student_id: int):
     db.add(new_mentorship)
     return
 
-def find_student_id(db: Session, user_id: int):
+def find_user_by_user_id(db: Session, user_id: int):
     return db.query(Users).filter(Users.id == user_id).first()
+
+def find_category_by_course_id(db: Session, course_id: int):
+    course = db.query(Courses).filter(Courses.id == course_id).first()
+    return db.query(TechCategories).filter(TechCategories.id == course.tech_category_id).first()
+
+def find_category_by_curriculum_id(db: Session, curriculum_id: int):
+    curriculum = db.query(Curriculums).filter(Curriculums.id == curriculum_id).first()
+    section = db.query(Sections).filter(Sections.id == curriculum.section_id).first()
+    course = db.query(Courses).filter(Courses.id == section.course_id).first()
+    return db.query(TechCategories).filter(TechCategories.id == course.tech_category_id).first()
+
+def find_notification_by_question_id(db: Session, question_id: int):
+    return db.query(Notifications).filter(Notifications.question_id == question_id).all()
+
+def find_notification_by_review_request_id(db: Session, review_request_id: int):
+    return db.query(Notifications).filter(Notifications.review_request_id == review_request_id).all()
+
+def find_mentors_by_student_id(db: Session, student_id: int):
+    return db.query(Mentorships).filter(Mentorships.student_id == student_id).all()
+
+def find_notifications_by_mentor_id(db: Session, mentor_id_list: list):
+    return db.query(Notifications).filter(Notifications.user_id.in_(mentor_id_list)).order_by(desc(Notifications.created_at)).all()
+
+def find_question_by_question_id(db: Session, question_id: int):
+    return db.query(Questions).filter(Questions.id == question_id).first()
+
+def find_answer_by_answer_id(db: Session, answer_id: int):
+    return db.query(Answers).filter(Answers.id == answer_id).first()
+
+def find_request_by_request_id(db: Session, request_id: int):
+    return db.query(ReviewRequests).filter(ReviewRequests.id == request_id).first()
+
+def find_response_by_response_id(db: Session, response_id: int):
+    return db.query(ReviewResponses).filter(ReviewResponses.id == response_id).first()

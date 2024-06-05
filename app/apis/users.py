@@ -6,7 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.users import UserUpdateRequestBody, UserDetailResponseBody, UserListResponseBody, AccountListResponseBody
+from schemas.users import UserCreateRequestBody, UserCreateResponseBody, \
+    UserUpdateRequestBody, UserDetailResponseBody, UserListResponseBody, AccountListResponseBody
 from cruds import users as users_crud
 from services import users as users_service
 
@@ -16,6 +17,52 @@ DbDependency = Annotated[Session, Depends(get_db)]
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
+
+@router.post("/", response_model=UserCreateResponseBody, status_code=status.HTTP_201_CREATED)
+async def create_user(db: DbDependency, param: UserCreateRequestBody):
+    """
+    アカウント作成
+
+    Parameters
+    -----------------------
+    dict
+        first_name: str
+            名前
+        last_name: str
+            姓
+        first_name_kana: str
+            名前（カナ）
+        last_name_kana: str
+            姓（カナ）
+        email: str
+            メールアドレス
+        role: str
+            ユーザーのロール
+        company_id: int
+            所属会社のID
+
+    Returns
+    -----------------------
+    user_id: int
+        新規作成されたユーザーのID
+    """
+    # メールアドレスの重複チェック
+    duplication_user = users_crud.find_user_by_email(db, param.email)
+    if duplication_user:
+        raise HTTPException(status_code=400, detail="Email is already in use.")
+
+    try:
+        create_user = users_crud.create_user(db, param)
+        if not create_user:
+            raise Exception("role or company_id not found.")
+
+        db.commit()
+        return {"user_id": create_user.id}
+
+    except Exception as e:
+        logger.error(str(e))
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid input data.")
 
 @router.patch("/{user_id}", status_code=status.HTTP_200_OK)
 async def update_user(db: DbDependency, param: UserUpdateRequestBody, user_id: int = Path(gt=0)):
@@ -35,6 +82,8 @@ async def update_user(db: DbDependency, param: UserUpdateRequestBody, user_id: i
             姓（カナ）
         email: str
             メールアドレス
+        is_enable: bool
+            アカウントの状態
     user_id: int
         更新するユーザーのID
 
@@ -43,8 +92,11 @@ async def update_user(db: DbDependency, param: UserUpdateRequestBody, user_id: i
     なし
     """
     # メールアドレスの重複チェック
-    duplication_user = users_crud.find_user_by_email(db, param.email, user_id)
-    if duplication_user:
+    duplication_user = users_crud.find_user_by_email(db, param.email)
+    # 重複しているユーザーがいない or 更新対象と同じメールアドレス → 更新可能
+    if not duplication_user or (duplication_user.id == user_id):
+        pass
+    else:
         raise HTTPException(status_code=400, detail="Email is already in use.")
 
     try:
@@ -86,6 +138,10 @@ async def find_user_details(db: DbDependency, user_id: int = Path(gt=0)):
             姓（カナ）
         email: str
             メールアドレス
+        company_name: str
+            会社名
+        is_enable: bool
+            アカウントの状態
         role: str
             ユーザーのロール
         last_login: str
@@ -96,6 +152,7 @@ async def find_user_details(db: DbDependency, user_id: int = Path(gt=0)):
         raise HTTPException(status_code=404, detail="User not found.")
 
     role = users_crud.find_role_by_role_id(db, user.role_id)
+    company = users_crud.find_company_by_company_id(db, user.company_id)
 
     re_di = {
         "user_id": user.id,
@@ -104,8 +161,10 @@ async def find_user_details(db: DbDependency, user_id: int = Path(gt=0)):
         "first_name_kana": user.first_name_kana,
         "last_name_kana": user.last_name_kana,
         "email": user.email,
+        "company_name": company.name,
+        "is_enable": user.is_enable,
         "role": role.name,
-        "last_login": user.last_login.isoformat()
+        "last_login": user.last_login.isoformat() if user.last_login else ""
     }
 
     return re_di
@@ -169,14 +228,16 @@ async def find_student_list(db:DbDependency, role: str, page: int, limit: int):
     users: array
         user_id: int
             ユーザーのID
-        first_name: str
-            名前
-        last_name: str
-            姓
+        name: str
+            ユーザーの名前
+        company_name: str
+            ユーザーの所属会社
         email: str
             メールアドレス
         role: str
             ユーザーの役割
+        is_enable: bool
+            アカウントの有効状態
         last_login: str
             最終ログイン日時（ISO 8601形式）
     """
@@ -188,11 +249,12 @@ async def find_student_list(db:DbDependency, role: str, page: int, limit: int):
     for user in users[(page-1)*limit : page*limit]:
         di = {
             "user_id": user.id,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
+            "name": user.last_name + user.first_name,
+            "company_name": users_crud.find_company_by_company_id(db, user.company_id).name,
             "email": user.email,
             "role": role,
-            "last_login": user.last_login.isoformat()
+            "is_enable": user.is_enable,
+            "last_login": user.last_login.isoformat() if user.last_login else ""
         }
         li.append(di)
 

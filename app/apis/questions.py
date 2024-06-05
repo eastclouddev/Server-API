@@ -28,8 +28,12 @@ async def create_answer(db: DbDependency, param: AnswerCreateRequestBody, questi
     dict
         user_id: int
             回答するユーザーのID
+        parent_answer_id: int
+            返信先の回答ID
         content: str
             回答
+        media_content: json
+            関連するメディアコンテンツの情報
 
     Returns
     -----------------------
@@ -38,31 +42,51 @@ async def create_answer(db: DbDependency, param: AnswerCreateRequestBody, questi
             作成された回答のID
         question_id: int
             回答に紐づく質問のID
-        user_id: int
-            回答したユーザーのID
+        parent_answer_id: int
+            返信先の回答ID
+        user: dict
+            user_id: int
+                回答したユーザーのID
+            name: str
+                回答したユーザーの名前
         content: str
             回答
+        media_content: json
+            関連するメディアコンテンツの情報
+            url: str
+                メディアコンテンツのURL
+        created_at: str
+            回答が作成された日時（ISO8601形式）
     """
 
-    question = questions_crud.find_by_question(db, question_id)
+    question = questions_crud.find_question_by_question_id(db, question_id)
     if not question:
         raise HTTPException(status_code=404, detail="Question not found.")
     
     try:
-        answer = questions_crud.find_answer_by_question_id(db, question_id)
+        # answer = questions_crud.find_answer_by_question_id(db, question_id)
 
-        # 同じ質問に対して、再度回答する場合はparent_answer_idを追加する
-        if answer:
-            new_answer = questions_crud.create_answer_parent_answer_id(db, param, question_id, answer.id)
-        else:
-            new_answer = questions_crud.create_answer(db, param, question_id)
+        # # 同じ質問に対して、再度回答する場合はparent_answer_idを追加する
+        # if answer:
+        #     new_answer = questions_crud.create_answer_parent_answer_id(db, param, question_id, answer.id)
+        # else:
+        #     new_answer = questions_crud.create_answer(db, param, question_id)
+        new_answer = questions_crud.create_answer(db, param, question_id)
         db.commit()
+
+        user = questions_crud.find_user_by_id(db, param.user_id)
 
         re_di = {
             "answer_id": new_answer.id,
             "question_id": new_answer.question_id,
-            "user_id": new_answer.user_id,
-            "content": new_answer.content
+            "parent_answer_id": param.parent_answer_id,
+            "user": {
+                "user_id": new_answer.user_id,
+                "name": user.last_name + user.first_name,
+            },
+            "content": new_answer.content,
+            "media_content": new_answer.media_content,
+            "created_at": new_answer.created_at.isoformat()
         }
 
         return re_di
@@ -88,14 +112,25 @@ async def find_question_thread_details(db: DbDependency, question_id: int):
                 質問のID
             curriculum_id: int
                 質問が含まれるカリキュラムのID
-            user_id: int
-                質問を投稿したユーザーのID
+            user: dict
+                user_id: int
+                    質問を投稿したユーザーのID
+                name: str
+                    質問を投稿したユーザーの名前
             title: int
                 質問のタイトル
+            objective: str
+                学習内容で実践したこと
+            current_situation: str
+                現状
+            research: str
+                自分で調べたこと
             content: str
                 質問の内容
             media_content: json
                 質問に関するメディアコンテンツの情報
+                url: str
+                    メディアコンテンツのURL
             is_closed: bool
                 質問がクローズされているか
             created_at: str
@@ -105,16 +140,19 @@ async def find_question_thread_details(db: DbDependency, question_id: int):
                 回答のID
             question_id: int
                 回答が紐づく質問のID
-            user_id: int
-                回答を投稿したユーザーのID
+            user: dict
+                user_id: int
+                    回答を投稿したユーザーのID
+                name: str
+                    回答を投稿したユーザーの名前                
             parent_answer_id: int or None
                 返信先の回答ID（返信先がない場合はNoneが返る）
             content: str
                 回答の内容
             media_content: json
                 回答に関するメディアコンテンツの情報
-            is_read: bool
-                回答が既読かどうかを示すフラグ
+                url: str
+                    メディアコンテンツのURL
             created_at: str
                 作成日（ISO 8601形式）
     """
@@ -124,13 +162,25 @@ async def find_question_thread_details(db: DbDependency, question_id: int):
     if not found_question:
         raise HTTPException(status_code=404,detail="Question not found.")
     
+    user = questions_crud.find_user_by_id(db, found_question.user_id)
+    media_content = []
+    for content in found_question.media_content:
+        if content.get("url"):
+            media_content.append({"url": content.get("url")})
+    
     question = {
         "id": found_question.id,
         "curriculum_id": found_question.curriculum_id,
-        "user_id": found_question.user_id,
+        "user": {
+            "user_id": user.id,
+            "name": user.last_name + user.first_name
+        },
         "title": found_question.title,
+        "objective": found_question.objective,
+        "current_situation": found_question.current_situation,
+        "research": found_question.research,
         "content": found_question.content,
-        "media_content": found_question.media_content,
+        "media_content": media_content,
         "is_closed": found_question.is_closed,
         "created_at": found_question.created_at.isoformat()
     }
@@ -138,14 +188,17 @@ async def find_question_thread_details(db: DbDependency, question_id: int):
     found_answers = questions_crud.find_answers_by_question_id(db, question_id)
     answer_list = []
     for answer in found_answers:
+        user = questions_crud.find_user_by_id(db, answer.user_id)
         one_answer = {
             "id": answer.id,
             "question_id": answer.question_id,
-            "user_id": answer.user_id,
+            "user": {
+                "user_id": user.id,
+                "name": user.last_name + user.first_name
+            },
             "parent_answer_id": answer.parent_answer_id,
             "content": answer.content,
             "media_content": answer.media_content,
-            "is_read": answer.is_read,
             "created_at": answer.created_at.isoformat()
         }
 
