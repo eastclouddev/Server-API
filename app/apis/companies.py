@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 from schemas.companies import CompanyCreateRequestBody, CompanyCreateResponseBody, CompanyDetailResponseBody, \
-CompanyListResponseBody, StudentListResponseBody, ProgressListResponseBody, AccountListResponseBody
+CompanyListResponseBody, StudentListResponseBody, ProgressListResponseBody, \
+                                BillingListResponseBody, AccountListResponseBody
 from cruds import companies as companies_cruds
 from services import companies as compamies_services
 
@@ -300,6 +301,36 @@ async def find_student_list_company(db: DbDependency, company_id: int, role: str
         found_user.append(user)
 
     return compamies_services.cereate_users_list(role, found_user)
+
+@router.get("/{company_id}/billings", response_model=BillingListResponseBody, status_code=status.HTTP_200_OK)
+async def find_billing_list(db: DbDependency, company_id: int):
+    """
+    請求履歴一覧取得
+
+    Parameter
+    -----------------------
+    company_id: int
+        会社のID
+    Returns
+    -----------------------
+    dict
+        billing_id: int
+            請求履歴のID
+        date: str
+            請求日（YYYY-MM-DD形式）
+        amount: float
+            請求金額
+        status: string
+            請求状況（例: "paid", "unpaid", "overdue"）
+        description:str
+            請求内容の説明
+    """
+    billings = companies_cruds.find_billing_by_company_id(db, company_id)
+
+    if not billings:
+        raise HTTPException(status_code=404, detail="Company not found.")    
+
+    return billings
 @router.get("/{company_id}/users/counts", response_model=AccountListResponseBody, status_code=status.HTTP_200_OK)
 async def find_number_of_accounts(db: DbDependency, company_id: int):
     """

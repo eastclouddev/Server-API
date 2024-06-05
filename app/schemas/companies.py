@@ -78,6 +78,16 @@ class Student(BaseModel):
 class StudentListResponseBody(BaseModel):
     users: list[Student]
 
+class Billing(BaseModel):
+    billing_id: int
+    date: str
+    amount: float
+    status: str
+    description: str
+
+class BillingListResponseBody(BaseModel):
+    billings: list[Billing]
+
 class Account(BaseModel):
     role_id: int
     role_name: str
