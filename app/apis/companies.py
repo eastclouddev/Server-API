@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 from schemas.companies import CompanyCreateRequestBody, CompanyCreateResponseBody, CompanyDetailResponseBody, \
+CompanyUpdateRequestBody, CompanyBillingInfoUpdateResponseBody, CompanyBillingInfoCreateRequestBody, CompanyBillingInfoCreateResponseBody, \
+CompanyBillingInfoDetailResponseBody, CompanyBillingInfoUpdateRequestBody, CompanyBillingInfoUpdateResponseBody, \
 CompanyListResponseBody, StudentListResponseBody, ProgressListResponseBody, \
                                 BillingListResponseBody, AccountListResponseBody
 from cruds import companies as companies_cruds
@@ -151,6 +153,71 @@ async def find_company_details(db: DbDependency, company_id: int = Path(gt=0)):
     }
 
     return info
+
+
+@router.patch("/{company_id}", response_model=CompanyBillingInfoUpdateResponseBody, status_code=status.HTTP_200_OK)
+async def update_company(db: DbDependency, update: CompanyBillingInfoUpdateRequestBody, company_id: int = Path(gt=0)):
+    """
+    会社情報更新
+
+    Parameters
+    -----------------------
+    company_id: int
+        会社情報のID
+    dict
+        name: str
+            会社名
+        prefecture: str
+            都道府県
+        city: str
+            市区町村
+        town: str
+            町名、番地等
+        address: str
+            建物名、部屋番号等
+        postal_code: str
+            郵便番号
+        phone_number: str
+            電話番号
+        email: str
+            メールアドレス
+
+    Returns
+    -----------------------
+    dict
+        company_id: int
+            会社のID
+        name: str
+            会社の名前
+        prefecture: str
+            所在地の都道府県
+        city: str
+            所在地の市区町村
+        town: str
+            所在地の町名・番地等
+        address: str
+            会社の詳細な住所
+        postal_code: str
+            郵便番号
+        phone_number: str
+            電話番号
+        email: str
+            会社のメールアドレス
+        updated_at: str
+            レコードの最終更新日時（ISO 8601形式）
+    """
+    update_company = companies_cruds.update_company(db, update, company_id)
+    if not update_company:
+        raise HTTPException(status_code=404, detail="Company not found.")
+
+    try:
+        db.commit()
+        return update_company
+
+    except Exception as e:
+        logger.error(str(e))
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid input data.")
 
 
 
@@ -372,3 +439,182 @@ async def find_number_of_accounts(db: DbDependency, company_id: int):
     }
 
     return re_di
+
+@router.post("/{company_id}/billing_info", response_model=CompanyBillingInfoCreateResponseBody, status_code=status.HTTP_201_CREATED)
+async def create_company_billing_info(db: DbDependency, param: CompanyBillingInfoCreateRequestBody):
+    """
+    請求先情報作成
+    Parameter
+    -----------------------
+    dict
+        prefecture: str
+            都道府県
+        city: str
+            市区町村
+        town: str
+            町名、番地等
+        address: str
+            建物名、部屋番号等
+        billing_email: str
+            メールアドレス
+        invoice_number: str
+            インボイス番号
+        tax_number: str
+            タックス番号
+        payment_method_id: int
+            支払い方法のID
+        notes: str
+            メモ
+        last_receipt_number: str
+            領収書番号
+    
+    Returns
+    -----------------------
+    dict
+        id: int
+            請求先情報ID（int）
+        prefecture: str
+            都道府県
+        city: str
+            市区町村
+        town: str
+            町名、番地等
+        address: str
+            建物名、部屋番号等
+        billing_email: str
+            メールアドレス
+        invoice_number: str
+            インボイス番号
+        tax_number: str
+            タックス番号
+        payment_method_id: int
+            支払い方法のID
+        notes: str
+            メモ
+        last_receipt_number: str
+            領収書番号
+    """
+    try:
+        new_company_billing_info = companies_cruds.create_company_billing_info(db, param)
+        db.commit()
+        return new_company_billing_info
+    
+    except Exception as e:
+        logger.error(e)
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid input data.")
+
+@router.get("/{company_id}/billing_info/{billing_info_id}", response_model=CompanyBillingInfoDetailResponseBody, status_code=status.HTTP_200_OK)
+async def find_company_billing_info_details(db: DbDependency, billing_info_id: int = Path(gt=0)):
+    """
+    請求先情報取得
+
+    Parameter
+    -----------------------
+    billing_info_id: int
+        詳細情報を取得したい請求先情報のID
+
+    Returns
+    -----------------------
+    dict
+        id: int
+            請求先情報ID（int）
+        prefecture: str
+            都道府県
+        city: str
+            市区町村
+        town: str
+            町名、番地等
+        address: str
+            建物名、部屋番号等
+        billing_email: str
+            メールアドレス
+        invoice_number: str
+            インボイス番号
+        tax_number: str
+            タックス番号
+        payment_method: str
+            支払い方法（例: "クレジットカード", "銀行振り込み" etc...）
+        description:str
+            支払い方法の説明
+        notes: str
+            メモ
+        last_receipt_number: str
+            領収書番号
+
+    """
+    company_billing_info = companies_cruds.find_company_billing_info_by_billing_info_id(db, billing_info_id)
+    if not company_billing_info:
+        raise HTTPException(status_code=404, detail="Company Billing Info not found.")
+
+    return company_billing_info
+
+@router.put("/{company_id}/billing_info/{billing_info_id}", response_model=CompanyBillingInfoUpdateResponseBody, status_code=status.HTTP_200_OK)
+async def update_company_billing_info(db: DbDependency, update: CompanyBillingInfoUpdateRequestBody, billing_info_id: int = Path(gt=0)):
+    """
+    会社請求情報更新
+
+    Parameters
+    -----------------------
+    billing_info_id: int
+        更新する請求情報のID
+    dict
+        prefecture: str
+            都道府県
+        city: str
+            市区町村
+        town: str
+            町名、番地等
+        address: str
+            建物名、部屋番号等
+        billing_email: str
+            メールアドレス
+        invoice_number: str
+            インボイス番号
+        tax_number: str
+            タックス番号
+        payment_method_id: int
+            支払い方法のID
+        notes: str
+            メモ
+        last_receipt_number: str
+            領収書番号
+
+    Returns
+    -----------------------
+    dict
+        id: int
+            請求先情報ID（int）
+        prefecture: str
+            都道府県
+        city: str
+            市区町村
+        town: str
+            町名、番地等
+        address: str
+            建物名、部屋番号等
+        billing_email: str
+            メールアドレス
+        invoice_number: str
+            インボイス番号
+        tax_number: str
+            タックス番号
+        payment_method_id: int
+            支払い方法のID
+        notes: str
+            メモ
+        last_receipt_number: str
+            領収書番号
+    """
+    update_company_billing_info = companies_cruds.update_company_billing_info(db, update, billing_info_id)
+    if not update_company_billing_info:
+        raise HTTPException(status_code=404, detail="Company Billing Info not found.")
+
+    try:
+        db.commit()
+        return update_company_billing_info
+
+    except Exception as e:
+        logger.error(str(e))
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid input data.")
