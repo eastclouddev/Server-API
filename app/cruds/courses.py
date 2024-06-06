@@ -6,7 +6,7 @@ from models.courses import Courses
 from models.sections import Sections
 from models.curriculums import Curriculums
 from models.course_progresses import CourseProgresses
-
+from models.tech_categories import TechCategories
 
 def find_courses(db: Session):
     return db.query(Courses).all()
@@ -42,3 +42,9 @@ def create_course_progress(db: Session, user_id: int, course_ids: list):
 def find_course_progress(db: Session, user_id: int, course_ids: list):
     return db.query(CourseProgresses).filter(CourseProgresses.user_id == user_id, \
                                              CourseProgresses.course_id.in_(course_ids)).all()
+
+def find_tech_category(db: Sections, tech_category_id: int):
+    return db.query(TechCategories).filter(TechCategories.id == tech_category_id).first()
+
+def find_curriculums(db: Session, course_id):
+    return db.query(Curriculums).filter(Curriculums.id == course_id).all()

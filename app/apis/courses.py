@@ -38,6 +38,12 @@ async def find_course_list(db: DbDependency):
             コースを作成したユーザーのID
         thumbnail_url: str
             コースのサムネイル画像のURL
+        expectesd_end_hours: int
+            コースの終了想定時間
+        total_curriculums: int
+            カリキュラム総数
+        tech_category: str
+            技術カテゴリ
         created_at: str
             コースの作成日時（ISO 8601形式）
     """
@@ -46,12 +52,17 @@ async def find_course_list(db: DbDependency):
 
     li = []
     for course in courses:
+        curriculums = courses_crud.find_curriculums(db, course.id)
+        tech_category = courses_crud.find_tech_category(db, course.tech_category_id)
         di = {
             "course_id": course.id,
             "title": course.title,
             "description": course.description,
             "created_user": course.created_user,
             "thumbnail_url": course.thumbnail_url,
+            "expected_end_hours": course.expected_end_hours,
+            "total_curriculums": len(curriculums),
+            "tech_category": tech_category.name,
             "created_at": course.created_at.isoformat()
         }
         li.append(di)

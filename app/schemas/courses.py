@@ -15,6 +15,9 @@ class Course(BaseModel):
     description: str
     created_user: int
     thumbnail_url: Optional[str]
+    expected_end_hours: int
+    total_curriculums: int
+    tech_category: str
     created_at: str
 
 class CourseListResponseBody(BaseModel):
