@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
-from schemas.companies import CompanyCreateRequestBody
+from schemas.companies import CompanyCreateRequestBody, CompanyUpdateRequestBody, \
+CompanyBillingInfoCreateRequestBody, CompanyBillingInfoUpdateRequestBody
 from models.companies import Companies 
 from models.users import Users
 from models.learning_statuses import LearningStatuses
@@ -13,11 +14,36 @@ from models.company_billing_info import CompanyBillingInfo
 from models.company_billing_statuses import CompanyBillingStatuses
 from models.company_receipts import CompanyReceipts
 from models.company_transaction_histories import CompanyTransactionHistories
+from models.payment_methods import PaymentMethods
 
 def create_company(db: Session, company_create: CompanyCreateRequestBody):
     new_company = Companies(**company_create.model_dump())
     db.add(new_company)
     return new_company
+
+def update_company(db: Session, update:CompanyUpdateRequestBody ,company_id: int):
+    company = find_company_by_company_id(db, company_id)
+    if not company:
+        return None
+    
+    company.content = update.content
+    company.is_read = update.is_read
+    db.add(company)
+    
+    update_company = {
+        "company_id": company_id,
+        "name": company.name,
+        "prefecture": company.prefecture,
+        "city": company.city,
+        "town": company.town,
+        "address": company.address,
+        "postal_code": company.postal_code,
+        "phone_number": company.phone_number,
+        "email": company.email,
+        "updated_at": company.updated_at.isoformat() 
+    }
+
+    return update_company
 
 def find_company_by_company_id(db: Session, company_id: int):
     return db.query(Companies).filter(Companies.id == company_id).first()
@@ -90,3 +116,70 @@ def find_roles(db: Session):
 
 def find_users_by_role_id(db: Session, role_id: int):
     return db.query(Users).filter(Users.role_id == role_id, Users.is_enable == True).all()
+
+def create_company_billing_info(db: Session, company_billing_info_create: CompanyBillingInfoCreateRequestBody):
+    new_company_billing_info = CompanyBillingInfo(**company_billing_info_create.model_dump())
+    
+    company_billing_info = {
+        "company_billing_info_id": new_company_billing_info.id,
+        "prefecture": new_company_billing_info.prefecture,
+        "city": new_company_billing_info.city,
+        "town": new_company_billing_info.town,
+        "address": new_company_billing_info.address,
+        "email": new_company_billing_info.email,
+        "invoice_number": new_company_billing_info.invoice_number,
+        "tax_number": new_company_billing_info.tax_number,
+        "payment_method_id": new_company_billing_info.payment_method_id,
+        "notes": new_company_billing_info.notes,
+        "last_receipt_number": new_company_billing_info.last_receipt_number,
+        "created_at": new_company_billing_info.created_at.isoformat()
+    }
+    db.add(company_billing_info)
+    return company_billing_info
+
+def find_company_billing_info_by_billing_info_id(db: Session, billing_info_id: int):
+    company_billing_info = db.query(CompanyBillingInfo).filter(CompanyBillingInfo.id == billing_info_id).first()
+    payment_method = db.query(PaymentMethods).filter(PaymentMethods.id == company_billing_info.payment_method_id).first()
+    di = {
+        "company_billing_info_id": billing_info_id,
+        "prefecture": company_billing_info.prefecture,
+        "city": company_billing_info.city,
+        "town": company_billing_info.town,
+        "address": company_billing_info.address,
+        "email": company_billing_info.email,
+        "invoice_number": company_billing_info.invoice_number,
+        "tax_number": company_billing_info.tax_number,
+        "payment_method": payment_method.name,
+        "description": payment_method.description,
+        "notes": company_billing_info.notes,
+        "last_receipt_number": company_billing_info.last_receipt_number,
+        "created_at": company_billing_info.created_at.isoformat(),
+        "updated_at": company_billing_info.updated_at.isoformat()
+    }
+    return di
+
+def update_company_billing_info(db: Session, update:CompanyBillingInfoUpdateRequestBody ,billing_info_id: int):
+    company_billing_info = find_company_billing_info_by_billing_info_id(db, billing_info_id)
+    if not company_billing_info:
+        return None
+    
+    company_billing_info.content = update.content
+    company_billing_info.is_read = update.is_read
+    db.add(company_billing_info)
+    
+    update_company_billing_info = {
+        "company_billing_info_id": billing_info_id,
+        "prefecture": company_billing_info.prefecture,
+        "city": company_billing_info.city,
+        "town": company_billing_info.town,
+        "address": company_billing_info.address,
+        "email": company_billing_info.email,
+        "invoice_number": company_billing_info.invoice_number,
+        "tax_number": company_billing_info.tax_number,
+        "payment_method": company_billing_info.payment_method_id,
+        "notes": company_billing_info.notes,
+        "last_receipt_number": company_billing_info.last_receipt_number,
+        "updated_at": company_billing_info.updated_at.isoformat() 
+    }
+
+    return update_company_billing_info
