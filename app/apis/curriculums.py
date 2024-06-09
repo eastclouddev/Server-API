@@ -160,20 +160,28 @@ async def find_curriculum_details(db: DbDependency, curriculum_id: int = Path(gt
 #     }
 #     return re_di
 
-@router.post("/{curriculum_id}/questions", response_model=QuestionCreateResponseBody, status_code=status.HTTP_201_CREATED)
-async def create_question(db: DbDependency, param: QuestionCreateRequestBody, curriculum_id: int = Path(gt=0)):
+@router.post("/{course_id}/questions", response_model=QuestionCreateResponseBody, status_code=status.HTTP_201_CREATED)
+async def create_question(db: DbDependency, param: QuestionCreateRequestBody, course_id: int = Path(gt=0)):
     """
     質問投稿作成取得
     
     Parameter
     -----------------------
-    curriculum_id: int
-        詳細を取得したいカリキュラムのID
+    course_id: int
+        質問を投稿したいコースのID
     dict
+        curriculum_id: int
+            質問が紐づくカリキュラムのID
         user_id: int
             ユーザーのID
         title: str
             質問のタイトル
+        objective: str
+            学習内容で実践したこと
+        current_situation: str
+            現状
+        research: str
+            自分が調べたこと
         content: str 
             質問の内容
         media_content: str
@@ -188,16 +196,33 @@ async def create_question(db: DbDependency, param: QuestionCreateRequestBody, cu
             質問のID
         curriculum_id: int
             カリキュラムのID
-        user_id: int
-            ユーザーのID
+        user: dict
+            user_id: int
+                質問を投稿したユーザーのID
+            name: str
+                質問を投稿したユーザーの名前
         title: str
             質問のタイトル
+        objective: str
+            学習内容で実践したこと
+        current_situation: str
+            現状
+        research: str
+            自分が調べたこと
         content: str 
             質問の内容
-        media_content: str 
+        media_content: dict
             関連するメディアコンテンツの情報
+        created_at: str
+            質問作成日（ISO 8601形式）
+        is_read: bool
+            未読コメントの有無
+        is_closed: bool
+            完了しているかどうか
+        reply_counts: int
+            質問の返信数
     """
-    found_curriculum = curriculums_crud.find_curriculum_by_curriculum_id(db, curriculum_id)
+    found_curriculum = curriculums_crud.find_curriculum_by_curriculum_id(db, param.curriculum_id)
 
     if not found_curriculum:
         raise HTTPException(status_code=404, detail="Curriculum not found.")
@@ -214,16 +239,28 @@ async def create_question(db: DbDependency, param: QuestionCreateRequestBody, cu
     media_json = li
 
     try:
-        new_question = curriculums_crud.create_question(db, param.user_id, param.title, param.content, media_json, curriculum_id)
+        new_question = curriculums_crud.create_question(db, course_id, param, media_json)
         db.commit()
+
+        user = curriculums_crud.find_user_by_id(db, new_question.user_id)
         
         re_di = {
             "question_id": new_question.id,
             "curriculum_id": new_question.curriculum_id,
-            "user_id": new_question.user_id,
+            "user": {
+                "user_id": user.id,
+                "name": user.last_name + user.first_name
+            },
             "title": new_question.title,
+            "objective": new_question.objective,
+            "current_situation": new_question.current_situation,
+            "research": new_question.research,
             "content": new_question.content,
-            "media_content": new_question.media_content
+            "media_content": new_question.media_content,
+            "created_at": new_question.created_at.isoformat(),
+            "is_read": False, # 作成なので、この時点ではFalse確定
+            "is_closed": False, # 作成なので、この時点ではFalse確定
+            "reply_counts": 0 # 作成なので、この時点では0確定
         }
 
         return re_di

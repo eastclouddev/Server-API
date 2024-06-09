@@ -1,5 +1,7 @@
 from sqlalchemy.orm import Session
 
+from schemas.curriculums import QuestionCreateRequestBody
+
 from models.review_requests import ReviewRequests
 from models.quiz_contents import QuizContents
 from models.questions import Questions
@@ -42,12 +44,16 @@ def find_questions_by_curriculum_id(db: Session, curriculum_id: int):
 def find_quiz_contents_by_curriculum_id(db: Session, curriculum_id: int):
     return db.query(QuizContents).filter(QuizContents.curriculum_id == curriculum_id).all()
 
-def create_question(db: Session, user_id: int, title: str, content: str, media_json: list, curriculum_id: int):
+def create_question(db: Session, course_id: int, param: QuestionCreateRequestBody, media_json):
     new_question = Questions(
-        curriculum_id = curriculum_id,
-        user_id = user_id,
-        title = title,
-        content = content,
+        curriculum_id = param.curriculum_id,
+        course_id = course_id,
+        user_id = param.user_id,
+        title = param.title,
+        objective = param.objective,
+        current_situation = param.current_situation,
+        research = param.research,
+        content = param.content,
         media_content = media_json
     )
     db.add(new_question)
@@ -71,3 +77,6 @@ def create_review_request(db: Session, curriculum_id: int, user_id:int, title: s
     db.add(new_review)
 
     return new_review
+
+def find_user_by_id(db: Session, user_id: int):
+    return db.query(Users).filter(Users.id == user_id).first()

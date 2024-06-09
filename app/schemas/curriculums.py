@@ -4,6 +4,10 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
+class User(BaseModel):
+    user_id: int
+    name: str
+
 class CurriculumDetailResponseBody(BaseModel):
     curriculum_id: int
     title: str
@@ -45,12 +49,31 @@ class MediaContent(BaseModel):
     url: str
 
 class QuestionCreateRequestBody(BaseModel):
-    user_id: int = Field(default=1)
-    title: str
-    content: str
+    curriculum_id : int = Field(examples=[1])
+    user_id: int = Field(examples=[1])
+    title: str = Field(examples=["title"])
+    objective: str = Field(examples=["やりたいこと"])
+    current_situation: str = Field(examples=["現状"])
+    research: str = Field(examples=["調べたこと"])
+    content: str = Field(examples=["質問内容"])
     media_content: list[MediaContent]
 
 class QuestionCreateResponseBody(BaseModel):
+    question_id: int
+    curriculum_id: int
+    user: User
+    title: str
+    objective: str
+    current_situation: str
+    research: str
+    content: str
+    media_content: list[MediaContent]
+    created_at: str
+    is_read: bool
+    is_closed: bool
+    reply_counts: int
+
+class QuestionList(BaseModel):
     question_id: int
     curriculum_id: int
     user_id: int
@@ -59,5 +82,5 @@ class QuestionCreateResponseBody(BaseModel):
     media_content: list[MediaContent]
 
 class QuestionListResponseBody(BaseModel):
-    questions: list[QuestionCreateResponseBody]
+    questions: list[QuestionList]
 

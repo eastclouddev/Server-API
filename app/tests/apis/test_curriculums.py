@@ -45,8 +45,12 @@ def test_create_question_01(client_fixture: TestClient):
     response = client_fixture.post(
         "/curriculums/1/questions",
         json={
+            "curriculum_id": 1,
             "user_id": 1,
             "title": "title",
+            "objective": "objective",
+            "current_situation": "current_situation",
+            "research": "research",
             "content": "content",
             "media_content": [{"url": "sample1.com"}, {"url": "sample2.com"}]
         }
@@ -55,17 +59,28 @@ def test_create_question_01(client_fixture: TestClient):
     assert response.status_code == 201
     assert "question_id" in response.json()
     assert "curriculum_id" in response.json()
-    assert "user_id" in response.json()
+    assert "user" in response.json()
     assert "title" in response.json()
+    assert "objective" in response.json()
+    assert "current_situation" in response.json()
+    assert "research" in response.json()
     assert "content" in response.json()
     assert "media_content" in response.json()
+    assert "created_at" in response.json()
+    assert "is_read" in response.json()
+    assert "is_closed" in response.json()
+    assert "reply_counts" in response.json()
 
 def test_create_question_ABNORMAL_01(client_fixture: TestClient):
     response = client_fixture.post(
-        "/curriculums/999/questions",
+        "/curriculums/1/questions",
         json={
+            "curriculum_id": 999,
             "user_id": 1,
             "title": "title",
+            "objective": "objective",
+            "current_situation": "current_situation",
+            "research": "research",
             "content": "content",
             "media_content": [{"url": "sample1.com"}, {"url": "sample2.com"}]
         }
