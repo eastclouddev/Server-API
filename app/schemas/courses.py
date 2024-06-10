@@ -5,8 +5,84 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class RequestBody(BaseModel):
-    pass
+class User(BaseModel):
+    user_id: int
+    name: str
+
+class MediaContent(BaseModel):
+    url: str
+
+class ReviewRequestCreateRequestBody(BaseModel):
+    curriculum_id: int = Field(examples=[1])
+    user_id: int = Field(examples=[1])
+    title: str = Field(examples=["Reviewのタイトル"])
+    content: str = Field(examples=["Reviewの内容"])
+    media_content: list[MediaContent]
+
+class ReviewRequestCreateResponseBody(BaseModel):
+    id: int
+    curriculum_id: int
+    user: User
+    title: str
+    content: str
+    media_content: list[MediaContent]
+    created_at: str
+    is_read: bool
+    is_closed: bool
+    reply_counts: int
+
+class ReviewRequest(BaseModel):
+    id: int
+    user: User
+    title: str
+    content: str
+    curriculum_id: int
+    created_at: str
+    is_read: bool
+    is_closed: bool
+    reply_counts: int
+
+class ReviewRequestListResponseBody(BaseModel):
+    reviews: list[ReviewRequest]
+
+class QuestionCreateResponseBody(BaseModel):
+    question_id: int
+    curriculum_id: int
+    user: User
+    title: str
+    objective: str
+    current_situation: str
+    research: str
+    content: str
+    media_content: list[MediaContent]
+    created_at: str
+    is_read: bool
+    is_closed: bool
+    reply_counts: int
+
+class QuestionCreateRequestBody(BaseModel):
+    curriculum_id : int = Field(examples=[1])
+    user_id: int = Field(examples=[1])
+    title: str = Field(examples=["title"])
+    objective: str = Field(examples=["やりたいこと"])
+    current_situation: str = Field(examples=["現状"])
+    research: str = Field(examples=["調べたこと"])
+    content: str = Field(examples=["質問内容"])
+    media_content: list[MediaContent]
+
+class QuestionList(BaseModel):
+    question_id: int
+    user: User
+    title: str
+    content: str
+    curriculum_id: int
+    created_at: str
+    is_read: bool
+    is_closed: bool
+    reply_counts: int
+
+class QuestionListResponseBody(BaseModel):
+    questions: list[QuestionList]
 
 
 class Course(BaseModel):
