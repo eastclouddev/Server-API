@@ -45,9 +45,12 @@ from models.devices import Devices
 from models.learning_records import LearningRecords
 from models.learning_statuses import LearningStatuses
 from models.mentorships import Mentorships
+from models.news_categories import NewsCategories
 from models.news import News
+from models.notifications import Notifications
 from models.payment_methods import PaymentMethods
 from models.questions import Questions
+from models.quiz_contents import QuizContents
 from models.review_requests import ReviewRequests
 from models.review_responses import ReviewResponses
 from models.roles import Roles
@@ -57,7 +60,6 @@ from models.sections import Sections
 from models.skill_levels import SkillLevels
 from models.tags import Tags
 from models.tech_categories import TechCategories
-from models.quiz_contents import QuizContents
 from models.users import Users
 target_metadata = Base.metadata
 

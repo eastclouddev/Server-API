@@ -10,6 +10,7 @@ class ReviewRequests(Base):
     __tablename__ = "review_requests"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
     curriculum_id = Column(Integer, ForeignKey("curriculums.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     title = Column(String(255), nullable=False)

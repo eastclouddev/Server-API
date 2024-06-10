@@ -1,14 +1,21 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, Date, Boolean, Text, Numeric, JSON
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, ForeignKeyConstraint
 from sqlalchemy.orm import relationship
 from database.database import Base
 
 class Notifications(Base):
     __tablename__ = "notifications"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["from_user_id", "to_user_id"],
+            ["users.id", "users.id"],
+        ),
+    )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    from_user_id = Column(Integer, nullable=False)
+    to_user_id = Column(Integer, nullable=False)
     question_id = Column(Integer, ForeignKey("questions.id"))
     answer_id = Column(Integer, ForeignKey("answers.id"))
     review_request_id = Column(Integer, ForeignKey("review_requests.id"))
