@@ -132,10 +132,10 @@ def test_find_student_list_company_01(client_fixture: TestClient):
     assert response.status_code == 200
     assert "users" in response.json()
     assert "user_id" in data["users"][0]
-    assert "first_name" in data["users"][0]
-    assert "last_name" in data["users"][0]
+    assert "name" in data["users"][0]
     assert "email" in data["users"][0]
     assert "role" in data["users"][0]
+    assert "is_enable" in data["users"][0]
     assert "last_login" in data["users"][0]
 
 def test_find_student_list_company_ABNORMAL_01(client_fixture: TestClient):

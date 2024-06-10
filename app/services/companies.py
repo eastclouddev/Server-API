@@ -32,10 +32,10 @@ def cereate_users_list(role, found_user):
     for user in found_user:
         user_personal = {
             "user_id": user.id,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
+            "name": user.last_name+user.first_name,
             "email": user.email,
             "role": role,
+            "is_enable": user.is_enable,
             "last_login": user.last_login.isoformat()
         }
         users_list.append(user_personal)

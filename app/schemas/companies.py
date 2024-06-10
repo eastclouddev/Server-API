@@ -73,10 +73,10 @@ class ProgressListResponseBody(BaseModel):
 
 class Student(BaseModel):
     user_id: int
-    first_name: str
-    last_name: str
+    name: str
     email: str
     role: str
+    is_enable: bool
     last_login: str
 
 class StudentListResponseBody(BaseModel):
