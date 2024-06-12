@@ -1,16 +1,33 @@
 from sqlalchemy.orm import Session
 
-from schemas.reviews import ReviewResponseUpdateRequestBody, ReviewRequestUpdateRequestBody
+from schemas.reviews import ReviewResponseUpdateRequestBody, ReviewRequestUpdateRequestBody, ReviewResponseCreateRequestBody
 from models.users import Users
 from models.review_responses import ReviewResponses
 from models.review_requests import ReviewRequests
 from models.mentorships import Mentorships
 
 
+def create_review_response(db: Session, param: ReviewResponseCreateRequestBody, review_request_id: int):
+    review_request = db.query(ReviewRequests).filter(ReviewRequests.id == review_request_id).first()
+    if not review_request:
+        return None
+    
+    new_review_response = ReviewResponses(
+        review_request_id = review_request_id,
+        user_id = param.user_id,
+        parent_response_id = param.parent_response_id,
+        content = param.content,
+        media_content = param.media_content
+    )
+
+    db.add(new_review_response)
+
+    return new_review_response
+
 def find_response_by_response_id(db: Session, response_id: int):
     return db.query(ReviewResponses).filter(ReviewResponses.id == response_id).first()
 
-def update_response(db: Session, update:ReviewResponseUpdateRequestBody ,response_id: int):
+def update_response(db: Session, update: ReviewResponseUpdateRequestBody ,response_id: int):
     found_response = find_response_by_response_id(db, response_id)
     if not found_response:
         return None
@@ -56,3 +73,6 @@ def find_review_request_by_review_request_id(db: Session, review_request_id: int
 
 def find_review_response_by_review_request_id(db: Session, review_request_id: int):
     return db.query(ReviewResponses).filter(ReviewResponses.review_request_id == review_request_id).all()
+
+def find_user_by_id(db: Session, user_id: int):
+    return db.query(Users).filter(Users.id == user_id).first()

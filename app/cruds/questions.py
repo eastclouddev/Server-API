@@ -21,6 +21,7 @@ def create_answer_parent_answer_id(db: Session, param: AnswerCreateRequestBody, 
         user_id = param.user_id,
         parent_answer_id = answer_id,
         content = param.content,
+        media_content = param.media_content
     )
     db.add(new_answer)
     return new_answer
@@ -29,7 +30,9 @@ def create_answer(db: Session, param: AnswerCreateRequestBody, question_id: int)
     new_answer = Answers(
         question_id = question_id,
         user_id = param.user_id,
+        parent_answer_id = param.parent_answer_id,
         content = param.content,
+        media_content = param.media_content
     )
     db.add(new_answer)
     return new_answer
@@ -63,3 +66,6 @@ def update_answer(db: Session, param: AnswerUpdateRequestBody, answer_id: int):
     db.add(answer)
 
     return answer
+
+def find_user_by_id(db: Session, user_id: int):
+    return db.query(Users).filter(Users.id == user_id).first()

@@ -6,19 +6,23 @@ def test_xxx_01(client_fixture: TestClient):
 
 # TODO:↓名前変わるかも
 """自分の質問を取得する"""
-def test_students_01(client_fixture: TestClient):
+def test_find_my_question_list_01(client_fixture: TestClient):
     response = client_fixture.get("/students/1/questions")
 
     assert response.status_code == 200
     assert "id" in response.json()["questions"][0]
     assert "title" in response.json()["questions"][0]
+    assert "objective" in response.json()["questions"][0]
+    assert "current_situation" in response.json()["questions"][0]
+    assert "research" in response.json()["questions"][0]
     assert "content" in response.json()["questions"][0]
     assert "curriculum_id" in response.json()["questions"][0]
+    assert "tech_category" in response.json()["questions"][0]
     assert "created_at" in response.json()["questions"][0]
     assert "is_read" in response.json()["questions"][0]
     assert "is_closed" in response.json()["questions"][0]
 
-def test_students_02(client_fixture: TestClient):
+def test_find_my_question_list_ABNORMAL_01(client_fixture: TestClient):
     response = client_fixture.get("/students/999/questions")
 
     assert response.status_code == 404
@@ -46,6 +50,7 @@ def test_find_my_review_list_01(client_fixture: TestClient):
     assert "content" in response.json()["reviews"][0]
     assert "curriculum_id" in response.json()["reviews"][0]
     assert "created_at" in response.json()["reviews"][0]
+    assert "tech_category" in response.json()["reviews"][0]
     assert "is_read" in response.json()["reviews"][0]
     assert "is_closed" in response.json()["reviews"][0]
 
