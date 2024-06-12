@@ -70,7 +70,6 @@ async def find_course_list(db: DbDependency):
     re_di = {
         "courses": li
     }
-
     return re_di
 
 @router.get("/{course_id}", response_model=CourseDetailResponseBody, status_code=status.HTTP_200_OK)

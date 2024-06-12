@@ -36,8 +36,8 @@ def find_info_by_curriculum_id(db: Session, curriculum_id: int):
         info.update(find_content)
 
     if curriculum_info.is_test == True:
+        li = []
         for quiz_content in quiz_contents:
-            li = []
             di = {
                 "quiz_id": quiz_content.id,
                 "question": quiz_content.question,
@@ -47,11 +47,15 @@ def find_info_by_curriculum_id(db: Session, curriculum_id: int):
                 "explanation": quiz_content.explanation
             }
             li.append(di)
-
-            re_di = {
-                "quiz_content": li
-            }
-            info.update(re_di)
+        di = {
+            "quiz_content": li
+        }
+        info.update(di)
+    else:
+        di = {
+            "quiz_content": None
+        }
+        info.update(di)
 
     return info
 

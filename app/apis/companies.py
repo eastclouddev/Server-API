@@ -99,8 +99,6 @@ async def create_company(db: DbDependency, param: CompanyCreateRequestBody):
         logger.error(e)
         db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")
-    
-
 
 @router.get("/{company_id}", response_model=CompanyDetailResponseBody, status_code=status.HTTP_200_OK)
 async def find_company_details(db: DbDependency, company_id: int = Path(gt=0)):
@@ -141,23 +139,23 @@ async def find_company_details(db: DbDependency, company_id: int = Path(gt=0)):
             レコードの最終更新日時（ISO 8601形式）
 
     """
-    company_info = companies_cruds.find_company_by_company_id(db, company_id)
-    if not company_info:
+    company = companies_cruds.find_company_by_company_id(db, company_id)
+    if not company:
         raise HTTPException(status_code=404, detail="Company not found.")
     
     info = {
         "company_id": company_id,
-        "name": company_info.name,
-        "name_kana": company_info.name_kana,
-        "prefecture": company_info.prefecture,
-        "city": company_info.city,
-        "town": company_info.town,
-        "address": company_info.address,
-        "postal_code": company_info.postal_code,
-        "phone_number": company_info.phone_number,
-        "email": company_info.email,
-        "created_at": company_info.created_at.isoformat(),
-        "updated_at": company_info.updated_at.isoformat()
+        "name": company.name,
+        "name_kana": company.name_kana,
+        "prefecture": company.prefecture,
+        "city": company.city,
+        "town": company.town,
+        "address": company.address,
+        "postal_code": company.postal_code,
+        "phone_number": company.phone_number,
+        "email": company.email,
+        "created_at": company.created_at.isoformat(),
+        "updated_at": company.updated_at.isoformat()
     }
 
     return info
@@ -265,16 +263,13 @@ async def find_company_list(db: DbDependency):
             会社情報が作成された日時（ISO 8601形式）
     
     """
-
     found_companies = companies_cruds.find_companies(db)
-
     if not found_companies:
         raise HTTPException(status_code=500, detail="Internal server error.")
     
     companies_list = []
-
     for company in found_companies:
-        one_company = {
+        di = {
             "company_id": company.id,
             "name": company.name,
             "name_kana": company.name_kana,
@@ -287,8 +282,7 @@ async def find_company_list(db: DbDependency):
             "email": company.email,
             "created_at": company.created_at.isoformat()
         }
-
-        companies_list.append(one_company)
+        companies_list.append(di)
     
     return {"companies": companies_list}
 
@@ -413,6 +407,7 @@ async def find_billing_list(db: DbDependency, company_id: int):
         raise HTTPException(status_code=404, detail="Company not found.")    
 
     return billings
+
 @router.get("/{company_id}/users/counts", response_model=AccountListResponseBody, status_code=status.HTTP_200_OK)
 async def find_number_of_accounts(db: DbDependency, company_id: int):
     """

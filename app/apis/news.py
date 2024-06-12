@@ -415,7 +415,7 @@ async def find_news_list(db: DbDependency, page: int, limit: int):
             ニュースのID
         title: str
             ニュースのタイトル
-        category: array
+        category: dict
             category_id: int
                 カテゴリのID
             category_name: str
@@ -429,17 +429,17 @@ async def find_news_list(db: DbDependency, page: int, limit: int):
     
     for data in news[(page-1)*limit : page*limit]:
         news_category = news_crud.find_news_categories_by_category_id(db, data.news_category_id)
-        di = {
+        category = {
             "category_id": news_category.id,
             "category_name": news_category.name
         }
 
-        re_di = {
+        di = {
             "id": data.id,
             "title": data.title,
-            "category": di,
+            "category": category,
             "published_at": data.published_at.isoformat()
         }
-        li.append(re_di)
+        li.append(di)
 
     return {"news": li}
