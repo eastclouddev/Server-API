@@ -11,6 +11,7 @@ def find_reviews_by_curriculum_id(db: Session, curriculum_id: int):
 
 def find_info_by_curriculum_id(db: Session, curriculum_id: int):
     curriculum_info = db.query(Curriculums).filter(Curriculums.id == curriculum_id).first()
+    quiz_contents = db.query(QuizContents).filter(QuizContents.curriculum_id == curriculum_id).all()
     if not curriculum_info:
         return None
 
@@ -18,7 +19,7 @@ def find_info_by_curriculum_id(db: Session, curriculum_id: int):
         "curriculum_id": curriculum_id,
         "title": curriculum_info.title,
         "description": curriculum_info.description,
-        "is_test": curriculum_info.is_test,
+        "is_quiz": curriculum_info.is_test,
         "display_no": curriculum_info.display_no
     }
 
@@ -33,6 +34,24 @@ def find_info_by_curriculum_id(db: Session, curriculum_id: int):
             "content": curriculum_info.content
         }
         info.update(find_content)
+
+    if curriculum_info.is_test == True:
+        for quiz_content in quiz_contents:
+            li = []
+            di = {
+                "quiz_id": quiz_content.id,
+                "question": quiz_content.question,
+                "media_content": quiz_content.media_content,
+                "options": quiz_content.options,
+                "correct_answer": quiz_content.correct_answer,
+                "explanation": quiz_content.explanation
+            }
+            li.append(di)
+
+            re_di = {
+                "quiz_content": li
+            }
+            info.update(re_di)
 
     return info
 

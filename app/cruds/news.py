@@ -10,9 +10,6 @@ def find_news_by_news_id(db: Session, news_id: int):
 
 def find_news(db: Session):
     return db.query(News).all()
-
-def create_news_category(db:Session):
-    return db.query(NewsCategories).first()
     
 def create_news(db: Session, param: NewsCreateRequestBody):
     

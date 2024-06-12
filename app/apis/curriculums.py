@@ -95,8 +95,21 @@ async def find_curriculum_details(db: DbDependency, curriculum_id: int = Path(gt
             ビデオコンテンツのURL(ビデオが存在する場合のみ）
         content: str 
             カリキュラムのテキストコンテンツ(テキストコンテンツが存在する場合のみ）
-        is_test: boolean
+        is_quiz: boolean
             このカリキュラムがテストかどうかを示すフラグ（boolean）
+        quiz_content: array
+            quiz_id: int
+                テストのID
+            question: str
+                問題文
+            media_content: str
+                メディアコンテンツのURL
+            options: array
+                選択肢
+            correct_answer: int
+                正しい回答
+            explanation: str
+                正解にする説明
         display_no: int
             カリキュラムの表示順
     """
@@ -357,4 +370,4 @@ async def create_review_request(db: DbDependency, param: ReviewRequestCreateRequ
     except Exception as e:
         logger.error(str(e)) 
         db.rollback()
-        raise HTTPException(status_code=400, detail="Invalid input data.") 
+        raise HTTPException(status_code=400, detail="Invalid input data.")

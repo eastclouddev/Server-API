@@ -250,7 +250,7 @@ async def create_news(db: DbDependency, param: NewsCreateRequestBody):
             "id": new_news.id,
             "title": new_news.title,
             "content": new_news.content,
-            "category": di,            
+            "category": di,
             "is_published": new_news.is_published,
             "published_at": new_news.published_at.isoformat(),
             "created_at": new_news.created_at.isoformat()

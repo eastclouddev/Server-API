@@ -32,7 +32,8 @@ def test_find_curriculum_details_01(client_fixture: TestClient):
     assert "description" in response.json()
     assert "video_url" in response.json()
     assert "content" in response.json()
-    assert "is_test" in response.json()
+    assert "is_quiz" in response.json()
+    assert "quiz_content" in response.json()
     assert "display_no" in response.json()
 
 def test_find_curriculum_details_ABNORMAL_01(client_fixture: TestClient):
