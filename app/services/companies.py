@@ -4,9 +4,7 @@ from logging import getLogger
 logger = getLogger("uvicorn.app")
 
 def create_companies_list(found_companies):
-
     companies_list = []
-
     for company in found_companies:
         one_company = {
             "company_id": company.id,
@@ -20,19 +18,16 @@ def create_companies_list(found_companies):
             "email": company.email,
             "created_at": company.created_at.isoformat()
         }
-
         companies_list.append(one_company)
 
     return {"companies":companies_list}
 
-def cereate_users_list(role, found_user):
-
+def create_users_list(role, found_user):
     users_list = []
-
     for user in found_user:
         user_personal = {
             "user_id": user.id,
-            "name": user.last_name+user.first_name,
+            "name": user.last_name + user.first_name,
             "email": user.email,
             "role": role,
             "is_enable": user.is_enable,

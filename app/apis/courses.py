@@ -112,8 +112,8 @@ async def find_course_details(db: DbDependency, course_id: int = Path(gt=0)):
                 セクションのタイトル
             description: str
                 セクションの説明
-            duration: int
-                セクションの時間
+            duration: str
+                セクションの時間（HH:MM:SS形式）
             curriculums: array
                 セクションに紐づくカリキュラムの一覧
                 curriculum_id: int
@@ -122,8 +122,8 @@ async def find_course_details(db: DbDependency, course_id: int = Path(gt=0)):
                     カリキュラムのタイトル
                 description: str
                     カリキュラムの説明
-                duration: int
-                    セクションの時間
+                duration: str
+                    セクションの時間（HH:MM:SS形式）
                 is_completed: bool
                     カリキュラム完了状況
     """
@@ -143,10 +143,10 @@ async def find_course_details(db: DbDependency, course_id: int = Path(gt=0)):
             # 最内のリストを作成
             for curriculum in curriculums:
                 curriculum_progresses = courses_crud.find_curriculums_progress_by_curriculum_id(db, curriculum.id)
-                #duration:動画時間の秒数を"00:00:00"の形で返す
-                hours = curriculum.duration/3600
-                minutes = (curriculum.duration%3600)/60
-                seconds = (curriculum.duration%60)
+                # duration:動画時間の秒数を"00:00:00"の形で返す
+                hours = curriculum.duration / 3600
+                minutes = (curriculum.duration % 3600) / 60
+                seconds = (curriculum.duration % 60)
                 curriculum_duration = f"{int(hours):02}:{int(minutes):02}:{int(seconds):02}"
                 curriculum_di = {
                     "curriculum_id": curriculum.id,
@@ -157,10 +157,10 @@ async def find_course_details(db: DbDependency, course_id: int = Path(gt=0)):
                 }
                 curriculum_li.append(curriculum_di)
             
-            #duration:動画時間の秒数を"00:00:00"の形で返す
-            hour = section.duration/3600
-            minute = (section.duration%3600)/60
-            second = (section.duration%60)
+            # duration:動画時間の秒数を"00:00:00"の形で返す
+            hour = section.duration / 3600
+            minute = (section.duration % 3600) / 60
+            second = (section.duration % 60)
             section_duration = f"{int(hour):02}:{int(minute):02}:{int(second):02}"
             section_di = {
                 "section_id": section.id,

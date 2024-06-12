@@ -382,7 +382,7 @@ async def find_student_list_company(db: DbDependency, company_id: int, role: str
     for user in users[(page - 1)*limit : page*limit]:
         found_user.append(user)
 
-    return compamies_services.cereate_users_list(role, found_user)
+    return compamies_services.create_users_list(role, found_user)
 
 @router.get("/{company_id}/billings", response_model=BillingListResponseBody, status_code=status.HTTP_200_OK)
 async def find_billing_list(db: DbDependency, company_id: int):
