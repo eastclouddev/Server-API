@@ -118,9 +118,6 @@ def find_user_by_id(db: Session, user_id: int):
 def find_students_by_mentor_id(db: Session, mentor_id: int):
     return db.query(Mentorships).filter(Mentorships.mentor_id == mentor_id).all()
 
-def find_notifications_by_user_id_list(db: Session, user_id_list: list):
-    return db.query(Notifications).filter(Notifications.user_id.in_(user_id_list)).order_by(desc(Notifications.created_at)).limit(10)
-
 def find_question_by_question_id(db: Session, question_id: int):
     return db.query(Questions).filter(Questions.id == question_id).first()
 
@@ -132,3 +129,6 @@ def find_request_by_request_id(db: Session, request_id: int):
 
 def find_response_by_response_id(db: Session, response_id: int):
     return db.query(ReviewResponses).filter(ReviewResponses.id == response_id).first()
+
+def find_notifications_by_mentor_id(db: Session, mentor_id: int):
+    return db.query(Notifications).filter(Notifications.to_user_id == mentor_id).order_by(desc(Notifications.created_at)).limit(10).all()
