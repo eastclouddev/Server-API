@@ -21,29 +21,23 @@ def create_company(db: Session, company_create: CompanyCreateRequestBody):
     db.add(new_company)
     return new_company
 
-def update_company(db: Session, update:CompanyUpdateRequestBody ,company_id: int):
+def update_company(db: Session, param: CompanyUpdateRequestBody, company_id: int):
     company = find_company_by_company_id(db, company_id)
     if not company:
         return None
-    
-    company.content = update.content
-    company.is_read = update.is_read
-    db.add(company)
-    
-    update_company = {
-        "company_id": company_id,
-        "name": company.name,
-        "prefecture": company.prefecture,
-        "city": company.city,
-        "town": company.town,
-        "address": company.address,
-        "postal_code": company.postal_code,
-        "phone_number": company.phone_number,
-        "email": company.email,
-        "updated_at": company.updated_at.isoformat() 
-    }
 
-    return update_company
+    company.name = param.name
+    company.name_kana = param.name_kana
+    company.prefecture = param.prefecture
+    company.city = param.city
+    company.town = param.town
+    company.address = param.address
+    company.postal_code = param.postal_code
+    company.phone_number = param.phone_number
+    company.email = param.email
+    db.add(company)
+
+    return "success"
 
 def find_company_by_company_id(db: Session, company_id: int):
     return db.query(Companies).filter(Companies.id == company_id).first()

@@ -161,8 +161,8 @@ async def find_company_details(db: DbDependency, company_id: int = Path(gt=0)):
     return info
 
 
-@router.patch("/{company_id}", response_model=CompanyBillingInfoUpdateResponseBody, status_code=status.HTTP_200_OK)
-async def update_company(db: DbDependency, update: CompanyBillingInfoUpdateRequestBody, company_id: int = Path(gt=0)):
+@router.patch("/{company_id}", status_code=status.HTTP_200_OK)
+async def update_company(db: DbDependency, param: CompanyUpdateRequestBody, company_id: int = Path(gt=0)):
     """
     会社情報更新
 
@@ -173,6 +173,8 @@ async def update_company(db: DbDependency, update: CompanyBillingInfoUpdateReque
     dict
         name: str
             会社名
+        name_kana: str
+            会社名フリガナ
         prefecture: str
             都道府県
         city: str
@@ -190,35 +192,17 @@ async def update_company(db: DbDependency, update: CompanyBillingInfoUpdateReque
 
     Returns
     -----------------------
-    dict
-        company_id: int
-            会社のID
-        name: str
-            会社の名前
-        prefecture: str
-            所在地の都道府県
-        city: str
-            所在地の市区町村
-        town: str
-            所在地の町名・番地等
-        address: str
-            会社の詳細な住所
-        postal_code: str
-            郵便番号
-        phone_number: str
-            電話番号
-        email: str
-            会社のメールアドレス
-        updated_at: str
-            レコードの最終更新日時（ISO 8601形式）
+    message: str
+        完了時のメッセージ(Company information updated successfully.)
     """
-    update_company = companies_cruds.update_company(db, update, company_id)
+
+    update_company = companies_cruds.update_company(db, param, company_id)
     if not update_company:
         raise HTTPException(status_code=404, detail="Company not found.")
 
     try:
         db.commit()
-        return update_company
+        return {"message": "Company information updated successfully."}
 
     except Exception as e:
         logger.error(str(e))

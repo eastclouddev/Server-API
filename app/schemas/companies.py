@@ -30,6 +30,7 @@ class CompanyCreateResponseBody(BaseModel):
 
 class CompanyUpdateRequestBody(BaseModel):
     name: Optional[str] = Field(examples=["会社名"])
+    name_kana: Optional[str] = Field(examples=["シャメイ"])
     prefecture: Optional[str] = Field(examples=["都道府県"])
     city: Optional[str] = Field(examples=["市区町村"])
     town: Optional[str] = Field(examples=["町名、番地等"])
