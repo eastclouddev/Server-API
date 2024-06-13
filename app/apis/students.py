@@ -83,7 +83,7 @@ async def find_my_question_list(db: DbDependency, student_id: int = Path(gt=0)):
     return {"questions": question_list}
 
 @router.get("/{student_id}/progresses", response_model=ProgressListResponseBody, status_code=status.HTTP_200_OK)
-async def find_progress_list_student(db: DbDependency, reqeust: Request):
+async def find_progress_list_student(db: DbDependency, reqeust: Request, student_id: int):
     """
     現在の学習進捗
     Parameters
@@ -105,13 +105,10 @@ async def find_progress_list_student(db: DbDependency, reqeust: Request):
         last_accessed_at: str
             最終アクセス日（ISO 8601形式）
     """
-    # TODO:ヘッダー情報から必要なパラメータを取得する
-    user_id = 1
 
-    progresses = students_crud.find_course_progresses_by_user_id(db, user_id)
+    progresses = students_crud.find_course_progresses_by_user_id(db, student_id)
                 
     li = []
-
     for progress in progresses:
         course = students_crud.find_course_by_course_id(db, progress.course_id)
         status = students_crud.find_status_by_status_id(db, progress.status_id)
