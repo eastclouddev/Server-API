@@ -11,7 +11,7 @@ class User(BaseModel):
 
 class AnswerCreateRequestBody(BaseModel):
     user_id: int = Field(examples=[1])
-    parent_answer_id: int = Field(None, examples=[1])
+    parent_answer_id: Optional[int] = Field(None, examples=[1])
     content: str = Field(examples=["内容を記載"])
     media_content: list = Field(None, examples=[[{"url": "hoge"}, {"url": "moge"}]])
 

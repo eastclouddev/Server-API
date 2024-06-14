@@ -20,9 +20,10 @@ router = APIRouter(prefix="/questions", tags=["Questions"])
 
 
 @router.post("/{question_id}/answers", response_model=AnswerCreateResponseBody, status_code=status.HTTP_201_CREATED)
-async def create_answer(db: DbDependency, param: AnswerCreateRequestBody, question_id: int = Path(gt=0)):
+async def create_answer(db: DbDependency, param: AnswerCreateRequestBody, question_id: int):
     """
     質問回答投稿作成
+
     Parameters
     -----------------------
     dict
