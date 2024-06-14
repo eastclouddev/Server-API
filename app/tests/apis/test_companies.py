@@ -47,6 +47,61 @@ def test_create_company_ABNORMAL_01(client_fixture: TestClient):
     )
     assert response.status_code == 422
 
+"""会社情報更新"""
+def test_update_company_01(client_fixture: TestClient):
+    response = client_fixture.patch(
+        "/companies/1",
+        json={
+            "name": "B社",
+            "prefecture": "B都",
+            "city": "B区",
+            "town": "B町",
+            "address": "建物B",
+            "postal_code": "100-0000",
+            "phone_number": "090-0000-0000",
+            "email": "bbb@mail.com"
+        }
+    )
+    assert response.status_code == 200
+    assert response.json() == None
+
+
+def test_update_company_ABNORMAL_01(client_fixture: TestClient):
+    response = client_fixture.patch(
+        "/companies/999",
+        json={
+            "name": "B社",
+            "prefecture": "B都",
+            "city": "B区",
+            "town": "B町",
+            "address": "建物B",
+            "postal_code": "100-0000",
+            "phone_number": "090-0000-0000",
+            "email": "bbb@mail.com"
+        }
+    )
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Company not found."}
+
+
+def test_update_company_ABNORMAL_02(client_fixture: TestClient):
+    response = client_fixture.patch(
+        "/companies/1",
+        json={
+            "name": 123,
+            "prefecture": "B都",
+            "city": "B区",
+            "town": "B町",
+            "address": "建物B",
+            "postal_code": "100-0000",
+            "phone_number": "090-0000-0000",
+            "email": "bbb@mail.com"
+        }
+    )
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Invalid input data."}
+
+
 """会社情報詳細"""
 def test_find_company_details_01(client_fixture: TestClient):
     
@@ -146,6 +201,25 @@ def test_find_student_list_company_ABNORMAL_01(client_fixture: TestClient):
 
     assert response.status_code == 404
 
+"""請求履歴一覧取得"""
+def test_find_billing_list_01(client_fixture: TestClient):
+    
+    response = client_fixture.get("/companies/3/billings")
+
+    assert response.status_code == 200
+    assert "billing_id" in response.json()["billings"][0]
+    assert "date" in response.json()["billings"][0]
+    assert "amount" in response.json()["billings"][0]
+    assert "status" in response.json()["billings"][0]
+    assert "description" in response.json()["billings"][0]
+
+def test_find_billing_list_ABNORMAL_01(client_fixture: TestClient):
+
+    response = client_fixture.get("/companies/999/billings")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Company not found."
+
 """有効アカウント数取得"""
 def test_find_number_of_accounts_01(client_fixture: TestClient):
     response = client_fixture.get("/companies/1/users/counts/")
@@ -159,3 +233,143 @@ def test_find_number_of_accounts_ABNORMAL_01(client_fixture: TestClient):
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Company not found."
+
+
+"""請求先情報作成"""
+def test_create_company_billing_info_01(client_fixture: TestClient):
+    response = client_fixture.post(
+        "/companies/1/billing_info",
+        json={
+            "prefecture": "A都",
+            "city": "A区",
+            "town": "A町",
+            "address": "建物A",
+            "email": "aaa@mail.com",
+            "invoice_number": "IB001",
+            "tax_number": "TAX001",
+            "payment_method_id": 1,
+            "notes": "Memo",
+            "last_receipt_number": "RCP00x",
+        }
+    )
+    assert response.status_code == 200
+    assert "id" in response.json()
+    assert "prefecture" in response.json()
+    assert "city" in response.json()
+    assert "town" in response.json()
+    assert "address" in response.json()
+    assert "email" in response.json()
+    assert "invoice_number" in response.json()
+    assert "tax_number" in response.json()
+    assert "payment_method_id" in response.json()
+    assert "notes" in response.json()
+    assert "last_receipt_number" in response.json()
+
+def test_create_company_billing_info_ABNORMAL_01(client_fixture: TestClient):
+    response = client_fixture.post(
+        "/companies/1/billing_info",
+        json={
+            "prefecture": 123,
+            "city": "A区",
+            "town": "A町",
+            "address": "建物A",
+            "email": "aaa@mail.com",
+            "invoice_number": "IB001",
+            "tax_number": "TAX001",
+            "payment_method_id": 1,
+            "notes": "Memo",
+            "last_receipt_number": "RCP00x",
+        }
+    )
+    assert response.status_code == 422
+
+"""請求先情報更新"""
+def test_update_company_billing_info_01(client_fixture: TestClient):
+    response = client_fixture.patch(
+        "/companies/1/billing_info/1",
+        json={
+            "prefecture": "B都",
+            "city": "B区",
+            "town": "B町",
+            "address": "建物B",
+            "email": "bbb@mail.com",
+            "invoice_number": "IB002",
+            "tax_number": "TAX002",
+            "payment_method_id": 2,
+            "notes": "Memo2",
+            "last_receipt_number": "RCP00x1",
+        }
+    )
+    assert response.status_code == 200
+    assert response.json() == None
+
+
+def test_update_company_billing_info_ABNORMAL_01(client_fixture: TestClient):
+    response = client_fixture.patch(
+        "/companies/1/billing_info/999",
+        json={
+            "prefecture": "B都",
+            "city": "B区",
+            "town": "B町",
+            "address": "建物B",
+            "email": "bbb@mail.com",
+            "invoice_number": "IB002",
+            "tax_number": "TAX002",
+            "payment_method_id": 2,
+            "notes": "Memo2",
+            "last_receipt_number": "RCP00x1",
+        }
+    )
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Company Billing Info not found."}
+
+
+def test_update_company_billing_info_ABNORMAL_02(client_fixture: TestClient):
+    response = client_fixture.patch(
+        "/companies/1/billing_info/1",
+        json={
+            "prefecture": 123,
+            "city": "B区",
+            "town": "B町",
+            "address": "建物B",
+            "email": "bbb@mail.com",
+            "invoice_number": "IB002",
+            "tax_number": "TAX002",
+            "payment_method_id": 2,
+            "notes": "Memo2",
+            "last_receipt_number": "RCP00x1",
+        }
+    )
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Invalid input data."}
+
+
+"""請求先情報詳細"""
+def test_find_company_billing_info_details_01(client_fixture: TestClient):
+    
+    response = client_fixture.get(
+        "/companies/1/billing_info/1"
+    )
+
+    assert response.status_code == 200
+    assert "id" in response.json()
+    assert "prefecture" in response.json()
+    assert "city" in response.json()
+    assert "town" in response.json()
+    assert "address" in response.json()
+    assert "email" in response.json()
+    assert "invoice_number" in response.json()
+    assert "tax_number" in response.json()
+    assert "payment_method_id" in response.json()
+    assert "notes" in response.json()
+    assert "last_receipt_number" in response.json()
+    assert "created_at" in response.json()
+    assert "updated_at" in response.json()
+
+def test_find_company_billing_info_details_ABNORMAL_01(client_fixture: TestClient):
+
+    response = client_fixture.get(
+       "/companies/1/billing_info/999"
+    )
+
+    assert response.status_code == 404

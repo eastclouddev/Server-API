@@ -6,22 +6,35 @@ def test_create_answers_01(client_fixture: TestClient):
         "/questions/1/answers",
         json={
             "user_id": "1",
-            "content": "質問への回答です"
+            "parent_answer_id": 1,
+            "content": "質問への回答です",
+            "media_content": [
+                {"url": "aaa.com"},
+                {"url": "bbb.com"}
+            ]
         }
     )
 
     assert response.status_code == 201
     assert "answer_id" in response.json()
     assert "question_id" in response.json()
-    assert "user_id" in response.json()
+    assert "parent_answer_id" in response.json()
+    assert "user" in response.json()
+    assert "media_content" in response.json()
     assert "content" in response.json()
+    assert "created_at" in response.json()
 
 def test_create_answers_ABNORMAL_01(client_fixture: TestClient):
     response = client_fixture.post(
         "/questions/999/answers",
         json={
             "user_id": "1",
-            "content": "質問への回答です"
+            "parent_answer_id": 1,
+            "content": "質問への回答です",
+            "media_content": [
+                {"url": "aaa.com"},
+                {"url": "bbb.com"}
+            ]
         }
     )
 
@@ -36,19 +49,21 @@ def test_find_question_thread_details_01(client_fixture: TestClient):
     assert response.status_code == 200
     assert "id" in response.json()["question"]
     assert "curriculum_id" in response.json()["question"]
-    assert "user_id" in response.json()["question"]
+    assert "user" in response.json()["question"]
     assert "title" in response.json()["question"]
+    assert "objective" in response.json()["question"]
+    assert "current_situation" in response.json()["question"]
+    assert "research" in response.json()["question"]
     assert "content" in response.json()["question"]
     assert "media_content" in response.json()["question"]
     assert "is_closed" in response.json()["question"]
     assert "created_at" in response.json()["question"]
     assert "id" in response.json()["answer"][0]
     assert "question_id" in response.json()["answer"][0]
-    assert "user_id" in response.json()["answer"][0]
+    assert "user" in response.json()["answer"][0]
     assert "parent_answer_id" in response.json()["answer"][0]
     assert "content" in response.json()["answer"][0]
     assert "media_content" in response.json()["answer"][0]
-    assert "is_read" in response.json()["answer"][0]
     assert "created_at" in response.json()["answer"][0]
 
 def test_find_question_thread_details_ABNORMAL_01(client_fixture: TestClient):

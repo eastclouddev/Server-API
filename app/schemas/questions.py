@@ -5,34 +5,45 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class User(BaseModel):
+    user_id: int
+    name: str
+
 class AnswerCreateRequestBody(BaseModel):
     user_id: int = Field(examples=[1])
+    parent_answer_id: int = Field(None, examples=[1])
     content: str = Field(examples=["内容を記載"])
+    media_content: list = Field(None, examples=[[{"url": "hoge"}, {"url": "moge"}]])
 
 class AnswerCreateResponseBody(BaseModel):
     answer_id: int
     question_id: int
-    user_id: int
+    parent_answer_id: Optional[int]
+    user: User
     content: str
+    media_content: Optional[list]
+    created_at: str
 
 class ResponseQuestion(BaseModel):
     id: int
     curriculum_id: int
-    user_id: int
+    user: User
     title: str
+    objective: str
+    current_situation: str
+    research: str    
     content: str
-    media_content: list
+    media_content: Optional[list]
     is_closed: bool
     created_at: str
 
 class ResponseList(BaseModel):
     id: int
     question_id: int
-    user_id: int
+    user: User
     parent_answer_id: Optional[int]
     content: str
     media_content: Optional[list]
-    is_read: bool
     created_at: str
 
 class QuestionThreadDetailResponseBody(BaseModel):
