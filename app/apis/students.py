@@ -83,7 +83,7 @@ async def find_my_question_list(db: DbDependency, student_id: int = Path(gt=0)):
     return {"questions": question_list}
 
 @router.get("/{student_id}/progresses", response_model=ProgressListResponseBody, status_code=status.HTTP_200_OK)
-async def find_progress_list_student(db: DbDependency, reqeust: Request, student_id: int):
+async def find_progress_list_student(db: DbDependency, student_id: int):
     """
     現在の学習進捗
     Parameters
@@ -119,7 +119,7 @@ async def find_progress_list_student(db: DbDependency, reqeust: Request, student
                 "course_title": course.title,
                 "progress_percentage": progress.progress_percentage,
                 "status": status.name,
-                "last_accessed_at": progress.last_accessed_at.isoformat()
+                "last_accessed_at": progress.last_accessed_at.isoformat() if progress.last_accessed_at else ""
             }
             li.append(di)
 

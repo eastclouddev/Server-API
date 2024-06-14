@@ -41,7 +41,8 @@ def create_course_progress(db: Session, user_id: int, course_ids: list):
             course_id = course_id,
             progress_percentage = 0,
             status_id = 1,
-            started_at = datetime.now()
+            started_at = datetime.now(),
+            last_accessed_at = datetime.now()
         )
         db.add(course_progress)
     return
