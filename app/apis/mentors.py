@@ -244,17 +244,16 @@ async def find_notification(db: DbDependency, mentor_id: int):
             通知が既読かどうか
         created_at: str
             通知が生成された日時（ISO 8601形式）
+
+    explanation
+    -----------------------
+    メンターが受け取る通知は受講生の質問・回答・レビュー依頼・レビュー回答
     """
     
-    # メンターに紐づく受講生を取得
-    students = mentors_crud.find_students_by_mentor_id(db, mentor_id)
-    if not students:
-        raise HTTPException(status_code=404, detail="User not found.")
-    student_list = [s.student_id for s in students]
+    # 自分宛ての通知を取得
+    notifications = mentors_crud.find_notifications_by_mentor_id(db, mentor_id)
 
-    # 受講生からの通知を取得
-    notifications = mentors_crud.find_notifications_by_user_id_list(db, student_list)
-
+    # 返却データ作成
     li = []
     for i, notification in enumerate(notifications):
         q_id = None
@@ -272,9 +271,9 @@ async def find_notification(db: DbDependency, mentor_id: int):
             content = question.content
         elif notification.answer_id:
             answer = mentors_crud.find_answer_by_answer_id(db, notification.answer_id)
-            q_id = answer.question_id
-            a_id = answer.id
             question = mentors_crud.find_question_by_question_id(db, answer.question_id)
+            q_id = question.id
+            a_id = answer.id
             title = question.title
             content = answer.content
         # レビューリクエスト・レビューレスポンス
@@ -285,18 +284,17 @@ async def find_notification(db: DbDependency, mentor_id: int):
             content = request.content
         elif notification.review_response_id:
             response = mentors_crud.find_response_by_response_id(db, notification.review_response_id)
-            req_id = response.review_request_id
-            res_id = response.id
             request = mentors_crud.find_request_by_request_id(db, response.review_request_id)
+            req_id = request.id
+            res_id = response.id
             title = request.title
             content = response.content
 
-        user = mentors_crud.find_user_by_id(db, notification.user_id)
-
+        user = mentors_crud.find_user_by_id(db, notification.from_user_id)
         di = {
             "id": i + 1,
             "from_user": {
-                "id": notification.user_id,
+                "id": notification.from_user_id,
                 "name": user.last_name + user.first_name
             },
             "question_id": q_id,

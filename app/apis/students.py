@@ -83,7 +83,7 @@ async def find_my_question_list(db: DbDependency, student_id: int = Path(gt=0)):
     return {"questions": question_list}
 
 @router.get("/{student_id}/progresses", response_model=ProgressListResponseBody, status_code=status.HTTP_200_OK)
-async def find_progress_list_student(db: DbDependency, reqeust: Request):
+async def find_progress_list_student(db: DbDependency, student_id: int):
     """
     現在の学習進捗
     Parameters
@@ -105,13 +105,10 @@ async def find_progress_list_student(db: DbDependency, reqeust: Request):
         last_accessed_at: str
             最終アクセス日（ISO 8601形式）
     """
-    # TODO:ヘッダー情報から必要なパラメータを取得する
-    user_id = 1
 
-    progresses = students_crud.find_course_progresses_by_user_id(db, user_id)
+    progresses = students_crud.find_course_progresses_by_user_id(db, student_id)
                 
     li = []
-
     for progress in progresses:
         course = students_crud.find_course_by_course_id(db, progress.course_id)
         status = students_crud.find_status_by_status_id(db, progress.status_id)
@@ -122,7 +119,7 @@ async def find_progress_list_student(db: DbDependency, reqeust: Request):
                 "course_title": course.title,
                 "progress_percentage": progress.progress_percentage,
                 "status": status.name,
-                "last_accessed_at": progress.last_accessed_at.isoformat()
+                "last_accessed_at": progress.last_accessed_at.isoformat() if progress.last_accessed_at else ""
             }
             li.append(di)
 
@@ -252,20 +249,19 @@ async def find_notification(db: DbDependency, student_id: int):
             通知が既読かどうか
         created_at: str
             通知が生成された日時（ISO 8601形式）
+
+    explanation
+    -----------------------
+    受講生が受け取る通知はメンターの回答・レビュー回答のみ
+    (質問・レビュー依頼は受講生が行う)
     """
 
-    # 受講生に紐づくメンターを取得
-    mentors = students_crud.find_mentors_by_student_id(db, student_id)
-    if not mentors:
-        raise HTTPException(status_code=404, detail="User not found")
-    mentor_id_list = [mentor.mentor_id for mentor in mentors]
+    # 自分宛ての通知を取得
+    notifications = students_crud.find_notifications_by_student_id(db, student_id)
 
     # 返却データ作成
-    notifications = students_crud.find_notifications_by_mentor_id(db, mentor_id_list)
-    count = 1
     li = []
-    for notification in notifications:
-        flag = False
+    for i, notification in enumerate(notifications):
         q_id = None
         a_id = None
         req_id = None
@@ -273,52 +269,39 @@ async def find_notification(db: DbDependency, student_id: int):
         title = ""
         content = ""
 
-        # 通知が自分に対するものかチェックする
+        # 回答・レビュー回答がある場合は質問・レビュー依頼を取得
         if notification.answer_id:
             answer = students_crud.find_answer_by_answer_id(db, notification.answer_id)
             question = students_crud.find_question_by_question_id(db, answer.question_id)
-            if student_id == question.user_id:
-                flag = True
-                q_id = question.id
-                a_id = answer.id
-                req_id = None
-                res_id = None
-                title = question.title
-                content = answer.content
+            q_id = question.id
+            a_id = answer.id
+            title = question.title
+            content = answer.content
 
         elif notification.review_response_id:
             response = students_crud.find_response_by_response_id(db, notification.review_response_id)
             request = students_crud.find_request_by_request_id(db, response.review_request_id)
-            if student_id == request.user_id:
-                flag = True
-                q_id = None
-                a_id = None
-                req_id = request.id
-                res_id = response.id
-                title = request.title
-                content = response.content
+            req_id = request.id
+            res_id = response.id
+            title = request.title
+            content = response.content
 
-        if flag:
-            user = students_crud.find_user_by_user_id(db, notification.user_id)
-            di = {
-                "id": count,
-                "from_user": {
-                    "id": notification.user_id,
-                    "name": user.last_name + user.first_name
-                },
-                "question_id": q_id,
-                "answer_id": a_id,
-                "review_request_id": req_id,
-                "review_response_id": res_id,
-                "title": title,
-                "content": content,
-                "is_read": notification.is_read,
-                "created_at": notification.created_at.isoformat()
-            }
-            li.append(di)
-            count = count + 1
-
-        if count > 10:
-            break
+        user = students_crud.find_user_by_user_id(db, notification.from_user_id)
+        di = {
+            "id": i + 1,
+            "from_user": {
+                "id": notification.from_user_id,
+                "name": user.last_name + user.first_name
+            },
+            "question_id": q_id,
+            "answer_id": a_id,
+            "review_request_id": req_id,
+            "review_response_id": res_id,
+            "title": title,
+            "content": content,
+            "is_read": notification.is_read,
+            "created_at": notification.created_at.isoformat()
+        }
+        li.append(di)
 
     return {"notifications": li}

@@ -49,11 +49,14 @@ async def find_notification(db: DbDependency):
             通知が既読かどうか
         created_at: str
             通知が生成された日時（ISO 8601形式）
+
+    explanation
+    -----------------------
+    メンターは全ての通知を取得
     """
 
     notifications = notifications_crud.find_notifications_order_by_created_at(db)
     li = []
-
     for i, notification in enumerate(notifications):
         q_id = None
         a_id = None
@@ -68,9 +71,9 @@ async def find_notification(db: DbDependency):
             content = question.content
         elif notification.answer_id:
             answer = notifications_crud.find_answer_by_answer_id(db, notification.answer_id)
-            q_id = answer.question_id
-            a_id = answer.id
             question = notifications_crud.find_question_by_question_id(db, answer.question_id)
+            q_id = question.id
+            a_id = answer.id
             title = question.title
             content = answer.content
         # レビューリクエスト・レビューレスポンス
@@ -81,18 +84,17 @@ async def find_notification(db: DbDependency):
             content = request.content
         elif notification.review_response_id:
             response = notifications_crud.find_response_by_response_id(db, notification.review_response_id)
-            req_id = response.review_request_id
-            res_id = response.id
             request = notifications_crud.find_request_by_request_id(db, response.review_request_id)
+            req_id = request.id
+            res_id = response.id
             title = request.title
             content = response.content
 
-        user = notifications_crud.find_user_by_id(db, notification.user_id)
-
+        user = notifications_crud.find_user_by_id(db, notification.from_user_id)
         di = {
             "id": i + 1,
             "from_user": {
-                "id": notification.user_id,
+                "id": notification.from_user_id,
                 "name": user.last_name + user.first_name
             },
             "question_id": q_id,

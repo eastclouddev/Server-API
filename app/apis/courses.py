@@ -6,7 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 
-from schemas.courses import CourseListResponseBody, CourseDetailResponseBody, CoursesStartRequestBody, CoursesStartResponsetBody
+from schemas.courses import CourseListResponseBody, CourseDetailResponseBody, CoursesStartRequestBody, CoursesStartResponsetBody,\
+                            ReviewRequestCreateResponseBody, ReviewRequestCreateRequestBody, ReviewRequestListResponseBody,\
+                            QuestionCreateResponseBody, QuestionCreateRequestBody, QuestionListResponseBody
 from cruds import courses as courses_crud
 
 logger = getLogger("uvicorn.app")
@@ -190,4 +192,353 @@ async def courses_start(db: DbDependency, param: CoursesStartRequestBody):
         "courses": li
     }
 
+    return re_di
+
+@router.post("/{course_id}/reviews", response_model=ReviewRequestCreateResponseBody, status_code=status.HTTP_201_CREATED)
+async def create_review_request(db: DbDependency, param: ReviewRequestCreateRequestBody, course_id: int):
+    """
+    レビュー投稿
+    
+    Parameter
+    -----------------------
+    course_id: int
+        レビューを取得したいコースのID
+    dict
+        curriculum_id: int
+            レビューが紐づくカリキュラムのID
+        user_id: int
+            ユーザーのID
+        title: str
+            レビューリクエストのタイトル
+        content: str 
+            レビューリクエストの内容
+        media_content: dict
+            関連するメディアコンテンツの情報
+            url: str
+                メディアコンテンツのURL
+
+    Returns
+    -----------------------
+    dict
+        id: int
+            レビューリクエストのID
+        curriculum_id: int
+            カリキュラムのID
+        user: dict
+            user_id: int
+                レビューを投稿したユーザーのID
+            name: str
+                レビューを投稿したユーザーの名前
+        title: str
+            レビューリクエストのタイトル
+        content: str 
+            レビューリクエストの内容
+        media_content: array
+            関連するメディアコンテンツの情報
+            url: str
+                メディアコンテンツのURL
+        created_at: str
+            レビューが作成された日時（ISO 8601形式）
+        is_read: bool
+            未読コメントの有無
+        is_closed: bool
+            レビューリクエストがクローズされているかどうか
+        reply_counts: int
+            質問の返信数
+    """
+
+    found_curriculum = courses_crud.find_review_request_by_curriculum_id(db, param.curriculum_id)
+
+    if not found_curriculum:
+        raise HTTPException(status_code=404, detail="Curriculum not found.")
+    
+    li = []
+    datas = param.media_content
+    for data in datas:
+        if hasattr(data, "url"):
+            di = {
+                "url": data.url
+            }
+            li.append(di)
+    media_json = li
+
+    try:
+        reviews = courses_crud.create_review_request(db, param, media_json, course_id)
+        db.commit()
+
+        user = courses_crud.find_user_by_id(db, reviews.user_id)
+        di = {
+            "id": reviews.id,
+            "curriculum_id": reviews.curriculum_id,
+            "user": {
+                "user_id": user.id,
+                "name": user.last_name + user.first_name
+            },
+            "title": reviews.title,
+            "content": reviews.content,
+            "media_content": reviews.media_content,
+            "created_at": reviews.created_at.isoformat(),
+            "is_read": False, # 作成なので、この時点ではFalse確定
+            "is_closed": False, # 作成なので、この時点ではFalse確定
+            "reply_counts": 0 # 作成なので、この時点では0確定
+        }
+        
+        return di
+    except Exception as e:
+        logger.error(str(e)) 
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid input data.")
+
+@router.get("/{course_id}/reviews", response_model=ReviewRequestListResponseBody, status_code=status.HTTP_200_OK)
+async def find_review_list(db: DbDependency, course_id: int):
+    """
+    コースのレビュー一覧
+
+    Parameter
+    -----------------------
+    course_id: int
+        レビュー一覧を取得したいコースのID
+
+    Returns
+    -----------------------
+    reviews: array
+        id: int
+            レビューリクエストのID
+        user: dict
+            user_id: int
+                レビューを投稿したユーザーのID
+            name: str
+                レビューを投稿したユーザーの名前
+        title: str
+            レビューリクエストのタイトル
+        content: str
+            レビューリクエストの内容
+        curriculum_id: int
+            関連するカリキュラムのID
+        created_at: str
+            レビューリクエストが作成された日時（ISO 8601形式）
+        is_read: bool
+            未読コメントの有無
+        is_closed: bool
+            レビューリクエストがクローズされているかどうか
+        reply_counts: int
+            レビューの返信数
+    """
+    reviews = courses_crud.find_reviews_by_curriculum_id(db, course_id)
+
+    li = []
+    for review in reviews:
+        user = courses_crud.find_user_by_id(db, review.user_id)
+        notifications = courses_crud.find_notification_by_user_id_and_question_id(db, review.user_id, review.id)
+        is_read = all([notification.is_read for notification in notifications])
+        responses = courses_crud.find_response_by_request_id(db, review.id)
+
+        di = {
+            "id": review.id,
+            "user": {
+                "user_id": user.id,
+                "name": user.last_name + user.first_name
+            },
+            "title": review.title,
+            "content": review.content,
+            "curriculum_id": review.curriculum_id,
+            "created_at": review.created_at.isoformat(),
+            "is_read": is_read,
+            "is_closed": review.is_closed,
+            "reply_counts": len(responses)
+        }
+        li.append(di)
+
+    re_di = {
+        "reviews": li
+    }
+
+    return re_di
+
+@router.post("/{course_id}/questions", response_model=QuestionCreateResponseBody, status_code=status.HTTP_201_CREATED)
+async def create_question(db: DbDependency, param: QuestionCreateRequestBody, course_id: int):
+    """
+    質問投稿
+    
+    Parameter
+    -----------------------
+    course_id: int
+        質問を投稿したいコースのID
+    dict
+        curriculum_id: int
+            質問が紐づくカリキュラムのID
+        user_id: int
+            ユーザーのID
+        title: str
+            質問のタイトル
+        objective: str
+            学習内容で実践したこと
+        current_situation: str
+            現状
+        research: str
+            自分が調べたこと
+        content: str 
+            質問の内容
+        media_content: str
+            関連するメディアコンテンツの情報
+            url: str
+                メディアコンテンツのURL
+
+    Returns
+    -----------------------
+    dict
+        question_id: int
+            質問のID
+        curriculum_id: int
+            カリキュラムのID
+        user: dict
+            user_id: int
+                質問を投稿したユーザーのID
+            name: str
+                質問を投稿したユーザーの名前
+        title: str
+            質問のタイトル
+        objective: str
+            学習内容で実践したこと
+        current_situation: str
+            現状
+        research: str
+            自分が調べたこと
+        content: str 
+            質問の内容
+        media_content: dict
+            関連するメディアコンテンツの情報
+        created_at: str
+            質問作成日（ISO 8601形式）
+        is_read: bool
+            未読コメントの有無
+        is_closed: bool
+            完了しているかどうか
+        reply_counts: int
+            質問の返信数
+    """
+    found_curriculum = courses_crud.find_curriculum_by_curriculum_id(db, param.curriculum_id)
+
+    if not found_curriculum:
+        raise HTTPException(status_code=404, detail="Curriculum not found.")
+
+    li = []
+    datas = param.media_content
+    for data in datas:
+        if hasattr(data, "url"):
+            di = {
+                "url": data.url
+            }
+            li.append(di)
+    media_json = li
+
+    try:
+        new_question = courses_crud.create_question(db, course_id, param, media_json)
+        db.commit()
+
+        user = courses_crud.find_user_by_id(db, new_question.user_id)
+        
+        re_di = {
+            "question_id": new_question.id,
+            "curriculum_id": new_question.curriculum_id,
+            "user": {
+                "user_id": user.id,
+                "name": user.last_name + user.first_name
+            },
+            "title": new_question.title,
+            "objective": new_question.objective,
+            "current_situation": new_question.current_situation,
+            "research": new_question.research,
+            "content": new_question.content,
+            "media_content": new_question.media_content,
+            "created_at": new_question.created_at.isoformat(),
+            "is_read": False, # 作成なので、この時点ではFalse確定
+            "is_closed": False, # 作成なので、この時点ではFalse確定
+            "reply_counts": 0 # 作成なので、この時点では0確定
+        }
+
+        return re_di
+
+    except Exception as e:
+        logger.error(str(e)) 
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Invalid input data.")
+
+@router.get("/{course_id}/questions", response_model=QuestionListResponseBody, status_code=status.HTTP_200_OK)
+async def find_question_list_in_curriculum(db: DbDependency, course_id: int):
+    """
+    コースの質問一覧
+    
+    Parameter
+    -----------------------
+    course_id: int
+        質問一覧を取得したいコースのID
+
+    Returns
+    -----------------------
+    questions: array
+        question_id: int
+            質問のID
+        user: dict
+            user_id: int
+                質問を投稿したユーザーのID
+            name: str
+                質問を投稿したユーザーの名前
+        title: str
+            質問のタイトル
+        content: str 
+            質問の内容
+        curriculum_id: int
+            カリキュラムのID
+        created_at: str
+            質問作成日（ISO 8601形式）
+        is_read: bool
+            未読コメントの有無
+        is_closed: bool
+            完了しているかどうか
+        reply_counts: int
+            質問の返信数
+    """
+
+    questions = courses_crud.find_questions_by_course_id(db, course_id)
+
+    if not questions:
+        raise HTTPException(status_code=404, detail="Questions not found for the specified curriculum.")
+
+    li = []
+    for question in questions:
+        # TODO:不要?
+        # media_content_list = []
+        # datas = question.media_content
+        # for data in datas:
+        #     if "url" in data:
+        #         di = {
+        #             "url": data.get("url", "")
+        #         }
+        #         media_content_list.append(di)
+        
+        user = courses_crud.find_user_by_id(db, question.user_id)
+        notifications = courses_crud.find_notification_by_user_id_and_question_id(db, question.user_id, question.id)
+        is_read = all([notification.is_read for notification in notifications])
+        answers = courses_crud.find_answers_by_question_id(db, question.id)
+        di = {
+            "question_id": question.id,
+            "user": {
+                "user_id": user.id,
+                "name": user.last_name + user.first_name
+            },
+            "title": question.title,
+            "content": question.content,
+            "curriculum_id": question.curriculum_id,
+            "created_at": question.created_at.isoformat(),
+            "is_read": is_read,
+            "is_closed": question.is_closed,
+            "reply_counts": len(answers)
+            # "media_content": media_content_list
+        }
+        li.append(di)
+    
+    re_di = {
+        "questions": li
+    }
     return re_di
