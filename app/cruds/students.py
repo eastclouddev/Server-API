@@ -33,8 +33,16 @@ def find_status_by_status_id(db: Session, status_id: int):
 def find_course_progresses_by_user_id(db: Session, user_id: int):
     return db.query(CourseProgresses).filter(CourseProgresses.user_id == user_id).all()
 
-def find_review_requests_by_user_id(db: Session, user_id: int):
-    return db.query(ReviewRequests).filter(ReviewRequests.user_id == user_id).all()
+def find_review_requests_by_user_id(db: Session, user_id: int, sort: str, order: str):
+    if (sort == "created_at") and ((order == "asc") or (order == "desc")):
+        if order == "asc":
+            review_requests = db.query(ReviewRequests).filter(ReviewRequests.user_id == user_id).order_by(ReviewRequests.created_at).all()
+        elif order == "desc":
+            review_requests = db.query(ReviewRequests).filter(ReviewRequests.user_id == user_id).order_by(desc(ReviewRequests.created_at)).all()
+    else:
+        review_requests = db.query(ReviewRequests).filter(ReviewRequests.user_id == user_id).all()
+
+    return review_requests
 
 def find_review_responses_by_review_id(db: Session, review_request_id: int):
     return db.query(ReviewResponses).filter(ReviewResponses.review_request_id == review_request_id).all()

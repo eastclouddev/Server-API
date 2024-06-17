@@ -130,15 +130,21 @@ async def find_progress_list_student(db: DbDependency, student_id: int):
     return re_di
   
 @router.get("/{student_id}/reviews", response_model=ReviewRequestListResponseBody, status_code=status.HTTP_200_OK)
-async def find_my_review_list(db: DbDependency, student_id: int):
-
+async def find_my_review_list(db: DbDependency, student_id: int, category: str = None, sort: str = None, order: str = None):
     """
     自分のレビュー一覧取得
     
     Parameters
     -----------------------
-    user_id:int
+    user_id: int
         ユーザーのID
+    フィルタ―
+        category: str
+    ソート
+        sort: str(sortとorderはセット)
+            created_at
+        order: str
+            asc, desc
 
     Returns
     -----------------------
@@ -160,8 +166,7 @@ async def find_my_review_list(db: DbDependency, student_id: int):
         is_closed: bool
             完了しているかどうか
     """
-
-    review_requests = students_crud.find_review_requests_by_user_id(db, student_id)
+    review_requests = students_crud.find_review_requests_by_user_id(db, student_id, sort, order)
 
     li = []
     for review in review_requests:
@@ -169,17 +174,21 @@ async def find_my_review_list(db: DbDependency, student_id: int):
         notifications = students_crud.find_notification_by_review_request_id(db, review.id)
         is_read = all([notification.is_read for notification in notifications])
 
-        di = {
-            "id": review.id,
-            "title": review.title,
-            "content": review.content,
-            "curriculum_id": review.curriculum_id,
-            "tech_category": tech_category.name,
-            "created_at": review.created_at.isoformat(),
-            "is_read": is_read,
-            "is_closed": review.is_closed
-        }
-        li.append(di)
+        if any([
+            category and (category == tech_category.name),
+            category == None # フィルターなし
+        ]):
+            di = {
+                "id": review.id,
+                "title": review.title,
+                "content": review.content,
+                "curriculum_id": review.curriculum_id,
+                "tech_category": tech_category.name,
+                "created_at": review.created_at.isoformat(),
+                "is_read": is_read,
+                "is_closed": review.is_closed
+            }
+            li.append(di)
 
     return {"reviews": li}
 

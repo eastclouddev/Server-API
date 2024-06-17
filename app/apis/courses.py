@@ -19,13 +19,21 @@ router = APIRouter(prefix="/courses", tags=["Courses"])
 
 
 @router.get("", response_model=CourseListResponseBody, status_code=status.HTTP_200_OK)
-async def find_course_list(db: DbDependency):
+async def find_course_list(db: DbDependency, category: str = None, sort: str = None, order: str = None, name: str = ""):
     """
     コース一覧取得
 
     Parameter
     -----------------------
-    なし
+    フィルター
+        category: str
+    ソート
+        sort: str(sortとorderはセット)
+            time
+        order: str
+            asc, desc
+    検索
+        name: str
 
     Returns
     -----------------------
@@ -50,24 +58,28 @@ async def find_course_list(db: DbDependency):
             コースの作成日時（ISO 8601形式）
     """
 
-    courses = courses_crud.find_courses(db)
+    courses = courses_crud.find_courses_like_name(db, name, sort, order)
 
     li = []
     for course in courses:
         curriculums = courses_crud.find_curriculums_by_course_id(db, course.id)
         tech_category = courses_crud.find_tech_category_by_category_id(db, course.tech_category_id)
-        di = {
-            "course_id": course.id,
-            "title": course.title,
-            "description": course.description,
-            "created_user": course.created_user,
-            "thumbnail_url": course.thumbnail_url,
-            "expected_end_hours": course.expected_end_hours,
-            "total_curriculums": len(curriculums),
-            "tech_category": tech_category.name,
-            "created_at": course.created_at.isoformat()
-        }
-        li.append(di)
+        if any([
+            category and (category == tech_category.name),
+            category == None # フィルターなし
+        ]):
+            di = {
+                "course_id": course.id,
+                "title": course.title,
+                "description": course.description,
+                "created_user": course.created_user,
+                "thumbnail_url": course.thumbnail_url,
+                "expected_end_hours": course.expected_end_hours,
+                "total_curriculums": len(curriculums),
+                "tech_category": tech_category.name,
+                "created_at": course.created_at.isoformat()
+            }
+            li.append(di)
 
     re_di = {
         "courses": li
@@ -509,7 +521,7 @@ async def create_question(db: DbDependency, param: QuestionCreateRequestBody, co
         raise HTTPException(status_code=400, detail="Invalid input data.")
 
 @router.get("/{course_id}/questions", response_model=QuestionListResponseBody, status_code=status.HTTP_200_OK)
-async def find_question_list_in_curriculum(db: DbDependency, course_id: int):
+async def find_question_list_in_curriculum(db: DbDependency, course_id: int, curriculum: int = 0, my_questions: bool = False, user_id: int = 0, unanswered: bool = False):
     """
     コースの質問一覧
     
@@ -517,6 +529,11 @@ async def find_question_list_in_curriculum(db: DbDependency, course_id: int):
     -----------------------
     course_id: int
         質問一覧を取得したいコースのID
+    フィルター
+        curriculum: int
+        my_questions: bool(my_questionsとuser_idはセット)
+        user_id: int
+        unanswered: bool
 
     Returns
     -----------------------
@@ -544,43 +561,44 @@ async def find_question_list_in_curriculum(db: DbDependency, course_id: int):
             質問の返信数
     """
 
-    questions = courses_crud.find_questions_by_course_id(db, course_id)
+    if curriculum:
+        questions = courses_crud.find_questions_by_course_id_and_curriculum_id(db, course_id, curriculum)
+    elif my_questions and user_id:
+        questions = courses_crud.find_questions_by_course_id_and_user_id(db, course_id, user_id)
+    else:
+        questions = courses_crud.find_questions_by_course_id(db, course_id)
 
     if not questions:
         raise HTTPException(status_code=404, detail="Questions not found for the specified curriculum.")
 
     li = []
     for question in questions:
-        # TODO:不要?
-        # media_content_list = []
-        # datas = question.media_content
-        # for data in datas:
-        #     if "url" in data:
-        #         di = {
-        #             "url": data.get("url", "")
-        #         }
-        #         media_content_list.append(di)
-        
         user = courses_crud.find_user_by_id(db, question.user_id)
         notifications = courses_crud.find_notification_by_user_id_and_question_id(db, question.user_id, question.id)
         is_read = all([notification.is_read for notification in notifications])
         answers = courses_crud.find_answers_by_question_id(db, question.id)
-        di = {
-            "question_id": question.id,
-            "user": {
-                "user_id": user.id,
-                "name": user.last_name + user.first_name
-            },
-            "title": question.title,
-            "content": question.content,
-            "curriculum_id": question.curriculum_id,
-            "created_at": question.created_at.isoformat(),
-            "is_read": is_read,
-            "is_closed": question.is_closed,
-            "reply_counts": len(answers)
-            # "media_content": media_content_list
-        }
-        li.append(di)
+
+        if any([
+            curriculum,
+            my_questions and user_id,
+            unanswered and (len(answers) == 0),
+            (curriculum == 0) and (my_questions == False) and (unanswered == False) # フィルターなし
+        ]):
+            di = {
+                "question_id": question.id,
+                "user": {
+                    "user_id": user.id,
+                    "name": user.last_name + user.first_name
+                },
+                "title": question.title,
+                "content": question.content,
+                "curriculum_id": question.curriculum_id,
+                "created_at": question.created_at.isoformat(),
+                "is_read": is_read,
+                "is_closed": question.is_closed,
+                "reply_counts": len(answers)
+            }
+            li.append(di)
     
     re_di = {
         "questions": li
