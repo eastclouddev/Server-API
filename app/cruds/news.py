@@ -10,12 +10,13 @@ def find_news_by_news_id(db: Session, news_id: int):
 
 def find_news(db: Session):
     return db.query(News).all()
-
+    
 def create_news(db: Session, param: NewsCreateRequestBody):
+    
     new_news = News(
         title = param.title,
         content = param.content,
-        is_published = param.is_published,
+        news_category_id = param.category_id,
         published_at = dt.datetime.strptime(param.published_at, "%Y-%m-%dT%H:%M:%S")
     )
     db.add(new_news)
@@ -31,7 +32,7 @@ def update_news_by_news_id(db: Session, news_id: int, title: str, content: str, 
     news.title = title
     news.content = content
     news.is_published = is_published
-    news.published_at =  dt.datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%S")
+    news.published_at =  dt.datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%SZ")
     db.add(news)
     return news
 
@@ -54,3 +55,9 @@ def create_news_category(db: Session, param: NewsCategoryRequestBody):
 
 def find_news_categories(db: Session):
     return db.query(NewsCategories).all()
+
+def find_news_categories_by_category_id(db: Session, news_category_id: int):
+    return db.query(NewsCategories).filter(NewsCategories.id == news_category_id).first()
+
+def find_news_by_published(db: Session):
+    return db.query(News).filter(News.is_published == True).all()

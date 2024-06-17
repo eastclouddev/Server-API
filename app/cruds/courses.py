@@ -7,6 +7,8 @@ from models.courses import Courses
 from models.sections import Sections
 from models.curriculums import Curriculums
 from models.course_progresses import CourseProgresses
+from models.tech_categories import TechCategories
+from models.curriculum_progresses import CurriculumProgresses
 from models.questions import Questions
 from models.answers import Answers
 from models.review_requests import ReviewRequests
@@ -106,3 +108,12 @@ def find_answers_by_question_id(db: Session, question_id: int):
 
 def find_response_by_request_id(db: Session, review_request_id: int):
     return db.query(ReviewResponses).filter(ReviewResponses.review_request_id == review_request_id).all()
+
+def find_tech_category_by_category_id(db: Session, tech_category_id: int):
+    return db.query(TechCategories).filter(TechCategories.id == tech_category_id).first()
+
+def find_curriculums_by_course_id(db: Session, course_id):
+    return db.query(Curriculums).filter(Curriculums.id == course_id).all()
+
+def find_curriculums_progress_by_curriculum_id(db: Session, curriculum_id: int):
+    return db.query(CurriculumProgresses).filter(CurriculumProgresses.curriculum_id == curriculum_id).first()
