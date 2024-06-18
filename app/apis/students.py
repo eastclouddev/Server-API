@@ -17,8 +17,7 @@ router = APIRouter(prefix="/students", tags=["Students"])
 
 
 @router.get("/{student_id}/questions", response_model=QuestionListResponseBody, status_code=status.HTTP_200_OK)
-async def find_my_question_list(db: DbDependency, student_id: int = Path(gt=0)):
-
+async def find_my_question_list(db: DbDependency, student_id: int, category: str = None, sort: str = None, order: str = None):
     """
     自分の質問を取得する
     
@@ -26,6 +25,11 @@ async def find_my_question_list(db: DbDependency, student_id: int = Path(gt=0)):
     -----------------------
     user_id: int
         取得するユーザーのID 
+    フィルター
+        category: str
+    ソート
+        sort: str(sortとorderはセット)
+        order: str
 
     Returns
     -----------------------
@@ -54,38 +58,44 @@ async def find_my_question_list(db: DbDependency, student_id: int = Path(gt=0)):
             完了しているかどうか
     """
 
-    found_question = students_crud.find_questions_by_user_id(db, student_id)
-
+    found_question = students_crud.find_questions_by_user_id(db, student_id, sort, order)
     if not found_question:
         raise HTTPException(status_code=404, detail="question not found")
 
-    question_list = []
+    li = []
+    logger.warning(category)
     for question in found_question:
         tech_category = students_crud.find_category_by_course_id(db, question.course_id)
         notifications = students_crud.find_notification_by_question_id(db, question.id)
         is_read = all([notification.is_read for notification in notifications])
-        one_question = {
-            "id": question.id,
-            "title": question.title,
-            "objective": question.objective,
-            "current_situation": question.current_situation,
-            "research": question.research,
-            "content": question.content,
-            "curriculum_id": question.curriculum_id,
-            "tech_category": tech_category.name,
-            "created_at": question.created_at,
-            "is_read": is_read,
-            "is_closed": question.is_closed
-        }
+        logger.warning(tech_category.name)
+        if any([
+            category and (category == tech_category.name),
+            category == None # フィルターなし
+        ]):
+            di = {
+                "id": question.id,
+                "title": question.title,
+                "objective": question.objective,
+                "current_situation": question.current_situation,
+                "research": question.research,
+                "content": question.content,
+                "curriculum_id": question.curriculum_id,
+                "tech_category": tech_category.name,
+                "created_at": question.created_at,
+                "is_read": is_read,
+                "is_closed": question.is_closed
+            }
         
-        question_list.append(one_question)
+            li.append(di)
     
-    return {"questions": question_list}
+    return {"questions": li}
 
 @router.get("/{student_id}/progresses", response_model=ProgressListResponseBody, status_code=status.HTTP_200_OK)
 async def find_progress_list_student(db: DbDependency, student_id: int):
     """
     現在の学習進捗
+
     Parameters
     -----------------------
     request: Request
