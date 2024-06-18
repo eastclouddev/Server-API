@@ -1,6 +1,7 @@
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
 from sqlalchemy.orm import Session
 
+from models.companies import Companies
 from models.users import Users
 from models.mentorships import Mentorships
 from models.learning_statuses import LearningStatuses
@@ -15,25 +16,11 @@ from models.courses import Courses
 from models.tech_categories import TechCategories
 from models.notifications import Notifications
 
+def find_companies_by_name(db: Session, company_nm: str):
+    return db.query(Companies).filter(or_(Companies.name.contains(company_nm), Companies.name_kana.contains(company_nm))).all()
 
-def find_course_progresses(db: Session, mentor_id: int):
-    mentor_ships = db.query(Mentorships).filter(Mentorships.mentor_id == mentor_id).all()
-    if not mentor_ships:
-        return None
-    student_list = []
-    for mentor in mentor_ships:
-        found_student = db.query(Users).filter(Users.id == mentor.student_id).first()
-        if not found_student:
-            return None
-        student_list.append(found_student)
-    progresses_list = []
-    for student in student_list:
-        found_progresses = db.query(CourseProgresses).filter(CourseProgresses.user_id == student.id).all()
-        if not found_progresses:
-            return None
-        for info in found_progresses:
-            progresses_list.append(info)
-    return progresses_list
+def find_course_progresses_by_student_id_list(db: Session, student_id_list: list):
+    return db.query(CourseProgresses).filter(CourseProgresses.user_id.in_(student_id_list)).all()
 
 def find_section_by_course_id(db: Session, course_id: int):
     section = db.query(Sections).filter(Sections.course_id == course_id).first()

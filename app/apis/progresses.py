@@ -17,13 +17,15 @@ router = APIRouter(prefix="/progresses", tags=["Progresses"])
 
 
 @router.get("", response_model=ProgressListResponseBody, status_code=status.HTTP_200_OK)
-async def find_progress_list_admin(db: DbDependency):
+async def find_progress_list_admin(db: DbDependency, name: str = "", company: str = ""):
     """
     進捗管理一覧
     
     Parameters
     -----------------------
-    なし
+    検索
+        name: str
+        company: str
 
     Returns
     -----------------------
@@ -43,22 +45,33 @@ async def find_progress_list_admin(db: DbDependency):
         status: str
             ステータス
     """
-    found_course_progresses = progresses_crud.find_course_progresses(db)
+    course_progresses = progresses_crud.find_course_progresses(db)
+    companies = progresses_crud.find_companies_by_name(db, company)
+    company_id_list = [com.id for com in companies]
 
-    progresses_list = []
+    li = []
+    for progress in course_progresses:
+        user = progresses_crud.find_user_by_id(db, progress.user_id)
+        if any([
+            name and (name in user.first_name),
+            name and (name in user.last_name),
+            name and (name in user.first_name_kana),
+            name and (name in user.last_name_kana),
+            name and (name in (user.last_name + user.first_name)),
+            name and (name in (user.last_name_kana + user.first_name_kana)),
+            company and (user.company_id in company_id_list),
+            name == "" and company == ""
+        ]):
+            di = {
+                "progress_id": progress.id,
+                "user_id": progress.user_id,
+                "course_id": progress.course_id,
+                "section_id": progresses_crud.find_section_by_course_id(db, progress.course_id),
+                "curriculum_id": progresses_crud.find_curriculum_by_course_id(db, progress.course_id),
+                "progress_percentage": progress.progress_percentage,
+                "status": progresses_crud.find_status_by_status_id(db, progress.status_id)
+            }
+            li.append(di)
 
-    for progress in found_course_progresses:
-        one_progress = {
-            "progress_id": progress.id,
-            "user_id": progress.user_id,
-            "course_id": progress.course_id,
-            "section_id": progresses_crud.find_section_by_course_id(db, progress.course_id),
-            "curriculum_id": progresses_crud.find_curriculum_by_course_id(db, progress.course_id),
-            "progress_percentage": progress.progress_percentage,
-            "status": progresses_crud.find_status_by_status_id(db, progress.status_id)
-        }
-
-        progresses_list.append(one_progress)
-
-    return {"progresses": progresses_list} 
+    return {"progresses": li} 
 

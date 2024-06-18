@@ -17,13 +17,15 @@ router = APIRouter(prefix="/mentors", tags=["Mentors"])
 
 
 @router.get("/{mentor_id}/progresses", response_model=ProgressListResponseBody, status_code=status.HTTP_200_OK)
-async def find_progress_list_mentor(db: DbDependency, mentor_id: int):
+async def find_progress_list_mentor(db: DbDependency, mentor_id: int, name: str = "", company: str = ""):
     """
     進捗管理一覧
     
     Parameters
     -----------------------
-    なし
+    検索
+        name: str
+        company: str
 
     Returns
     -----------------------
@@ -43,13 +45,32 @@ async def find_progress_list_mentor(db: DbDependency, mentor_id: int):
         status: str
             ステータス
     """
-    found_course_progresses = mentors_crud.find_course_progresses(db, mentor_id)
-    if not found_course_progresses:
+
+    students = mentors_crud.find_students_by_mentor_id(db, mentor_id)
+    student_id_list = []
+    companies = mentors_crud.find_companies_by_name(db, company)
+    company_id_list = [com.id for com in companies]
+    for student in students:
+        user = mentors_crud.find_user_by_id(db, student.student_id)
+        if any([
+            name and (name in user.first_name),
+            name and (name in user.last_name),
+            name and (name in user.first_name_kana),
+            name and (name in user.last_name_kana),
+            name and (name in (user.last_name + user.first_name)),
+            name and (name in (user.last_name_kana + user.first_name_kana)),
+            company and (user.company_id in company_id_list),
+            name == "" and company == "" # 検索なし
+        ]):
+            student_id_list.append(user.id)
+    
+    course_progresses = mentors_crud.find_course_progresses_by_student_id_list(db, student_id_list)
+    if not course_progresses:
         raise HTTPException(status_code=404, detail="progresses not found")
 
-    progresses_list = []
-    for progress in found_course_progresses:
-        one_progress = {
+    li = []
+    for progress in course_progresses:
+        di = {
             "progress_id": progress.id,
             "user_id": progress.user_id,
             "course_id": progress.course_id,
@@ -58,9 +79,9 @@ async def find_progress_list_mentor(db: DbDependency, mentor_id: int):
             "progress_percentage": progress.progress_percentage,
             "status": mentors_crud.find_status_by_status_id(db, progress.status_id)
         }
-        progresses_list.append(one_progress)
+        li.append(di)
 
-    return {"progresses": progresses_list} 
+    return {"progresses": li}
 
 @router.get("/{mentor_id}/students/questions", response_model=QuestionListResponseBody, status_code=status.HTTP_200_OK)
 async def find_question_list_from_student(db: DbDependency, request: Request, mentor_id: int = Path(gt=0)):
@@ -127,9 +148,7 @@ async def find_question_list_from_student(db: DbDependency, request: Request, me
         "questions": li
     }
 
-    return re_di 
-
-
+    return re_di
 
 @router.get("/{mentor_id}/students/reviews", response_model=ReviewRequestListResponseBody, status_code=status.HTTP_200_OK)
 async def find_review_list_from_student(request: Request, db: DbDependency, mentor_id: int):
@@ -259,7 +278,7 @@ async def find_notification(db: DbDependency, mentor_id: int):
         q_id = None
         a_id = None
         req_id = None
-        res_id = None        
+        res_id = None
         title = ""
         content = ""
 

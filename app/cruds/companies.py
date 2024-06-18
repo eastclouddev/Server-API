@@ -45,14 +45,11 @@ def find_company_by_company_id(db: Session, company_id: int):
 def find_companies(db: Session):
     return db.query(Companies).all()
 
-def find_course_progresses_by_company_id(db: Session, company_id: int):
-    users = db.query(Users).filter(Users.company_id == company_id).all()
-    progresses_list = []
-    for user in users:
-        progresses = db.query(CourseProgresses).filter(CourseProgresses.user_id == user.id).all()
-        for progress in progresses:
-            progresses_list.append(progress)
-    return progresses_list
+def find_user_by_company_id(db: Session, company_id: int):
+    return db.query(Users).filter(Users.company_id == company_id).all()
+
+def find_progresses_by_user_id_list(db: Session, user_id_list: list):
+    return db.query(CourseProgresses).filter(CourseProgresses.user_id.in_(user_id_list)).all()
 
 def find_section_by_course_id(db: Session, course_id: int):
     section = db.query(Sections).filter(Sections.course_id == course_id).first()
