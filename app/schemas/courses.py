@@ -91,6 +91,9 @@ class Course(BaseModel):
     description: str
     created_user: int
     thumbnail_url: Optional[str]
+    expected_end_hours: int
+    total_curriculums: int
+    tech_category: str
     created_at: str
 
 class CourseListResponseBody(BaseModel):
@@ -100,11 +103,14 @@ class Curriculum(BaseModel):
     curriculum_id: int
     title: str
     description: Optional[str]
+    duration: str
+    is_completed: bool
 
 class Section(BaseModel):
     section_id: int
     title: str
     description: Optional[str]
+    duration: str
     curriculums: list[Curriculum]
 
 class CourseDetailResponseBody(BaseModel):
@@ -112,6 +118,10 @@ class CourseDetailResponseBody(BaseModel):
     title: str
     description: str
     created_user_id: int
+    thumbnail_url: Optional[str]
+    expected_end_hours: int
+    total_curriculums: int
+    tech_category: str
     created_at: str
     sections: list[Section]
 

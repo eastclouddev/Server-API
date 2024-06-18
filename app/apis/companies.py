@@ -31,6 +31,8 @@ async def create_company(db: DbDependency, param: CompanyCreateRequestBody):
     dict
         name: str
             会社名
+        name_kana: str
+            会社名フリガナ
         prefecture: str
             都道府県
         city: str
@@ -53,6 +55,8 @@ async def create_company(db: DbDependency, param: CompanyCreateRequestBody):
             新しく作成された会社のID
         name: str
             会社名
+        name_kana: str
+            会社名フリガナ
         prefecture: str
             都道府県
         city: str
@@ -73,12 +77,13 @@ async def create_company(db: DbDependency, param: CompanyCreateRequestBody):
 
     try:
         new_company = companies_cruds.create_company(db, param)
-        
+            
         db.commit()
         
         re_di = {
             "company_id": new_company.id,
             "name": new_company.name,
+            "name_kana": new_company.name_kana,
             "prefecture": new_company.prefecture,
             "city": new_company.city,
             "town": new_company.town,
@@ -94,8 +99,6 @@ async def create_company(db: DbDependency, param: CompanyCreateRequestBody):
         logger.error(e)
         db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")
-    
-
 
 @router.get("/{company_id}", response_model=CompanyDetailResponseBody, status_code=status.HTTP_200_OK)
 async def find_company_details(db: DbDependency, company_id: int = Path(gt=0)):
@@ -114,6 +117,8 @@ async def find_company_details(db: DbDependency, company_id: int = Path(gt=0)):
             会社のID
         name: str
             会社の名前
+        name: str
+            会社名のフリガナ
         prefecture: str
             所在地の都道府県
         city: str
@@ -134,29 +139,30 @@ async def find_company_details(db: DbDependency, company_id: int = Path(gt=0)):
             レコードの最終更新日時（ISO 8601形式）
 
     """
-    company_info = companies_cruds.find_company_by_company_id(db, company_id)
-    if not company_info:
+    company = companies_cruds.find_company_by_company_id(db, company_id)
+    if not company:
         raise HTTPException(status_code=404, detail="Company not found.")
     
     info = {
         "company_id": company_id,
-        "name": company_info.name,
-        "prefecture": company_info.prefecture,
-        "city": company_info.city,
-        "town": company_info.town,
-        "address": company_info.address,
-        "postal_code": company_info.postal_code,
-        "phone_number": company_info.phone_number,
-        "email": company_info.email,
-        "created_at": company_info.created_at.isoformat(),
-        "updated_at": company_info.updated_at.isoformat()
+        "name": company.name,
+        "name_kana": company.name_kana,
+        "prefecture": company.prefecture,
+        "city": company.city,
+        "town": company.town,
+        "address": company.address,
+        "postal_code": company.postal_code,
+        "phone_number": company.phone_number,
+        "email": company.email,
+        "created_at": company.created_at.isoformat(),
+        "updated_at": company.updated_at.isoformat()
     }
 
     return info
 
 
-@router.patch("/{company_id}", response_model=CompanyBillingInfoUpdateResponseBody, status_code=status.HTTP_200_OK)
-async def update_company(db: DbDependency, update: CompanyBillingInfoUpdateRequestBody, company_id: int = Path(gt=0)):
+@router.patch("/{company_id}", status_code=status.HTTP_200_OK)
+async def update_company(db: DbDependency, param: CompanyUpdateRequestBody, company_id: int = Path(gt=0)):
     """
     会社情報更新
 
@@ -167,6 +173,8 @@ async def update_company(db: DbDependency, update: CompanyBillingInfoUpdateReque
     dict
         name: str
             会社名
+        name_kana: str
+            会社名フリガナ
         prefecture: str
             都道府県
         city: str
@@ -184,35 +192,17 @@ async def update_company(db: DbDependency, update: CompanyBillingInfoUpdateReque
 
     Returns
     -----------------------
-    dict
-        company_id: int
-            会社のID
-        name: str
-            会社の名前
-        prefecture: str
-            所在地の都道府県
-        city: str
-            所在地の市区町村
-        town: str
-            所在地の町名・番地等
-        address: str
-            会社の詳細な住所
-        postal_code: str
-            郵便番号
-        phone_number: str
-            電話番号
-        email: str
-            会社のメールアドレス
-        updated_at: str
-            レコードの最終更新日時（ISO 8601形式）
+    message: str
+        完了時のメッセージ(Company information updated successfully.)
     """
-    update_company = companies_cruds.update_company(db, update, company_id)
+
+    update_company = companies_cruds.update_company(db, param, company_id)
     if not update_company:
         raise HTTPException(status_code=404, detail="Company not found.")
 
     try:
         db.commit()
-        return update_company
+        return {"message": "Company information updated successfully."}
 
     except Exception as e:
         logger.error(str(e))
@@ -237,6 +227,8 @@ async def find_company_list(db: DbDependency):
             会社のID（int）
         name: str
             会社名
+        name_kana: str
+            会社名のフリガナ
         prefecture: str
             都道府県
         city: str
@@ -255,18 +247,16 @@ async def find_company_list(db: DbDependency):
             会社情報が作成された日時（ISO 8601形式）
     
     """
-
     found_companies = companies_cruds.find_companies(db)
-
     if not found_companies:
         raise HTTPException(status_code=500, detail="Internal server error.")
     
     companies_list = []
-
     for company in found_companies:
-        one_company = {
+        di = {
             "company_id": company.id,
             "name": company.name,
+            "name_kana": company.name_kana,
             "prefecture": company.prefecture,
             "city": company.city,
             "town": company.town,
@@ -276,10 +266,11 @@ async def find_company_list(db: DbDependency):
             "email": company.email,
             "created_at": company.created_at.isoformat()
         }
-
-        companies_list.append(one_company)
+        companies_list.append(di)
     
     return {"companies": companies_list}
+
+
 
 @router.get("/{company_id}/progresses", response_model=ProgressListResponseBody, status_code=status.HTTP_200_OK)
 async def find_progress_list_company(db: DbDependency, company_id: int):
@@ -310,7 +301,7 @@ async def find_progress_list_company(db: DbDependency, company_id: int):
     """
     found_course_progresses = companies_cruds.find_course_progresses_by_company_id(db, company_id)
     if not found_course_progresses:
-        raise HTTPException(status_code=404, detail="progresses not found")
+        raise HTTPException(status_code=404, detail="progresses not found.")
 
     progresses_list = []
 
@@ -328,6 +319,8 @@ async def find_progress_list_company(db: DbDependency, company_id: int):
         progresses_list.append(one_progress)
 
     return {"progresses": progresses_list} 
+
+
 
 @router.get("/{company_id}/users", response_model=StudentListResponseBody, status_code=status.HTTP_200_OK)
 async def find_student_list_company(db: DbDependency, company_id: int, role: str, page: int, limit: int):
@@ -348,14 +341,14 @@ async def find_student_list_company(db: DbDependency, company_id: int, role: str
     users: array
         user_id: int
             ユーザーのID
-        first_name: str
-            ユーザーの名
-        last_name: str
-            ユーザーの姓
+        name: str
+            ユーザーの名前
         email: str
             ユーザーのメールアドレス
         role: str
             ユーザーのロール
+        is_enable: bool
+            アカウントの有効状態
         last_login: str
             最終ログイン日（ISO 8601形式）
     """
@@ -367,7 +360,7 @@ async def find_student_list_company(db: DbDependency, company_id: int, role: str
     for user in users[(page - 1)*limit : page*limit]:
         found_user.append(user)
 
-    return compamies_services.cereate_users_list(role, found_user)
+    return compamies_services.create_users_list(role, found_user)
 
 @router.get("/{company_id}/billings", response_model=BillingListResponseBody, status_code=status.HTTP_200_OK)
 async def find_billing_list(db: DbDependency, company_id: int):
