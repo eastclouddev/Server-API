@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from schemas.courses import QuestionCreateRequestBody, ReviewRequestCreateRequestBody
@@ -19,6 +20,17 @@ from models.notifications import Notifications
 
 def find_courses(db: Session):
     return db.query(Courses).all()
+
+def find_courses_like_name(db: Session, name: str, sort: str, order: str):
+    if (sort == "time") and ((order == "asc") or (order == "desc")):
+        if order == "asc": # 昇順（短い順）
+            courses = db.query(Courses).filter(Courses.title.contains(name)).order_by(Courses.expected_end_hours).all()
+        elif order == "desc": # 降順（長い順）
+            courses = db.query(Courses).filter(Courses.title.contains(name)).order_by(desc(Courses.expected_end_hours)).all()
+    else:
+        courses = db.query(Courses).filter(Courses.title.contains(name)).all()
+
+    return courses
 
 def find_course_by_course_id(db: Session, course_id: int):
     return db.query(Courses).filter(Courses.id == course_id).first()
@@ -96,6 +108,12 @@ def find_user_by_id(db: Session, user_id: int):
 
 def find_questions_by_course_id(db: Session, course_id: int):
     return db.query(Questions).filter(Questions.course_id == course_id).all()
+
+def find_questions_by_course_id_and_curriculum_id(db: Session, course_id: int, curriculum_id: int):
+    return db.query(Questions).filter(Questions.course_id == course_id, Questions.curriculum_id == curriculum_id).all()
+
+def find_questions_by_course_id_and_user_id(db: Session, course_id: int, user_id: int):
+    return db.query(Questions).filter(Questions.course_id == course_id, Questions.user_id == user_id).all()
 
 def find_notification_by_user_id_and_question_id(db: Session, user_id: int, question_id: int):
     return db.query(Notifications).filter(Notifications.from_user_id == user_id, Notifications.question_id == question_id).all()

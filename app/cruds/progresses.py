@@ -1,5 +1,7 @@
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
+from models.companies import Companies
 from models.users import Users
 from models.course_progresses import CourseProgresses
 from models.sections import Sections
@@ -7,10 +9,13 @@ from models.curriculums import Curriculums
 from models.learning_statuses import LearningStatuses
 
 def find_course_progresses(db: Session):
-    progresses = db.query(CourseProgresses).all()
-    if not progresses:
-        return None
-    return progresses
+    return db.query(CourseProgresses).all()
+
+def find_companies_by_name(db: Session, company_nm: str):
+    return db.query(Companies).filter(or_(Companies.name.contains(company_nm), Companies.name_kana.contains(company_nm))).all()
+
+def find_user_by_id(db: Session, user_id: int):
+    return db.query(Users).filter(Users.id == user_id).first()
 
 def find_section_by_course_id(db: Session, course_id: int):
     section = db.query(Sections).filter(Sections.course_id == course_id).first()

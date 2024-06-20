@@ -270,16 +270,15 @@ async def find_company_list(db: DbDependency):
     
     return {"companies": companies_list}
 
-
-
 @router.get("/{company_id}/progresses", response_model=ProgressListResponseBody, status_code=status.HTTP_200_OK)
-async def find_progress_list_company(db: DbDependency, company_id: int):
+async def find_progress_list_company(db: DbDependency, company_id: int, name: str = ""):
     """
     進捗管理一覧
     
     Parameters
     -----------------------
-    なし
+    検索
+        name: str
 
     Returns
     -----------------------
@@ -299,14 +298,28 @@ async def find_progress_list_company(db: DbDependency, company_id: int):
         status: str
             ステータス
     """
-    found_course_progresses = companies_cruds.find_course_progresses_by_company_id(db, company_id)
-    if not found_course_progresses:
+
+    users = companies_cruds.find_user_by_company_id(db, company_id)
+    user_id_list = []
+    for user in users:
+        if any([
+            name and (name in user.first_name),
+            name and (name in user.last_name),
+            name and (name in user.first_name_kana),
+            name and (name in user.last_name_kana),
+            name and (name in (user.last_name + user.first_name)),
+            name and (name in (user.last_name_kana + user.first_name_kana)),
+            name == "" # 検索なし
+        ]):
+            user_id_list.append(user.id)
+
+    course_progresses = companies_cruds.find_progresses_by_user_id_list(db, user_id_list)
+    if not course_progresses:
         raise HTTPException(status_code=404, detail="progresses not found.")
 
-    progresses_list = []
-
-    for progress in found_course_progresses:
-        one_progress = {
+    li = []
+    for progress in course_progresses:
+        di = {
             "progress_id": progress.id,
             "user_id": progress.user_id,
             "course_id": progress.course_id,
@@ -315,12 +328,9 @@ async def find_progress_list_company(db: DbDependency, company_id: int):
             "progress_percentage": progress.progress_percentage,
             "status": companies_cruds.find_status_by_status_id(db, progress.status_id)
         }
+        li.append(di)
 
-        progresses_list.append(one_progress)
-
-    return {"progresses": progresses_list} 
-
-
+    return {"progresses": li}
 
 @router.get("/{company_id}/users", response_model=StudentListResponseBody, status_code=status.HTTP_200_OK)
 async def find_student_list_company(db: DbDependency, company_id: int, role: str, page: int, limit: int):
@@ -363,7 +373,7 @@ async def find_student_list_company(db: DbDependency, company_id: int, role: str
     return compamies_services.create_users_list(role, found_user)
 
 @router.get("/{company_id}/billings", response_model=BillingListResponseBody, status_code=status.HTTP_200_OK)
-async def find_billing_list(db: DbDependency, company_id: int):
+async def find_billing_list(db: DbDependency, company_id: int, target_month: str = None, status: str = None):
     """
     請求履歴一覧取得
 
@@ -371,6 +381,11 @@ async def find_billing_list(db: DbDependency, company_id: int):
     -----------------------
     company_id: int
         会社のID
+    フィルター
+        target_month: str
+            (YYYYMM形式)
+        status: str
+
     Returns
     -----------------------
     dict
@@ -385,12 +400,32 @@ async def find_billing_list(db: DbDependency, company_id: int):
         description:str
             請求内容の説明
     """
-    billings = companies_cruds.find_billing_by_company_id(db, company_id)
 
-    if not billings:
-        raise HTTPException(status_code=404, detail="Company not found.")    
+    billing_infos = companies_cruds.find_billing_by_company_id(db, company_id)
+    if not billing_infos:
+        raise HTTPException(status_code=404, detail="Company not found.")
+    
+    li = []
+    info_list = [info.id for info in billing_infos]
+    transaction_histories = companies_cruds.find_transaction_histories_by_billing_info_id(db, info_list)
+    for history in transaction_histories:
+        billing_status = companies_cruds.find_billing_status_by_status_id(db, history.billing_status_id)
+        if any([
+            target_month and (target_month == history.due_date.strftime("%Y%m")),
+            status and (status == billing_status.name),
+            (target_month == None) and (status == None) # フィルターなし
+        ]):
+            di = {
+                "billing_id": history.billing_info_id,
+                "date": str(history.due_date),
+                "amount": history.amount,
+                "status": billing_status.name,
+                "description": billing_status.description
+            }
+            li.append(di)
 
-    return billings
+    return {"billings": li}
+
 @router.get("/{company_id}/users/counts", response_model=AccountListResponseBody, status_code=status.HTTP_200_OK)
 async def find_number_of_accounts(db: DbDependency, company_id: int):
     """

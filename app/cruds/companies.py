@@ -45,14 +45,11 @@ def find_company_by_company_id(db: Session, company_id: int):
 def find_companies(db: Session):
     return db.query(Companies).all()
 
-def find_course_progresses_by_company_id(db: Session, company_id: int):
-    users =  db.query(Users).filter(Users.company_id == company_id).all()
-    progresses_list = []
-    for user in users:
-        progresses = db.query(CourseProgresses).filter(CourseProgresses.user_id == user.id).all()
-        for progress in progresses:
-            progresses_list.append(progress)
-    return progresses_list
+def find_user_by_company_id(db: Session, company_id: int):
+    return db.query(Users).filter(Users.company_id == company_id).all()
+
+def find_progresses_by_user_id_list(db: Session, user_id_list: list):
+    return db.query(CourseProgresses).filter(CourseProgresses.user_id.in_(user_id_list)).all()
 
 def find_section_by_course_id(db: Session, course_id: int):
     section = db.query(Sections).filter(Sections.course_id == course_id).first()
@@ -83,24 +80,13 @@ def find_users_by_company_id_and_role(db: Session, company_id: int, role: str):
     return users
 
 def find_billing_by_company_id(db: Session, company_id: int):
-    billing_infos = db.query(CompanyBillingInfo).filter(CompanyBillingInfo.company_id == company_id).all()
-    if not billing_infos:
-        return None
-    list = []
-    for billing_info in billing_infos:
-        transaction_histories = db.query(CompanyTransactionHistories).filter(CompanyTransactionHistories.billing_info_id == billing_info.id).all()
-        for transaction_history in transaction_histories:
-            status = db.query(CompanyBillingStatuses).filter(CompanyBillingStatuses.id == transaction_history.billing_status_id).first()
-            di = {
-                "billing_id": transaction_history.billing_info_id,
-                "date": str(transaction_history.due_date),
-                "amount": transaction_history.amount,
-                "status": status.name,
-                "description": status.description
-            }
-            list.append(di)
+    return db.query(CompanyBillingInfo).filter(CompanyBillingInfo.company_id == company_id).all()
 
-    return {"billings": list}
+def find_transaction_histories_by_billing_info_id(db: Session, billing_info_id_list: list):
+    return db.query(CompanyTransactionHistories).filter(CompanyTransactionHistories.billing_info_id.in_(billing_info_id_list)).all()
+
+def find_billing_status_by_status_id(db: Session, status_id: int):
+    return db.query(CompanyBillingStatuses).filter(CompanyBillingStatuses.id == status_id).first()
 
 def find_users_by_company_id(db: Session, company_id: int):
     return db.query(Users).filter(Users.company_id == company_id).first()
