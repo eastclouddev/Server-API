@@ -2,6 +2,7 @@ import random
 import string
 import hashlib
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from schemas.users import UserCreateRequestBody, UserUpdateRequestBody
@@ -69,14 +70,19 @@ def update_email(db: Session, found_user, token_info):
     return found_user
 
 def find_users_by_role(db: Session, role: str):
-    find_role = db.query(Roles).filter(Roles.name == role).first()
-    if not find_role:
+    role = db.query(Roles).filter(Roles.name == role).first()
+    if not role:
         return []
-    users = db.query(Users).filter(Users.role_id == find_role.id).all()
-    return users
+    return db.query(Users).filter(Users.role_id == role.id).all()
+
+def find_users(db: Session):
+    return db.query(Users).all()
 
 def find_roles(db: Session):
     return db.query(Roles).all()
 
 def find_users_by_role_id(db: Session, role_id: int):
     return db.query(Users).filter(Users.role_id == role_id, Users.is_enable == True).all()
+
+def find_companies_by_name(db: Session, name: str):
+    return db.query(Companies).filter(or_(Companies.name.contains(name), Companies.name_kana.contains(name))).all()
