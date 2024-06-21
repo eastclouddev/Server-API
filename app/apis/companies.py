@@ -257,7 +257,7 @@ async def find_company_list(db: DbDependency, name: str = ""):
         if any([
             name and (name in company.name),
             name and (name in company.name_kana),
-            name == ""
+            name == "" # 検索なし
         ]):
             di = {
                 "company_id": company.id,
@@ -378,7 +378,7 @@ async def find_student_list_company(db: DbDependency, company_id: int, page: int
         users = companies_cruds.find_user_by_company_id(db, company_id)
     if not users:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     return_user_list = []
     for user in users:
         if any([
@@ -403,10 +403,10 @@ async def find_student_list_company(db: DbDependency, company_id: int, page: int
             "email": user.email,
             "role": role.name,
             "is_enable": user.is_enable,
-            "last_login": user.last_login.isoformat()
+            "last_login": user.last_login.isoformat() if user.last_login else ""
         }
         li.append(di)
-    
+
     return {"users": li}
 
 @router.get("/{company_id}/billings", response_model=BillingListResponseBody, status_code=status.HTTP_200_OK)

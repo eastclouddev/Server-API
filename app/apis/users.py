@@ -210,7 +210,6 @@ async def find_user_details(db: DbDependency, user_id: int = Path(gt=0)):
     
 @router.get("", response_model=UserListResponseBody, status_code=status.HTTP_200_OK)
 async def find_student_list(db:DbDependency, page: int, limit: int, name: str = "", company: str = "", role: str = "", enable: bool = None):
-
     """
     受講生一覧(管理者)
 
