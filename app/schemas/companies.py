@@ -82,9 +82,10 @@ class CompanyListResponseBody(BaseModel):
     companies: list[Company]
 
 class ProgressesResponseList(BaseModel):
-    progress_id: int
     user_id: int
+    user_name: str
     course_id: int
+    course_name: str
     section_id: Optional[int]
     curriculum_id: Optional[int]
     progress_percentage: int

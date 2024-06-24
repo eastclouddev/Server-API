@@ -7,6 +7,7 @@ from models.course_progresses import CourseProgresses
 from models.sections import Sections
 from models.curriculums import Curriculums
 from models.learning_statuses import LearningStatuses
+from models.courses import Courses
 
 def find_course_progresses(db: Session):
     return db.query(CourseProgresses).all()
@@ -16,6 +17,9 @@ def find_companies_by_name(db: Session, company_nm: str):
 
 def find_user_by_id(db: Session, user_id: int):
     return db.query(Users).filter(Users.id == user_id).first()
+
+def find_course_by_course_id(db: Session, course_id: int):
+    return db.query(Courses).filter(Courses.id == course_id).first()
 
 def find_section_by_course_id(db: Session, course_id: int):
     section = db.query(Sections).filter(Sections.course_id == course_id).first()

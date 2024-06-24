@@ -30,12 +30,14 @@ async def find_progress_list_mentor(db: DbDependency, mentor_id: int, name: str 
     Returns
     -----------------------
     progresses: array
-        progress_id: int
-            進捗のID
         user_id: int
             ユーザーのID
+        user_name: str
+            ユーザーの名前
         course_id: int
             コースのID
+        course_name: str
+            コースの名前
         section_id: int
             セクションのID
         curriculum_id: int
@@ -70,10 +72,13 @@ async def find_progress_list_mentor(db: DbDependency, mentor_id: int, name: str 
 
     li = []
     for progress in course_progresses:
+        user = mentors_crud.find_user_by_id(db, progress.user_id)
+        course = mentors_crud.find_course_by_course_id(db, progress.course_id)
         di = {
-            "progress_id": progress.id,
             "user_id": progress.user_id,
+            "user_name": user.last_name + user.first_name,
             "course_id": progress.course_id,
+            "course_name": course.title,
             "section_id": mentors_crud.find_section_by_course_id(db, progress.course_id),
             "curriculum_id": mentors_crud.find_curriculum_by_course_id(db, progress.course_id),
             "progress_percentage": progress.progress_percentage,
