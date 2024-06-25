@@ -205,13 +205,20 @@ async def find_review_list_from_student(request: Request, db: DbDependency, ment
     return {"reviews": li}
 
 @router.get("/counts", response_model=MentorsCountListResponseBody, status_code=status.HTTP_200_OK)
-async def find_student_count(db: DbDependency):
+async def find_student_count(db: DbDependency, name: str = "", course: str = "", sort: str = "", order: str = ""):
     """
     メンター担当受講生数取得
     
     Parameter
     -----------------------
-    なし
+    検索
+        name: str
+        course: str
+    ソート
+        sort: str
+            coutns, questions, reviews
+        order: str
+            asc, desc
 
     Returns
     -----------------------
@@ -224,12 +231,21 @@ async def find_student_count(db: DbDependency):
             そのメンターが担当する受講生の数
     """
 
-    mentors = mentors_crud.find_mentor_by_students(db)
-    return mentors
+    mentors = mentors_crud.find_mentors_distinct(db)
+    li = []
+    for mentor in mentors:
+        user = mentors_crud.find_user_by_id(db, mentor.mentor_id)
+        count = len(mentors_crud.find_students_by_mentor_id(db, mentor.mentor_id))
+        di = {
+            "mentor_id": mentor.mentor_id,
+            "mentor_name": user.last_name + user.first_name,
+            "student_count": count
+        }
+        li.append(di)
+    return {"mentors": li}
 
 @router.get("/{mentor_id}/notifications", response_model=NotificationListResponseBody, status_code=status.HTTP_200_OK)
 async def find_notification(db: DbDependency, mentor_id: int):
-
     """
     通知一覧（メンター）
     

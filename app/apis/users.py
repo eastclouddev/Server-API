@@ -209,19 +209,22 @@ async def find_user_details(db: DbDependency, user_id: int = Path(gt=0)):
 #         raise HTTPException(status_code = 400,detail="Invalid or expired token.")
     
 @router.get("", response_model=UserListResponseBody, status_code=status.HTTP_200_OK)
-async def find_student_list(db:DbDependency, role: str, page: int, limit: int):
-
+async def find_student_list(db:DbDependency, page: int, limit: int, name: str = "", company: str = "", role: str = "", enable: bool = None):
     """
     受講生一覧(管理者)
 
     Parameters
     -----------------------
-    role: str
-        ユーザーの役割
     page: int
         取得するページ番号
     limit: int
         1ページ当たりの記事数
+    検索
+        name: str
+        company: str
+    フィルター
+        role: str
+        enable: bool
 
     Return
     -----------------------
@@ -242,23 +245,46 @@ async def find_student_list(db:DbDependency, role: str, page: int, limit: int):
             最終ログイン日時（ISO 8601形式）
     """
 
-    users = users_crud.find_users_by_role(db, role)
+    if role:
+        users = users_crud.find_users_by_role(db, role)
+    else:
+        users = users_crud.find_users(db)
+
+    companies = users_crud.find_companies_by_name(db, company)
+    company_list = [com.id for com in companies]
+
+    return_user_list = []
+    for user in users:
+        if any([
+            name and (name in user.first_name),
+            name and (name in user.last_name),
+            name and (name in user.first_name_kana),
+            name and (name in user.last_name_kana),
+            name and (name in (user.last_name + user.first_name)),
+            name and (name in (user.last_name_kana + user.first_name_kana)),
+            company and (user.company_id in company_list),
+            (enable == True) and (user.is_enable == True),
+            (enable == False) and (user.is_enable == False),
+            name == "" and company == "" and enable == None # フィルター・検索なし
+        ]):
+            return_user_list.append(user)
 
     li = []
-
-    for user in users[(page-1)*limit : page*limit]:
+    for user in return_user_list[(page-1)*limit : page*limit]:
+        company = users_crud.find_company_by_company_id(db, user.company_id)
+        role = users_crud.find_role_by_role_id(db, user.role_id)
         di = {
             "user_id": user.id,
             "name": user.last_name + user.first_name,
-            "company_name": users_crud.find_company_by_company_id(db, user.company_id).name,
+            "company_name": company.name,
             "email": user.email,
-            "role": role,
+            "role": role.name,
             "is_enable": user.is_enable,
             "last_login": user.last_login.isoformat() if user.last_login else ""
         }
         li.append(di)
 
-    return {"users":li}
+    return {"users": li}
 
 @router.get("/counts/", response_model=AccountListResponseBody, status_code=status.HTTP_200_OK)
 async def find_number_of_accounts(db: DbDependency):

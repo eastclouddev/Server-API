@@ -212,13 +212,14 @@ async def update_company(db: DbDependency, param: CompanyUpdateRequestBody, comp
 
 
 @router.get("", response_model=CompanyListResponseBody, status_code=status.HTTP_200_OK)
-async def find_company_list(db: DbDependency):
+async def find_company_list(db: DbDependency, name: str = ""):
     """
     会社情報一覧取得
     
     Parameters
     -----------------------
-    なし
+    検索
+        name: str
 
     Returns
     -----------------------
@@ -253,20 +254,25 @@ async def find_company_list(db: DbDependency):
     
     companies_list = []
     for company in found_companies:
-        di = {
-            "company_id": company.id,
-            "name": company.name,
-            "name_kana": company.name_kana,
-            "prefecture": company.prefecture,
-            "city": company.city,
-            "town": company.town,
-            "address": company.address,
-            "postal_code": company.postal_code,
-            "phone_number": company.phone_number,
-            "email": company.email,
-            "created_at": company.created_at.isoformat()
-        }
-        companies_list.append(di)
+        if any([
+            name and (name in company.name),
+            name and (name in company.name_kana),
+            name == "" # 検索なし
+        ]):
+            di = {
+                "company_id": company.id,
+                "name": company.name,
+                "name_kana": company.name_kana,
+                "prefecture": company.prefecture,
+                "city": company.city,
+                "town": company.town,
+                "address": company.address,
+                "postal_code": company.postal_code,
+                "phone_number": company.phone_number,
+                "email": company.email,
+                "created_at": company.created_at.isoformat()
+            }
+            companies_list.append(di)
     
     return {"companies": companies_list}
 
@@ -333,18 +339,21 @@ async def find_progress_list_company(db: DbDependency, company_id: int, name: st
     return {"progresses": li}
 
 @router.get("/{company_id}/users", response_model=StudentListResponseBody, status_code=status.HTTP_200_OK)
-async def find_student_list_company(db: DbDependency, company_id: int, role: str, page: int, limit: int):
+async def find_student_list_company(db: DbDependency, company_id: int, page: int, limit: int, name: str = "", role: str = "", enable: bool = None):
     """
     受講生一覧（法人、法人代行)
     
     Parameters
     -----------------------
-    role: str
-        ユーザーの役割
     page: int
         取得するページ番号
     limit: int
         1ページ当たりの記事数
+    検索
+        name: str
+    フィルター
+        role: str
+        enable: bool
 
     Returns
     -----------------------
@@ -362,15 +371,43 @@ async def find_student_list_company(db: DbDependency, company_id: int, role: str
         last_login: str
             最終ログイン日（ISO 8601形式）
     """
-    users = companies_cruds.find_users_by_company_id_and_role(db, company_id, role)
+
+    if role:
+        users = companies_cruds.find_users_by_company_id_and_role(db, company_id, role)
+    else:
+        users = companies_cruds.find_user_by_company_id(db, company_id)
     if not users:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    found_user = []
-    for user in users[(page - 1)*limit : page*limit]:
-        found_user.append(user)
 
-    return compamies_services.create_users_list(role, found_user)
+    return_user_list = []
+    for user in users:
+        if any([
+            name and (name in user.first_name),
+            name and (name in user.last_name),
+            name and (name in user.first_name_kana),
+            name and (name in user.last_name_kana),
+            name and (name in (user.last_name + user.first_name)),
+            name and (name in (user.last_name_kana + user.first_name_kana)),
+            (enable == True) and (user.is_enable == True),
+            (enable == False) and (user.is_enable == False),
+            name == "" and enable == None # フィルター・検索なし
+        ]):
+            return_user_list.append(user)
+
+    li = []
+    for user in return_user_list[(page - 1)*limit : page*limit]:
+        role = companies_cruds.find_role_by_role_id(db, user.role_id)
+        di = {
+            "user_id": user.id,
+            "name": user.last_name + user.first_name,
+            "email": user.email,
+            "role": role.name,
+            "is_enable": user.is_enable,
+            "last_login": user.last_login.isoformat() if user.last_login else ""
+        }
+        li.append(di)
+
+    return {"users": li}
 
 @router.get("/{company_id}/billings", response_model=BillingListResponseBody, status_code=status.HTTP_200_OK)
 async def find_billing_list(db: DbDependency, company_id: int, target_month: str = None, status: str = None):

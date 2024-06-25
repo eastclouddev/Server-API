@@ -79,6 +79,9 @@ def find_users_by_company_id_and_role(db: Session, company_id: int, role: str):
     users = db.query(Users).filter(Users.company_id == company_id, Users.role_id == found_role.id).all()
     return users
 
+def find_role_by_role_id(db: Session, role_id: int):
+    return db.query(Roles).filter(Roles.id == role_id).first()
+
 def find_billing_by_company_id(db: Session, company_id: int):
     return db.query(CompanyBillingInfo).filter(CompanyBillingInfo.company_id == company_id).all()
 

@@ -21,18 +21,3 @@ def create_companies_list(found_companies):
         companies_list.append(one_company)
 
     return {"companies":companies_list}
-
-def create_users_list(role, found_user):
-    users_list = []
-    for user in found_user:
-        user_personal = {
-            "user_id": user.id,
-            "name": user.last_name + user.first_name,
-            "email": user.email,
-            "role": role,
-            "is_enable": user.is_enable,
-            "last_login": user.last_login.isoformat()
-        }
-        users_list.append(user_personal)
-    
-    return {"users": users_list}
