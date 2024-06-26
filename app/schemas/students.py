@@ -42,6 +42,7 @@ class ReviewResponse(BaseModel):
     tech_category: str
     created_at: str
     is_read: bool
+    number_of_comments: int
     is_closed: bool
 
 class ReviewRequestListResponseBody(BaseModel):

@@ -182,6 +182,8 @@ async def find_review_list_from_student(request: Request, db: DbDependency, ment
             レビューの作成日（ISO 8601形式）
         is_read: bool
             未読コメントの有無
+        number_of_comments: int 
+            コメント数
         is_closed: bool
             完了しているかどうか
     """
@@ -202,6 +204,7 @@ async def find_review_list_from_student(request: Request, db: DbDependency, ment
             "tech_category": tech_category.name,
             "created_at": review_request.created_at.isoformat(),
             "is_read": is_read,
+            "number_of_comments": len(review_requests),
             "is_closed": review_request.is_closed
         }
 

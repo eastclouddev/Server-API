@@ -132,6 +132,7 @@ def test_find_review_list_from_student_01(client_fixture: TestClient):
     assert "created_at" in response.json()["reviews"][0]
     assert "is_read" in response.json()["reviews"][0]
     assert "is_closed" in response.json()["reviews"][0]
+    assert "number_of_comments" in response.json()["reviews"][0]
 
 """メンター担当受講者数取得"""
 def test_find_mentors_student_count_01(client_fixture: TestClient):
