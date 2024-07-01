@@ -109,10 +109,11 @@ def create_company_billing_info(db: Session, company_billing_info_create: Compan
         "city": new_company_billing_info.city,
         "town": new_company_billing_info.town,
         "address": new_company_billing_info.address,
-        "email": new_company_billing_info.email,
+        "postal_code": new_company_billing_info.postal_code,
+        "phone_number": new_company_billing_info.phone_number,
+        "billing_email": new_company_billing_info.billing_email,
         "invoice_number": new_company_billing_info.invoice_number,
         "tax_number": new_company_billing_info.tax_number,
-        "payment_method_id": new_company_billing_info.payment_method_id,
         "notes": new_company_billing_info.notes,
         "last_receipt_number": new_company_billing_info.last_receipt_number,
         "created_at": new_company_billing_info.created_at.isoformat()
@@ -122,18 +123,19 @@ def create_company_billing_info(db: Session, company_billing_info_create: Compan
 
 def find_company_billing_info_by_billing_info_id(db: Session, billing_info_id: int):
     company_billing_info = db.query(CompanyBillingInfo).filter(CompanyBillingInfo.id == billing_info_id).first()
-    payment_method = db.query(PaymentMethods).filter(PaymentMethods.id == company_billing_info.payment_method_id).first()
+    # 現状不要
+    # payment_method = db.query(PaymentMethods).filter(PaymentMethods.id == company_billing_info.payment_method_id).first()
     di = {
         "company_billing_info_id": billing_info_id,
         "prefecture": company_billing_info.prefecture,
         "city": company_billing_info.city,
         "town": company_billing_info.town,
         "address": company_billing_info.address,
-        "email": company_billing_info.email,
+        "postal_code": company_billing_info.postal_code,
+        "phone_number": company_billing_info.phone_number,
+        "billing_email": company_billing_info.billing_email,
         "invoice_number": company_billing_info.invoice_number,
         "tax_number": company_billing_info.tax_number,
-        "payment_method": payment_method.name,
-        "description": payment_method.description,
         "notes": company_billing_info.notes,
         "last_receipt_number": company_billing_info.last_receipt_number,
         "created_at": company_billing_info.created_at.isoformat(),
@@ -156,10 +158,11 @@ def update_company_billing_info(db: Session, update:CompanyBillingInfoUpdateRequ
         "city": company_billing_info.city,
         "town": company_billing_info.town,
         "address": company_billing_info.address,
-        "email": company_billing_info.email,
+        "postal_code": company_billing_info.postal_code,
+        "phone_number": company_billing_info.phone_number,
+        "billing_email": company_billing_info.billing_email,
         "invoice_number": company_billing_info.invoice_number,
         "tax_number": company_billing_info.tax_number,
-        "payment_method": company_billing_info.payment_method_id,
         "notes": company_billing_info.notes,
         "last_receipt_number": company_billing_info.last_receipt_number,
         "updated_at": company_billing_info.updated_at.isoformat() 
