@@ -244,12 +244,12 @@ def test_create_company_billing_info_01(client_fixture: TestClient):
             "city": "A区",
             "town": "A町",
             "address": "建物A",
-            "email": "aaa@mail.com",
+            "postal_code": "100-0000",
+            "phone_number": "090-0000-0000",
+            "billing_email": "aaa@mail.com",
             "invoice_number": "IB001",
             "tax_number": "TAX001",
-            "payment_method_id": 1,
             "notes": "Memo",
-            "last_receipt_number": "RCP00x",
         }
     )
     assert response.status_code == 200
@@ -258,12 +258,12 @@ def test_create_company_billing_info_01(client_fixture: TestClient):
     assert "city" in response.json()
     assert "town" in response.json()
     assert "address" in response.json()
-    assert "email" in response.json()
+    assert "postal_code" in response.json()
+    assert "phone_number" in response.json()
+    assert "billing_email" in response.json()
     assert "invoice_number" in response.json()
     assert "tax_number" in response.json()
-    assert "payment_method_id" in response.json()
     assert "notes" in response.json()
-    assert "last_receipt_number" in response.json()
 
 def test_create_company_billing_info_ABNORMAL_01(client_fixture: TestClient):
     response = client_fixture.post(
@@ -273,12 +273,12 @@ def test_create_company_billing_info_ABNORMAL_01(client_fixture: TestClient):
             "city": "A区",
             "town": "A町",
             "address": "建物A",
-            "email": "aaa@mail.com",
+            "postal_code": "100-0000",
+            "phone_number": "090-0000-0000",
+            "billing_email": "aaa@mail.com",
             "invoice_number": "IB001",
             "tax_number": "TAX001",
-            "payment_method_id": 1,
             "notes": "Memo",
-            "last_receipt_number": "RCP00x",
         }
     )
     assert response.status_code == 422
@@ -292,12 +292,12 @@ def test_update_company_billing_info_01(client_fixture: TestClient):
             "city": "B区",
             "town": "B町",
             "address": "建物B",
-            "email": "bbb@mail.com",
+            "postal_code": "101-0000",
+            "phone_number": "080-0000-0000",
+            "billing_email": "bbb@mail.com",
             "invoice_number": "IB002",
             "tax_number": "TAX002",
-            "payment_method_id": 2,
             "notes": "Memo2",
-            "last_receipt_number": "RCP00x1",
         }
     )
     assert response.status_code == 200
@@ -312,12 +312,12 @@ def test_update_company_billing_info_ABNORMAL_01(client_fixture: TestClient):
             "city": "B区",
             "town": "B町",
             "address": "建物B",
-            "email": "bbb@mail.com",
+            "postal_code": "101-0000",
+            "phone_number": "080-0000-0000",
+            "billing_email": "bbb@mail.com",
             "invoice_number": "IB002",
             "tax_number": "TAX002",
-            "payment_method_id": 2,
             "notes": "Memo2",
-            "last_receipt_number": "RCP00x1",
         }
     )
     assert response.status_code == 404
@@ -332,12 +332,12 @@ def test_update_company_billing_info_ABNORMAL_02(client_fixture: TestClient):
             "city": "B区",
             "town": "B町",
             "address": "建物B",
-            "email": "bbb@mail.com",
+            "postal_code": "101-0000",
+            "phone_number": "080-0000-0000",
+            "billing_email": "bbb@mail.com",
             "invoice_number": "IB002",
             "tax_number": "TAX002",
-            "payment_method_id": 2,
             "notes": "Memo2",
-            "last_receipt_number": "RCP00x1",
         }
     )
     assert response.status_code == 400
@@ -357,12 +357,12 @@ def test_find_company_billing_info_details_01(client_fixture: TestClient):
     assert "city" in response.json()
     assert "town" in response.json()
     assert "address" in response.json()
-    assert "email" in response.json()
+    assert "postal_code" in response.json()
+    assert "phone_number" in response.json()
+    assert "billing_email" in response.json()
     assert "invoice_number" in response.json()
     assert "tax_number" in response.json()
-    assert "payment_method_id" in response.json()
     assert "notes" in response.json()
-    assert "last_receipt_number" in response.json()
     assert "created_at" in response.json()
     assert "updated_at" in response.json()
 

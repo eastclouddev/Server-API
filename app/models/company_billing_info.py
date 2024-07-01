@@ -16,12 +16,13 @@ class CompanyBillingInfo(Base):
     city = Column(String(100), nullable=False)
     town = Column(String(255), nullable=False)
     address = Column(String(255), nullable=False)
-    email = Column(String(255), nullable=False)
+    postal_code = Column(String(10), nullable=False)
+    phone_number = Column(String(20), nullable=False)
+    billing_email = Column(String(255), nullable=False)
     invoice_number = Column(String(255), nullable=False)
     tax_number = Column(String(255), nullable=False)
-    payment_method_id = Column(Integer, ForeignKey("payment_methods.id"), nullable=False)
+    # payment_method_id = Column(Integer, ForeignKey("payment_methods.id"), nullable=False) #現状不要
     notes = Column(Text)
-    last_receipt_number = Column(String(255))
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 
