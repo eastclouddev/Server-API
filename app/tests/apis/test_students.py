@@ -53,6 +53,7 @@ def test_find_my_review_list_01(client_fixture: TestClient):
     assert "tech_category" in response.json()["reviews"][0]
     assert "is_read" in response.json()["reviews"][0]
     assert "is_closed" in response.json()["reviews"][0]
+    assert "number_of_comments" in response.json()["reviews"][0]
 
 def test_find_my_review_list_02(client_fixture: TestClient):
 

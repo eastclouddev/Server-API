@@ -6,9 +6,10 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class ProgressesResponseList(BaseModel):
-    progress_id: int
     user_id: int
+    user_name: str
     course_id: int
+    course_name: str
     section_id: Optional[int]
     curriculum_id: Optional[int]
     progress_percentage: int
@@ -41,6 +42,7 @@ class AllResponseList(BaseModel):
     tech_category: str
     created_at: str
     is_read: bool
+    number_of_comments: int
     is_closed: bool
 
 class ReviewRequestListResponseBody(BaseModel):

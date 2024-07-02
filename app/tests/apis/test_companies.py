@@ -9,7 +9,7 @@ def test_create_company_01(client_fixture: TestClient):
         "/companies",
         json={
             "name": "F社",
-            "name_kana": "会社名フリガナ",            
+            "name_kana": "会社名フリガナ",
             "prefecture": "F都",
             "city": "F区",
             "town": "F町",
@@ -160,9 +160,10 @@ def test_find_progress_list_company_01(client_fixture: TestClient):
     
     assert response.status_code == 200
     assert "progresses" in response.json()
-    assert "progress_id" in response.json()["progresses"][0]
     assert "user_id" in response.json()["progresses"][0]
+    assert "user_name" in response.json()["progresses"][0]
     assert "course_id" in response.json()["progresses"][0]
+    assert "course_name" in response.json()["progresses"][0]
     assert "section_id" in response.json()["progresses"][0]
     assert "curriculum_id" in response.json()["progresses"][0]
     assert "progress_percentage" in response.json()["progresses"][0]

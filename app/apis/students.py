@@ -138,7 +138,6 @@ async def find_progress_list_student(db: DbDependency, student_id: int):
     }
 
     return re_di
-  
 @router.get("/{student_id}/reviews", response_model=ReviewRequestListResponseBody, status_code=status.HTTP_200_OK)
 async def find_my_review_list(db: DbDependency, student_id: int, category: str = None, sort: str = None, order: str = None):
     """
@@ -173,6 +172,8 @@ async def find_my_review_list(db: DbDependency, student_id: int, category: str =
             レビュー作成日
         is_read: bool
             未読コメントの有無
+        number_of_comments: int 
+            コメント数
         is_closed: bool
             完了しているかどうか
     """
@@ -196,6 +197,7 @@ async def find_my_review_list(db: DbDependency, student_id: int, category: str =
                 "tech_category": tech_category.name,
                 "created_at": review.created_at.isoformat(),
                 "is_read": is_read,
+                "number_of_comments": len(review_requests),
                 "is_closed": review.is_closed
             }
             li.append(di)

@@ -85,13 +85,14 @@ def test_xxx_01(client_fixture: TestClient):
 def test_progresses_01(client_fixture: TestClient):
     
     response = client_fixture.get(
-        "/mentors/1/progresses"
+        "/mentors/6/progresses"
     )
     
     assert response.status_code == 200
-    assert "progress_id" in response.json()["progresses"][0]
     assert "user_id" in response.json()["progresses"][0]
+    assert "user_name" in response.json()["progresses"][0]
     assert "course_id" in response.json()["progresses"][0]
+    assert "course_name" in response.json()["progresses"][0]
     assert "section_id" in response.json()["progresses"][0]
     assert "curriculum_id" in response.json()["progresses"][0]
     assert "progress_percentage" in response.json()["progresses"][0]
@@ -131,6 +132,7 @@ def test_find_review_list_from_student_01(client_fixture: TestClient):
     assert "created_at" in response.json()["reviews"][0]
     assert "is_read" in response.json()["reviews"][0]
     assert "is_closed" in response.json()["reviews"][0]
+    assert "number_of_comments" in response.json()["reviews"][0]
 
 """メンター担当受講者数取得"""
 def test_find_mentors_student_count_01(client_fixture: TestClient):

@@ -12,9 +12,9 @@ from models.roles import Roles
 from models.users import Users
 from models.company_billing_info import CompanyBillingInfo
 from models.company_billing_statuses import CompanyBillingStatuses
-from models.company_receipts import CompanyReceipts
 from models.company_transaction_histories import CompanyTransactionHistories
 from models.payment_methods import PaymentMethods
+from models.courses import Courses
 
 def create_company(db: Session, company_create: CompanyCreateRequestBody):
     new_company = Companies(**company_create.model_dump())
@@ -45,11 +45,17 @@ def find_company_by_company_id(db: Session, company_id: int):
 def find_companies(db: Session):
     return db.query(Companies).all()
 
+def find_course_by_course_id(db: Session, course_id: int):
+    return db.query(Courses).filter(Courses.id == course_id).first()
+
 def find_user_by_company_id(db: Session, company_id: int):
     return db.query(Users).filter(Users.company_id == company_id).all()
 
 def find_progresses_by_user_id_list(db: Session, user_id_list: list):
     return db.query(CourseProgresses).filter(CourseProgresses.user_id.in_(user_id_list)).all()
+
+def find_user_by_user_id(db: Session, user_id: int):
+    return db.query(Users).filter(Users.id == user_id).first()
 
 def find_section_by_course_id(db: Session, course_id: int):
     section = db.query(Sections).filter(Sections.course_id == course_id).first()
